@@ -7,6 +7,11 @@ import com.alexfh.dictionary.WordGraph;
 import com.alexfh.dictionary.IDictionary;
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 
 public class WordGraphTest {
@@ -47,6 +52,23 @@ public class WordGraphTest {
         assertFalse(dictionary.hasPrefix("fooba"));
         testWords.forEach(dictionary::removeWord);
         assertFalse(dictionary.hasPrefix("")); // should be false if dictionary is empty
+    }
+
+    @Test
+    public void nwl20() throws IOException {
+        IDictionary dictionary = new WordGraph();
+        BufferedReader reader = new BufferedReader(new FileReader("src/test/resources/nwl20.txt", StandardCharsets.UTF_8));
+        List<String> words = new ArrayList<>();
+        String line;
+
+        while((line = reader.readLine()) != null) {
+            words.add(line.toLowerCase().strip());
+        }
+
+        words.forEach(dictionary::addWord);
+        words.forEach(word -> assertTrue(dictionary.hasWord(word)));
+        words.forEach(dictionary::removeWord);
+        assertFalse(dictionary.hasPrefix(""));
     }
 
 }

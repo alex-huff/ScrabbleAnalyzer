@@ -1,5 +1,7 @@
 package com.alexfh.scrabbleai.dictionary;
 
+import java.util.function.Consumer;
+
 public interface IDictionary {
 
     boolean hasWord(String word);
@@ -9,5 +11,7 @@ public interface IDictionary {
     void addWord(String word);
 
     void removeWord(String word);
+
+    void forEach(Consumer<String> consumer);
 
 }

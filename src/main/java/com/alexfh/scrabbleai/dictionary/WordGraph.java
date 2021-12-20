@@ -1,46 +1,74 @@
 package com.alexfh.scrabbleai.dictionary;
 
+import com.alexfh.scrabbleai.util.ScrabbleUtil;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 public class WordGraph implements IDictionary {
 
-    private static class DAWGNode {
+    public static WordGraph fromFile(File dictionaryFile) throws IOException {
+        WordGraph dictionary = new WordGraph();
+        BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8));
+        String line;
 
-        private final DAWGNode[] nodes = new DAWGNode[26];
-        public boolean wordHere;
-        private int paths;
-        private final DAWGNode parent;
-
-        public DAWGNode(DAWGNode parent) {
-            this(false, parent);
+        while((line = reader.readLine()) != null) {
+            dictionary.addWord(line.toLowerCase().strip());
         }
 
-        public DAWGNode(boolean wordHere, DAWGNode parent) {
+        reader.close();
+
+        return dictionary;
+    }
+
+    private static class WGNode {
+
+        private final WGNode[] nodes = new WGNode[26];
+        public boolean wordHere;
+        private final WGNode parent;
+        private final List<Character> paths;
+        private final String word;
+
+        public WGNode(WGNode parent, String word) {
+            this(false, parent, word);
+        }
+
+        public WGNode(boolean wordHere, WGNode parent, String word) {
             this.wordHere = wordHere;
             this.parent = parent;
-            this.paths = 0;
+            this.paths = new ArrayList<>();
+            this.word = word;
         }
 
         public void removePath(char c) {
-            int i = charToInt(c);
-            DAWGNode path = this.nodes[i];
+            int i = ScrabbleUtil.charToInt(c);
+            WGNode path = this.nodes[i];
 
             if (path != null) {
                 this.nodes[i] = null;
-                this.paths--;
+
+                this.paths.remove(Character.valueOf(c));
             }
         }
 
-        public DAWGNode getPath(char c) {
-            return this.nodes[charToInt(c)];
+        public WGNode getPath(char c) {
+            return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        public DAWGNode getOrCreatePath(char c) {
-            int i = charToInt(c);
-            DAWGNode current = this.nodes[i];
+        public WGNode getOrCreatePath(char c) {
+            int i = ScrabbleUtil.charToInt(c);
+            WGNode current = this.nodes[i];
 
             if (current == null) {
-                this.nodes[i] = new DAWGNode(this);
+                this.nodes[i] = new WGNode(this, this.word.concat(String.valueOf(c)));
 
-                this.paths++;
+                this.paths.add(c);
             }
 
             return this.nodes[i];
@@ -48,16 +76,12 @@ public class WordGraph implements IDictionary {
 
     }
 
-    private static int charToInt(char c) {
-        return (int) c - 97;
-    }
+    private WGNode root = null;
 
-    private DAWGNode root = null;
-
-    private DAWGNode followPath(String path) {
+    private WGNode followPath(String path) {
         if (this.root == null) return null;
 
-        DAWGNode current = this.root;
+        WGNode current = this.root;
 
         for (int i = 0; i < path.length(); i++) {
             current = current.getPath(path.charAt(i));
@@ -68,9 +92,9 @@ public class WordGraph implements IDictionary {
         return current;
     }
 
-    private DAWGNode getOrCreateRoot() {
+    private WGNode getOrCreateRoot() {
         if (this.root == null) {
-            this.root = new DAWGNode(null);
+            this.root = new WGNode(null, "");
         }
 
         return this.root;
@@ -78,7 +102,7 @@ public class WordGraph implements IDictionary {
 
     @Override
     public boolean hasWord(String word) {
-        DAWGNode path = this.followPath(word);
+        WGNode path = this.followPath(word);
 
         return path != null && path.wordHere;
     }
@@ -90,7 +114,7 @@ public class WordGraph implements IDictionary {
 
     @Override
     public void addWord(String word) {
-        DAWGNode current = this.getOrCreateRoot();
+        WGNode current = this.getOrCreateRoot();
 
         for (int i = 0; i < word.length(); i++) {
             current = current.getOrCreatePath(word.charAt(i));
@@ -101,23 +125,38 @@ public class WordGraph implements IDictionary {
 
     @Override
     public void removeWord(String word) {
-        DAWGNode path = this.followPath(word);
+        WGNode path = this.followPath(word);
 
         if (path == null || !path.wordHere) return;
 
         path.wordHere = false;
 
         for (int i = word.length() - 1; i >= 0; i--) {
-            DAWGNode parent = path.parent;
+            WGNode parent = path.parent;
 
-            if (path.paths == 0 && !path.wordHere) {
+            if (path.paths.size() == 0 && !path.wordHere) {
                 parent.removePath(word.charAt(i));
             }
 
             path = parent;
         }
 
-        if (path.paths == 0 && !path.wordHere) this.root = null;
+        if (path.paths.size() == 0 && !path.wordHere) this.root = null;
+    }
+
+    @Override
+    public void forEach(Consumer<String> consumer) {
+        if (this.root == null) return;
+
+        this.forEach(this.root, consumer);
+    }
+
+    private void forEach(WGNode node, Consumer<String> consumer) {
+        if (node.wordHere) consumer.accept(node.word);
+
+        node.paths.stream()
+            .map(node::getPath)
+            .forEach(wgNode -> this.forEach(wgNode, consumer));
     }
 
 }

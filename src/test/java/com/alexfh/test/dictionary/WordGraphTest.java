@@ -2,13 +2,13 @@ package com.alexfh.test.dictionary;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.alexfh.scrabbleai.dictionary.WordGraph;
 import com.alexfh.scrabbleai.dictionary.IDictionary;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,16 +54,11 @@ public class WordGraphTest {
 
     @Test
     public void nwl20() throws IOException {
-        IDictionary dictionary = new WordGraph();
-        BufferedReader reader = new BufferedReader(new FileReader("src/test/resources/nwl20.txt", StandardCharsets.UTF_8));
+        IDictionary dictionary = WordGraph.fromFile(new File("src/test/resources/nwl20.txt"));
         List<String> words = new ArrayList<>();
-        String line;
 
-        while((line = reader.readLine()) != null) {
-            words.add(line.toLowerCase().strip());
-        }
-
-        words.forEach(dictionary::addWord);
+        dictionary.forEach(words::add);
+        assertEquals(words.size(), 191852);
         words.forEach(word -> assertTrue(dictionary.hasWord(word)));
         words.forEach(dictionary::removeWord);
         assertFalse(dictionary.hasPrefix(""));

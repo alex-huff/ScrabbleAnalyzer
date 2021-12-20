@@ -1,4 +1,4 @@
-package com.alexfh;
+package com.alexfh.scrabbleai;
 
 public class Main {
 

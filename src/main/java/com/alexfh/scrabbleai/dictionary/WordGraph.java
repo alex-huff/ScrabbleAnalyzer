@@ -1,4 +1,4 @@
-package com.alexfh.dictionary;
+package com.alexfh.scrabbleai.dictionary;
 
 public class WordGraph implements IDictionary {
 

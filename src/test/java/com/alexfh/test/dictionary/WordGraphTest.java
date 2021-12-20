@@ -3,8 +3,8 @@ package com.alexfh.test.dictionary;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import com.alexfh.dictionary.WordGraph;
-import com.alexfh.dictionary.IDictionary;
+import com.alexfh.scrabbleai.dictionary.WordGraph;
+import com.alexfh.scrabbleai.dictionary.IDictionary;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

@@ -3,50 +3,42 @@ package com.alexfh.scrabbleai.state.impl;
 import com.alexfh.scrabbleai.state.IScrabbleBoard;
 import com.alexfh.scrabbleai.util.ImmutablePair;
 import com.alexfh.scrabbleai.util.Pair;
+import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
 public class ScrabbleBoardImpl implements IScrabbleBoard {
 
     public static ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException {
-        Pair<Pair<Integer, Integer>, Pair<char[][], boolean[][]>> gameData = ScrabbleBoardImpl.readGameFile(gameFile);
-        Pair<Pair<Integer, Integer>, Pair<int[][], int[][]>> multipliersData = ScrabbleBoardImpl.readMultipliersFile(multipliersFile);
-        Pair<Integer, Integer> gameDimensions = gameData.getLeft();
-        Pair<Integer, Integer> multipliersDimensions = multipliersData.getLeft();
-        int gameRows = gameDimensions.getLeft();
-        int gameCols = gameDimensions.getRight();
-        int multiplierRows = multipliersDimensions.getLeft();
-        int multiplierCols = multipliersDimensions.getRight();
+        Pair<char[][], boolean[][]> gameData = ScrabbleBoardImpl.readGameFile(gameFile);
+        Pair<int[][], int[][]> multipliersData = ScrabbleBoardImpl.readMultipliersFile(multipliersFile);
+        char[][] playedTiles = gameData.getLeft();
+        boolean[][] wildcardTiles = gameData.getRight();
+        int[][] letterMultipliers = multipliersData.getLeft();
+        int[][] wordMultipliers = multipliersData.getRight();
+        int gameRows = playedTiles.length;
+        int gameCols = playedTiles[0].length;
+        int multiplierRows = letterMultipliers.length;
+        int multiplierCols = letterMultipliers[0].length;
 
         if (gameRows != multiplierRows) throw new IllegalStateException("Game board rows are not equal to multiplier rows: " + gameRows + "!=" + multiplierRows);
         if (gameCols != multiplierCols) throw new IllegalStateException("Game board columns are not equal to multiplier columns: " + gameCols + "!=" + multiplierCols);
 
-        Pair<char[][], boolean[][]> tileMaps = gameData.getRight();
-        char[][] playedTiles = tileMaps.getLeft();
-        boolean[][] wildcardTiles = tileMaps.getRight();
-        Pair<int[][], int[][]> multiplierTiles = multipliersData.getRight();
-        int[][] letterMultipliers = multiplierTiles.getLeft();
-        int[][] wordMultipliers = multiplierTiles.getRight();
-
         return new ScrabbleBoardImpl(gameRows, gameCols, letterMultipliers, wordMultipliers, playedTiles, wildcardTiles);
     }
 
-    private static Pair<Pair<Integer, Integer>, Pair<int[][], int[][]>> readMultipliersFile(File multipliersFile) throws IOException {
-        Pair<Pair<Integer, Integer>, char[][]> rectangularBoardText;
+    private static Pair<int[][], int[][]> readMultipliersFile(File multipliersFile) throws IOException {
+        char[][] boardText;
 
         try {
-            rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(multipliersFile);
+            boardText = ScrabbleUtil.readRectangularBoardText(multipliersFile);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Failed to read multipliers board", e);
         }
 
-        Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();
-        char[][] boardText = rectangularBoardText.getRight();
-        int rows = dimensions.getLeft();
-        int cols = dimensions.getRight();
+        int rows = boardText.length;
+        int cols = boardText[0].length;
         int[][] letterMultipliers = new int[rows][cols];
         int[][] wordMultipliers = new int[rows][cols];
 
@@ -79,22 +71,20 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
             }
         }
 
-        return new ImmutablePair<>(new ImmutablePair<>(rows, cols), new ImmutablePair<>(letterMultipliers, wordMultipliers));
+        return new ImmutablePair<>(letterMultipliers, wordMultipliers);
     }
 
-    private static Pair<Pair<Integer, Integer>, Pair<char[][], boolean[][]>> readGameFile(File gameFile) throws IOException {
-        Pair<Pair<Integer, Integer>, char[][]> rectangularBoardText;
+    private static Pair<char[][], boolean[][]> readGameFile(File gameFile) throws IOException {
+        char[][] boardText;
 
         try {
-            rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(gameFile);
+            boardText = ScrabbleUtil.readRectangularBoardText(gameFile);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Failed to read game board", e);
         }
 
-        Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();
-        char[][] boardText = rectangularBoardText.getRight();
-        int rows = dimensions.getLeft();
-        int cols = dimensions.getRight();
+        int rows = boardText.length;
+        int cols = boardText[0].length;
         char[][] playedTiles = new char[rows][cols];
         boolean[][] wildcardTiles = new boolean[rows][cols];
 
@@ -111,37 +101,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
             }
         }
 
-        return new ImmutablePair<>(new ImmutablePair<>(rows, cols), new ImmutablePair<>(playedTiles, wildcardTiles));
-    }
-
-    private static Pair<Pair<Integer, Integer>, char[][]> readRectangularBoardText(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8));
-        List<String> boardText = new ArrayList<>();
-        String line = reader.readLine();
-
-        if (line == null) throw new IllegalStateException("Empty board");
-
-        int cols = line.length();
-        int rows = 1;
-
-        boardText.add(line);
-
-        while ((line = reader.readLine()) != null) {
-            if (line.length() != cols) throw new IllegalStateException("Non-rectangular board");
-
-            boardText.add(line);
-            rows++;
-        }
-
-        reader.close();
-
-        char[][] boardChars = new char[rows][cols];
-
-        for (int r = 0; r < rows; r++) {
-            boardChars[r] = boardText.get(r).toCharArray();
-        }
-
-        return new ImmutablePair<>(new ImmutablePair<>(rows, cols), boardChars);
+        return new ImmutablePair<>(playedTiles, wildcardTiles);
     }
 
     private final int rows;

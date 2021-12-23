@@ -3,11 +3,10 @@ package com.alexfh.scrabbleai;
 import com.alexfh.scrabbleai.state.impl.ScrabbleBoardImpl;
 import com.alexfh.scrabbleai.dictionary.impl.WordGraphDictionary;
 import com.alexfh.scrabbleai.rule.impl.LetterScoreMapImpl;
+import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class Main {
 
@@ -24,7 +23,9 @@ public class Main {
                 new File(gameFolder + "board.txt"),
                 new File("src/main/resources/multipliers.txt")
             ),
-            Files.readString(new File(gameFolder + "currentletters.txt").toPath(), StandardCharsets.UTF_8).toCharArray()
+            ScrabbleUtil.readPlayerTiles(
+                new File(gameFolder + "currentletters.txt")
+            )
         );
     }
 

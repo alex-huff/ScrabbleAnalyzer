@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.alexfh.scrabbleai.dictionary.WordGraph;
+import com.alexfh.scrabbleai.dictionary.impl.WordGraphDictionary;
 import com.alexfh.scrabbleai.dictionary.IDictionary;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class WordGraphTest {
 
     @Test
     public void testInclusion() {
-        IDictionary dictionary = new WordGraph();
+        IDictionary dictionary = new WordGraphDictionary();
 
         dictionary.addWord("foo");
         dictionary.addWord("foobar");
@@ -30,7 +30,7 @@ public class WordGraphTest {
 
     @Test
     public void testPrefix() {
-        IDictionary dictionary = new WordGraph();
+        IDictionary dictionary = new WordGraphDictionary();
         List<String> testWords = List.of("prefix", "foo", "bar", "foobar", "a", "dictionary");
 
         assertFalse(dictionary.hasPrefix("")); // should be false if dictionary is empty
@@ -54,7 +54,7 @@ public class WordGraphTest {
 
     @Test
     public void nwl20() throws IOException {
-        IDictionary dictionary = WordGraph.fromFile(new File("src/test/resources/nwl20.txt"));
+        IDictionary dictionary = WordGraphDictionary.fromFile(new File("src/test/resources/nwl20.txt"));
         List<String> words = new ArrayList<>();
 
         dictionary.forEach(words::add);

@@ -1,5 +1,6 @@
-package com.alexfh.scrabbleai.dictionary;
+package com.alexfh.scrabbleai.dictionary.impl;
 
+import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.BufferedReader;
@@ -7,14 +8,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WordGraph implements IDictionary {
+public class WordGraphDictionary implements IDictionary {
 
-    public static WordGraph fromFile(File dictionaryFile) throws IOException {
-        WordGraph dictionary = new WordGraph();
+    public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException {
+        WordGraphDictionary dictionary = new WordGraphDictionary();
         BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8));
         String line;
 
@@ -42,7 +43,7 @@ public class WordGraph implements IDictionary {
         public WGNode(boolean wordHere, WGNode parent, String word) {
             this.wordHere = wordHere;
             this.parent = parent;
-            this.paths = new ArrayList<>();
+            this.paths = new LinkedList<>();
             this.word = word;
         }
 
@@ -156,9 +157,9 @@ public class WordGraph implements IDictionary {
     private void forEach(WGNode node, Consumer<String> consumer) {
         if (node.wordHere) consumer.accept(node.word);
 
-        node.paths.stream()
-            .map(node::getPath)
-            .forEach(wgNode -> this.forEach(wgNode, consumer));
+        for (char c : node.paths) {
+            this.forEach(node.getPath(c), consumer);
+        }
     }
 
 }

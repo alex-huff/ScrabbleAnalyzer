@@ -1,12 +1,13 @@
-package com.alexfh.scrabbleai;
+package com.alexfh.scrabbleai.rule.impl;
 
+import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.*;
 
-public class LetterScoreMap {
+public class LetterScoreMapImpl implements ILetterScoreMap {
 
-    public static LetterScoreMap fromFile(File scoreMapFile) throws IOException {
+    public static LetterScoreMapImpl fromFile(File scoreMapFile) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(scoreMapFile));
         int[] scoreMap = new int[26];
         String line;
@@ -27,12 +28,12 @@ public class LetterScoreMap {
 
         reader.close();
 
-        return new LetterScoreMap(scoreMap);
+        return new LetterScoreMapImpl(scoreMap);
     }
 
     private final int[] scoreMap;
 
-    private LetterScoreMap(int[] scoreMap) {
+    private LetterScoreMapImpl(int[] scoreMap) {
         this.scoreMap = scoreMap;
     }
 

@@ -12,7 +12,9 @@ public class Main {
             LetterScoreMap.fromFile(
                 new File("src/main/resources/scoremap.txt")
             ),
-            WordGraph.fromFile(new File("src/test/resources/nwl20.txt"))
+            WordGraph.fromFile(
+                new File("src/test/resources/nwl20.txt")
+            )
         );
     }
 

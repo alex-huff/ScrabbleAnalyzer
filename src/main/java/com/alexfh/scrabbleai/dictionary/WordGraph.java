@@ -136,6 +136,8 @@ public class WordGraph implements IDictionary {
 
             if (path.paths.size() == 0 && !path.wordHere) {
                 parent.removePath(word.charAt(i));
+            } else {
+                return;
             }
 
             path = parent;

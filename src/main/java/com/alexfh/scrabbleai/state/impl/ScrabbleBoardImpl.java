@@ -34,7 +34,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     private static Pair<Pair<Integer, Integer>, Pair<int[][], int[][]>> readMultipliersFile(File multipliersFile) throws IOException {
-        Pair<Pair<Integer, Integer>, List<String>> rectangularBoardText;
+        Pair<Pair<Integer, Integer>, char[][]> rectangularBoardText;
 
         try {
             rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(multipliersFile);
@@ -43,18 +43,15 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         }
 
         Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();
-        List<String> boardText = rectangularBoardText.getRight();
+        char[][] boardText = rectangularBoardText.getRight();
         int rows = dimensions.getLeft();
         int cols = dimensions.getRight();
         int[][] letterMultipliers = new int[rows][cols];
         int[][] wordMultipliers = new int[rows][cols];
 
         for (int r = 0; r < rows; r++) {
-            String boardLine = boardText.get(r);
-            char[] boardLineChars = boardLine.toCharArray();
-
             for (int c = 0; c < cols; c++) {
-                char b = boardLineChars[c];
+                char b = boardText[r][c];
                 boolean isAlpha = Character.isAlphabetic(b);
                 boolean isUpper = Character.isUpperCase(b);
 
@@ -85,7 +82,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     private static Pair<Pair<Integer, Integer>, Pair<char[][], boolean[][]>> readGameFile(File gameFile) throws IOException {
-        Pair<Pair<Integer, Integer>, List<String>> rectangularBoardText;
+        Pair<Pair<Integer, Integer>, char[][]> rectangularBoardText;
 
         try {
             rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(gameFile);
@@ -94,18 +91,15 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         }
 
         Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();
-        List<String> boardText = rectangularBoardText.getRight();
+        char[][] boardText = rectangularBoardText.getRight();
         int rows = dimensions.getLeft();
         int cols = dimensions.getRight();
         char[][] playedTiles = new char[rows][cols];
         boolean[][] wildcardTiles = new boolean[rows][cols];
 
         for (int r = 0; r < rows; r++) {
-            String boardLine = boardText.get(r);
-            char[] boardLineChars = boardLine.toCharArray();
-
             for (int c = 0; c < cols; c++) {
-                char b = boardLineChars[c];
+                char b = boardText[r][c];
                 boolean isAlpha = Character.isAlphabetic(b);
                 boolean isUpper = Character.isUpperCase(b);
 
@@ -119,7 +113,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         return new ImmutablePair<>(new ImmutablePair<>(rows, cols), new ImmutablePair<>(playedTiles, wildcardTiles));
     }
 
-    private static Pair<Pair<Integer, Integer>, List<String>> readRectangularBoardText(File file) throws IOException {
+    private static Pair<Pair<Integer, Integer>, char[][]> readRectangularBoardText(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         List<String> boardText = new ArrayList<>();
         String line = reader.readLine();
@@ -140,7 +134,13 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
 
         reader.close();
 
-        return new ImmutablePair<>(new ImmutablePair<>(rows, cols), boardText);
+        char[][] boardChars = new char[rows][cols];
+
+        for (int r = 0; r < rows; r++) {
+            boardChars[r] = boardText.get(r).toCharArray();
+        }
+
+        return new ImmutablePair<>(new ImmutablePair<>(rows, cols), boardChars);
     }
 
     private final int rows;

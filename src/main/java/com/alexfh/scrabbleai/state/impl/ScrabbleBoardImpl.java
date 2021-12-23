@@ -39,7 +39,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         try {
             rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(multipliersFile);
         } catch (IllegalStateException e) {
-            throw new IllegalStateException("Failed to read multipliers file", e);
+            throw new IllegalStateException("Failed to read multipliers board", e);
         }
 
         Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();
@@ -90,7 +90,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         try {
             rectangularBoardText = ScrabbleBoardImpl.readRectangularBoardText(gameFile);
         } catch (IllegalStateException e) {
-            throw new IllegalStateException("Failed to read game file", e);
+            throw new IllegalStateException("Failed to read game board", e);
         }
 
         Pair<Integer, Integer> dimensions = rectangularBoardText.getLeft();

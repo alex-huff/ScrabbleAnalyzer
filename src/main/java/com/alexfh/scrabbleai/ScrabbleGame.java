@@ -9,11 +9,13 @@ public class ScrabbleGame {
     private final ILetterScoreMap letterScoreMap;
     private final IDictionary dictionary;
     private final IScrabbleBoard board;
+    private final char[] playerTiles;
 
-    public ScrabbleGame(ILetterScoreMap letterScoreMap, IDictionary dictionary, IScrabbleBoard board) {
+    public ScrabbleGame(ILetterScoreMap letterScoreMap, IDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         this.letterScoreMap = letterScoreMap;
         this.dictionary = dictionary;
         this.board = board;
+        this.playerTiles = playerTiles;
     }
 
 }

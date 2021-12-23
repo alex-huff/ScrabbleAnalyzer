@@ -4,11 +4,12 @@ import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class LetterScoreMapImpl implements ILetterScoreMap {
 
     public static LetterScoreMapImpl fromFile(File scoreMapFile) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(scoreMapFile));
+        BufferedReader reader = new BufferedReader(new FileReader(scoreMapFile, StandardCharsets.UTF_8));
         int[] scoreMap = new int[26];
         String line;
 

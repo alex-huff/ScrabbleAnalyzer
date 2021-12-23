@@ -5,6 +5,7 @@ import com.alexfh.scrabbleai.util.ImmutablePair;
 import com.alexfh.scrabbleai.util.Pair;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +115,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     private static Pair<Pair<Integer, Integer>, char[][]> readRectangularBoardText(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8));
         List<String> boardText = new ArrayList<>();
         String line = reader.readLine();
 

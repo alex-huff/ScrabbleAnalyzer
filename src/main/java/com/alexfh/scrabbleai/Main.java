@@ -6,6 +6,8 @@ import com.alexfh.scrabbleai.rule.impl.LetterScoreMapImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class Main {
 
@@ -21,7 +23,8 @@ public class Main {
             ScrabbleBoardImpl.fromFiles(
                 new File(gameFolder + "board.txt"),
                 new File("src/main/resources/multipliers.txt")
-            )
+            ),
+            Files.readString(new File(gameFolder + "currentletters.txt").toPath(), StandardCharsets.UTF_8).toCharArray()
         );
     }
 

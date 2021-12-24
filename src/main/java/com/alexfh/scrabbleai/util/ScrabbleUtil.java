@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 public class ScrabbleUtil {
 
-    public static final String newLineRegex = "\\r?\\n|\\r";
+    public static final String newLineRegex = "\\R";
 
     private static boolean isValidTiles(String s) {
         return s.matches("^[a-zA-Z0]*$");

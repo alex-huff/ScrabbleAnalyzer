@@ -3,11 +3,11 @@ package com.alexfh.scrabbleai.dictionary.impl;
 import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,14 +16,12 @@ public class WordGraphDictionary implements IDictionary {
 
     public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException {
         WordGraphDictionary dictionary = new WordGraphDictionary();
-        BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8));
-        String line;
 
-        while((line = reader.readLine()) != null) {
-            dictionary.addWord(line.toLowerCase().strip());
-        }
-
-        reader.close();
+        Arrays.stream(
+            Files.readString(dictionaryFile.toPath(), StandardCharsets.UTF_8).split(ScrabbleUtil.newLineRegex)
+        ).forEach(
+            line -> dictionary.addWord(line.toLowerCase().strip())
+        );
 
         return dictionary;
     }

@@ -1,15 +1,13 @@
 package com.alexfh.scrabbleai.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ScrabbleUtil {
+
+    public static final String newLineRegex = "\\r?\\n|\\r";
 
     private static boolean isValidTiles(String s) {
         return s.matches("^[a-zA-Z0]*$");
@@ -28,30 +26,21 @@ public class ScrabbleUtil {
     }
 
     public static char[][] readRectangularBoardText(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8));
-        List<String> boardText = new ArrayList<>();
-        String line = reader.readLine();
+        String boardText = Files.readString(file.toPath(), StandardCharsets.UTF_8);
 
-        if (line == null) throw new IllegalStateException("Empty board");
+        if (boardText.isEmpty() || boardText.isBlank()) throw new IllegalStateException("Empty board");
 
-        int cols = line.length();
-        int rows = 1;
-
-        boardText.add(line);
-
-        while ((line = reader.readLine()) != null) {
-            if (line.length() != cols) throw new IllegalStateException("Non-rectangular board");
-
-            boardText.add(line);
-            rows++;
-        }
-
-        reader.close();
-
+        String[] lines = boardText.split(ScrabbleUtil.newLineRegex);
+        int rows = lines.length;
+        int cols = lines[0].length();
         char[][] boardChars = new char[rows][cols];
 
         for (int r = 0; r < rows; r++) {
-            boardChars[r] = boardText.get(r).toCharArray();
+            String line = lines[r].strip();
+
+            if (line.length() != cols) throw new IllegalStateException("Non-rectangular board");
+
+            boardChars[r] = line.toCharArray();
         }
 
         return boardChars;

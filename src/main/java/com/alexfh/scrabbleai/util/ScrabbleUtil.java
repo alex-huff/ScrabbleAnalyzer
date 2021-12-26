@@ -8,13 +8,19 @@ import java.nio.file.Files;
 public class ScrabbleUtil {
 
     public static final String newLineRegex = "\\R";
+    public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
+    public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
 
     private static boolean isValidTiles(String s) {
         return s.matches("^[a-zA-Z0]*$");
     }
 
     public static int charToInt(char c) {
-        return (int) c - 97;
+        return c - 97;
+    }
+
+    public static char intToChar(int i) {
+        return (char) (i + 97);
     }
 
     public static char[] readPlayerTiles(File file) throws IOException {

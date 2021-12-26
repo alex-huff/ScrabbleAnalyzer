@@ -10,6 +10,8 @@ import java.io.IOException;
 
 public class ScrabbleBoardImpl implements IScrabbleBoard {
 
+    private static final char emptyMarker = '.';
+
     public static ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException {
         Pair<char[][], boolean[][]> gameData = ScrabbleBoardImpl.readGameFile(gameFile);
         Pair<int[][], int[][]> multipliersData = ScrabbleBoardImpl.readMultipliersFile(multipliersFile);
@@ -63,7 +65,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                     letterMultipliers[r][c] = !isUpper ? modifier : 1;
                     wordMultipliers[r][c] = isUpper ? modifier : 1;
                 } else {
-                    if (b != '.') throw new IllegalStateException("Invalid character in multipliers board");
+                    if (b != ScrabbleBoardImpl.emptyMarker) throw new IllegalStateException("Invalid character in multipliers board");
 
                     letterMultipliers[r][c] = 1;
                     wordMultipliers[r][c] = 1;
@@ -94,9 +96,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                 boolean isAlpha = Character.isAlphabetic(b);
                 boolean isUpper = Character.isUpperCase(b);
 
-                if (!isAlpha && b != '.') throw new IllegalStateException("Invalid character: '" + b + "' in game board");
+                if (!isAlpha && b != ScrabbleBoardImpl.emptyMarker) throw new IllegalStateException("Invalid character: '" + b + "' in game board");
 
-                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : '.';
+                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : ScrabbleBoardImpl.emptyMarker;
                 wildcardTiles[r][c] = isAlpha && (!isUpper);
             }
         }
@@ -148,6 +150,11 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     @Override
     public boolean isWildcardAt(int r, int c) {
         return this.wildcardTiles[r][c];
+    }
+
+    @Override
+    public boolean isEmptyAt(int r, int c) {
+        return this.playedTiles[r][c] == ScrabbleBoardImpl.emptyMarker;
     }
 
 }

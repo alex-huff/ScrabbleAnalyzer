@@ -14,4 +14,6 @@ public interface IScrabbleBoard {
 
     boolean isWildcardAt(int r, int c);
 
+    boolean isEmptyAt(int r, int c);
+
 }

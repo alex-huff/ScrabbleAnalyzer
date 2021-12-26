@@ -27,6 +27,8 @@ public class Main {
                 new File(gameFolder + "currentletters.txt")
             )
         );
+
+        scrabbleGame.findMoves();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.alexfh.scrabbleai.util;
+package com.alexfh.scrabbleai.util.structure;
 
 public class ImmutablePair<L, R> implements Pair<L, R> {
 

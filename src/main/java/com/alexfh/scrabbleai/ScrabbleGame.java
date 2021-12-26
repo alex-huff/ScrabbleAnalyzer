@@ -4,6 +4,9 @@ import com.alexfh.scrabbleai.state.IScrabbleBoard;
 import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScrabbleGame {
 
     private final ILetterScoreMap letterScoreMap;
@@ -16,6 +19,14 @@ public class ScrabbleGame {
         this.dictionary = dictionary;
         this.board = board;
         this.playerTiles = playerTiles;
+    }
+
+    public List<Move> findMoves() {
+        List<Move> ret = new ArrayList<>();
+
+
+
+        return ret;
     }
 
 }

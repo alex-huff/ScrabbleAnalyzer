@@ -1,4 +1,4 @@
-package com.alexfh.scrabbleai.util;
+package com.alexfh.scrabbleai.util.structure;
 
 public interface Pair<L, R> {
 

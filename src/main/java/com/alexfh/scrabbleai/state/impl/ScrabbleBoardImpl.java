@@ -1,8 +1,8 @@
 package com.alexfh.scrabbleai.state.impl;
 
 import com.alexfh.scrabbleai.state.IScrabbleBoard;
-import com.alexfh.scrabbleai.util.ImmutablePair;
-import com.alexfh.scrabbleai.util.Pair;
+import com.alexfh.scrabbleai.util.structure.ImmutablePair;
+import com.alexfh.scrabbleai.util.structure.Pair;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.File;

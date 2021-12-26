@@ -4,12 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.function.Supplier;
 
 public class ScrabbleUtil {
 
     public static final String newLineRegex = "\\R";
     public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
     public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
+
+    public static <T> T timeRetrieval(Supplier<T> supplier, String message) {
+        long start = System.nanoTime();
+
+        T t = supplier.get();
+
+        long finish = System.nanoTime();
+
+        System.out.println(message + " " + 1.0D * (finish - start) / 1000000000 + "s");
+
+        return t;
+    }
 
     public static void timeIt(Runnable runnable, String message) {
         long start = System.nanoTime();

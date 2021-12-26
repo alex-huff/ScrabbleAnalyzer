@@ -71,7 +71,7 @@ public class ScrabbleGame {
     }
 
     public List<Move> findMoves() {
-        this.initializeValidPerpendicularPlacements();
+        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
 
         List<Move> ret = new ArrayList<>();
 

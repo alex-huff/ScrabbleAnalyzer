@@ -11,6 +11,16 @@ public class ScrabbleUtil {
     public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
     public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
 
+    public static void timeIt(Runnable runnable, String message) {
+        long start = System.nanoTime();
+
+        runnable.run();
+
+        long finish = System.nanoTime();
+
+        System.out.println(message + " " + 1.0D * (finish - start) / 1000000000 + "s");
+    }
+
     private static boolean isValidTiles(String s) {
         return s.matches("^[a-zA-Z0]*$");
     }

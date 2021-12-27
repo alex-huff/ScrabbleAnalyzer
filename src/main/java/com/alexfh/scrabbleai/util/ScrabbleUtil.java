@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 public class ScrabbleUtil {
 
+    public static final char wildCardMarker = '0';
+    public static final char wildCardTile = '{';
     public static final String newLineRegex = "\\R";
     public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
     public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
@@ -35,7 +37,7 @@ public class ScrabbleUtil {
     }
 
     private static boolean isValidTiles(String s) {
-        return s.matches("^[a-zA-Z0]*$");
+        return s.matches("^[a-zA-Z" + ScrabbleUtil.wildCardTile + "]*$");
     }
 
     public static int charToInt(char c) {
@@ -47,7 +49,9 @@ public class ScrabbleUtil {
     }
 
     public static char[] readPlayerTiles(File file) throws IOException {
-        String playerTiles = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        String playerTiles = Files.readString(file.toPath(), StandardCharsets.UTF_8)
+            .toLowerCase()
+            .replaceAll(String.valueOf(ScrabbleUtil.wildCardMarker), String.valueOf(ScrabbleUtil.wildCardTile));
 
         if (!ScrabbleUtil.isValidTiles(playerTiles)) throw new IllegalStateException("Invalid player tiles");
 

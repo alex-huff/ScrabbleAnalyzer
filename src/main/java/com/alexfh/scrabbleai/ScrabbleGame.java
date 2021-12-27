@@ -1,5 +1,6 @@
 package com.alexfh.scrabbleai;
 
+import com.alexfh.scrabbleai.ai.PermuteTree;
 import com.alexfh.scrabbleai.state.IScrabbleBoard;
 import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.rule.ILetterScoreMap;
@@ -60,6 +61,7 @@ public class ScrabbleGame {
      */
     private final boolean[][][] perpVert;
     private final boolean[][][] perpHori;
+    private final PermuteTree permuteTree;
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, IDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         this.letterScoreMap = letterScoreMap;
@@ -68,10 +70,13 @@ public class ScrabbleGame {
         this.playerTiles = playerTiles;
         this.perpVert = new boolean[this.board.getRows()][this.board.getCols()][];
         this.perpHori = new boolean[this.board.getRows()][this.board.getCols()][];
+        this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
+
+        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
     }
 
     public List<Move> findMoves() {
-        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
+        // this.permuteTree.forEach(System.out::println);
 
         List<Move> ret = new ArrayList<>();
 

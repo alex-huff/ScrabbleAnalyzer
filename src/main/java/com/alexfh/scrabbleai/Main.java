@@ -7,6 +7,7 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
@@ -33,7 +34,7 @@ public class Main {
                 )
             );
 
-            scrabbleGame.findMoves();
+            List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
         } catch (IOException e) {
             e.printStackTrace();
         }

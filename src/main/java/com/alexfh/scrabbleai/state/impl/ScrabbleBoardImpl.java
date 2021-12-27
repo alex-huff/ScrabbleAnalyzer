@@ -112,6 +112,8 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     private final int[][] wordMultipliers;
     private final char[][] playedTiles;
     private final boolean[][] wildcardTiles;
+    private final int anchorRow;
+    private final int anchorCol;
 
     public ScrabbleBoardImpl(int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles, boolean[][] wildcardTiles) {
         this.rows = rows;
@@ -120,6 +122,8 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         this.wordMultipliers = wordMultipliers;
         this.playedTiles = playedTiles;
         this.wildcardTiles = wildcardTiles;
+        this.anchorRow = this.rows / 2;
+        this.anchorCol = this.cols / 2;
     }
 
     @Override
@@ -155,6 +159,16 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     @Override
     public boolean isEmptyAt(int r, int c) {
         return this.playedTiles[r][c] == ScrabbleBoardImpl.emptyMarker;
+    }
+
+    @Override
+    public int getAnchorRow() {
+        return this.anchorRow;
+    }
+
+    @Override
+    public int getAnchorCol() {
+        return this.anchorCol;
     }
 
 }

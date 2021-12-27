@@ -8,6 +8,7 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ScrabbleGame {
@@ -20,6 +21,71 @@ public class ScrabbleGame {
     }
 
     public record Move(String playedWord, char[] playedTiles, boolean isVertical, int row, int col) { }
+
+    public class Placement {
+
+        private final int row;
+        private final int col;
+        private final boolean isVertical;
+        private final int minTilesPlaced;
+        private final int maxTilesPlaced;
+        private final int maxWordSize;
+        private final char[] currentlyPlacedTiles;
+        private final char[] effectiveWord;
+        private final int[] posInEffectiveWordMap;
+        private final int[] effectiveWordSizeMap;
+        private int numPlacedTiles;
+        private int currentEffectiveWordSize;
+        private boolean[][] validPerpTilesForPlacement;
+
+        public Placement(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
+            this.row = row;
+            this.col = col;
+            this.isVertical = isVertical;
+            this.minTilesPlaced = minTilesPlaced;
+            this.maxTilesPlaced = maxTilesPlaced;
+            this.currentlyPlacedTiles = new char[this.maxTilesPlaced];
+            this.effectiveWord = effectiveWord;
+            this.maxWordSize = this.effectiveWord.length;
+            this.posInEffectiveWordMap = posInEffectiveWordMap;
+            this.effectiveWordSizeMap = effectiveWordSizeMap;
+            this.validPerpTilesForPlacement = new boolean[this.maxTilesPlaced][];
+
+            for (int i = 0; i < this.validPerpTilesForPlacement.length; i++) {
+                int spotInWord = this.posInEffectiveWordMap[i];
+                this.validPerpTilesForPlacement[i] = this.isVertical ?
+                    ScrabbleGame.this.perpVert[row + spotInWord][col] :
+                    ScrabbleGame.this.perpHori[row][col + spotInWord];
+            }
+        }
+
+        public boolean placeTile(char tile) {
+            return this.placeTileAs(tile, tile);
+        }
+
+        public boolean placeWildcardTileAs(char as) {
+            return this.placeTileAs(ScrabbleUtil.wildCardTile, as);
+        }
+
+        private boolean placeTileAs(char tile, char as) {
+            if (!this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(as)]) {
+                return false;
+            }
+
+            this.currentlyPlacedTiles[this.numPlacedTiles] = tile;
+            this.effectiveWord[this.posInEffectiveWordMap[this.numPlacedTiles]] = as;
+            this.currentEffectiveWordSize = this.effectiveWordSizeMap[this.numPlacedTiles];
+            this.numPlacedTiles++;
+
+            return true;
+        }
+
+        public void removeTile() {
+            this.numPlacedTiles--;
+            this.currentEffectiveWordSize = this.numPlacedTiles == 0 ? 0 : this.effectiveWordSizeMap[this.numPlacedTiles - 1];
+        }
+
+    }
 
     private final ILetterScoreMap letterScoreMap;
     private final WordGraphDictionary dictionary;
@@ -64,6 +130,7 @@ public class ScrabbleGame {
     private final boolean[][][] perpVert;
     private final boolean[][][] perpHori;
     private final PermuteTree permuteTree;
+    private final List<Placement> validPlacements;
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
@@ -77,14 +144,194 @@ public class ScrabbleGame {
         this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
 
         ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
+
+        this.validPlacements = ScrabbleUtil.timeRetrieval(this::findValidPlacements, "findValidPlacements");
     }
 
     public List<Move> findMoves() {
         // this.permuteTree.forEach(System.out::println);
 
+        //        this.validPlacements.stream().sequential().filter(placement -> !placement.isVertical).forEach(
+//            placement -> System.out.println(
+//                "Vert: " + placement.isVertical +
+//                    " Row: " + placement.row +
+//                    " Col: " + placement.col +
+////                    " MinPlaced: " + placement.minTilesPlaced +
+////                    " MaxPlaced: " + placement.maxTilesPlaced +
+////                    " MaxWordSize: " + placement.maxWordSize +
+//                    " EffectiveWord: " + Arrays.toString(placement.effectiveWord) +
+//                    " PosInWord: " + Arrays.toString(placement.posInEffectiveWordMap) +
+//                    " WordSize: " + Arrays.toString(placement.effectiveWordSizeMap)
+//            )
+//        );
+
         List<Move> ret = new ArrayList<>();
 
         return ret;
+    }
+
+    private List<Placement> findValidPlacements() {
+        List<Placement> placements = new LinkedList<>();
+
+        for (int row = 0; row < this.board.getRows(); row++) {
+            for (int col = 0; col < this.board.getCols(); col++) {
+                Placement vert = this.getVertPlacement(row, col), hori = this.getHoriPlacement(row, col);
+
+                if (vert != null) placements.add(vert);
+
+                if (hori != null) placements.add(hori);
+            }
+        }
+
+        return placements;
+    }
+
+    private Placement getVertPlacement(int row, int col) {
+        boolean topEmpty = row == 0 || this.board.isEmptyAt(row - 1, col);
+
+        if (!topEmpty) return null; // letter above this position
+
+        int blanks = 0;
+        int current = row;
+        boolean hasAnchor = false;
+        int blanksTillAnchor = 0;
+
+        while (current < this.board.getRows()) {
+            boolean isBlank = this.board.isEmptyAt(current, col);
+
+            if (isBlank) {
+                if (blanks == this.playerTiles.length) break;
+
+                blanks++;
+            }
+
+            if (!hasAnchor) {
+                boolean onLeft = col > 0 && !this.board.isEmptyAt(current, col - 1);
+                boolean onRight = col < this.board.getCols() - 1 && !this.board.isEmptyAt(current, col + 1);
+                boolean onAnchor = current == this.board.getAnchorRow() && col == this.board.getAnchorCol();
+                boolean anchorable = !isBlank || onLeft || onRight || onAnchor;
+
+                if (anchorable) {
+                    hasAnchor = true;
+                    blanksTillAnchor = blanks;
+                }
+            }
+
+            current++;
+        }
+
+        if (!hasAnchor || blanks == 0) return null;
+
+        int maxWordLength = current - row;
+        char[] effectiveWord = new char[maxWordLength];
+        int[] posInEffectiveWordMap = new int[blanks];
+        int[] effectiveWordSizeMap = new int[blanks];
+        current = row;
+        int stop = row + maxWordLength;
+        int i = 0;
+        int b = 0;
+
+        while (current < stop) {
+            effectiveWord[i] = this.board.getCharAt(current, col);
+            boolean isBlank = this.board.isEmptyAt(current, col);
+
+            if (isBlank) {
+                posInEffectiveWordMap[b] = i;
+                b++;
+            }
+
+            i++;
+            current++;
+        }
+
+        System.arraycopy(posInEffectiveWordMap, 1, effectiveWordSizeMap, 0, effectiveWordSizeMap.length - 1);
+
+        effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
+
+        return new Placement(
+            row,
+            col,
+            true,
+            blanksTillAnchor,
+            blanks,
+            effectiveWord,
+            posInEffectiveWordMap,
+            effectiveWordSizeMap
+        );
+    }
+
+    private Placement getHoriPlacement(int row, int col) {
+        boolean leftEmpty = col == 0 || this.board.isEmptyAt(row, col - 1);
+
+        if (!leftEmpty) return null; // letter to the left of this position
+
+        int blanks = 0;
+        int current = col;
+        boolean hasAnchor = false;
+        int blanksTillAnchor = 0;
+
+        while (current < this.board.getCols()) {
+            boolean isBlank = this.board.isEmptyAt(row, current);
+
+            if (isBlank) {
+                if (blanks == this.playerTiles.length) break;
+
+                blanks++;
+            }
+
+            if (!hasAnchor) {
+                boolean onTop = row > 0 && !this.board.isEmptyAt(row - 1, current);
+                boolean onBot = row < this.board.getRows() - 1 && !this.board.isEmptyAt(row + 1, current);
+                boolean onAnchor = current == this.board.getAnchorCol() && row == this.board.getAnchorRow();
+                boolean anchorable = !isBlank || onTop || onBot || onAnchor;
+
+                if (anchorable) {
+                    hasAnchor = true;
+                    blanksTillAnchor = blanks;
+                }
+            }
+
+            current++;
+        }
+
+        if (!hasAnchor || blanks == 0) return null;
+
+        int maxWordLength = current - col;
+        char[] effectiveWord = new char[maxWordLength];
+        int[] posInEffectiveWordMap = new int[blanks];
+        int[] effectiveWordSizeMap = new int[blanks];
+        current = col;
+        int stop = col + maxWordLength;
+        int i = 0;
+        int b = 0;
+
+        while (current < stop) {
+            effectiveWord[i] = this.board.getCharAt(row, current);
+            boolean isBlank = this.board.isEmptyAt(row, current);
+
+            if (isBlank) {
+                posInEffectiveWordMap[b] = i;
+                b++;
+            }
+
+            i++;
+            current++;
+        }
+
+        System.arraycopy(posInEffectiveWordMap, 1, effectiveWordSizeMap, 0, effectiveWordSizeMap.length - 1);
+
+        effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
+
+        return new Placement(
+            row,
+            col,
+            false,
+            blanksTillAnchor,
+            blanks,
+            effectiveWord,
+            posInEffectiveWordMap,
+            effectiveWordSizeMap
+        );
     }
 
     private void initializeValidPerpendicularPlacements() {

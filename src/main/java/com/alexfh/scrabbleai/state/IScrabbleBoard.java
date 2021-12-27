@@ -16,4 +16,8 @@ public interface IScrabbleBoard {
 
     boolean isEmptyAt(int r, int c);
 
+    int getAnchorRow();
+
+    int getAnchorCol();
+
 }

@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.alexfh.scrabbleai.ai.PermuteTree;
 import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WordGraphTest {
 
@@ -61,6 +65,22 @@ public class WordGraphTest {
         words.forEach(word -> assertTrue(dictionary.hasWord(word)));
         words.forEach(dictionary::removeWord);
         assertFalse(dictionary.hasPrefix(""));
+    }
+
+    @Test
+    public void testPermuteTree() {
+        PermuteTree permuteTree = new PermuteTree(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g' });
+        AtomicInteger i = new AtomicInteger(-1); // -1 to ignore 0-perm
+        Set<String> permutations = new TreeSet<>();
+
+        permuteTree.forEach(
+            perm -> {
+                i.incrementAndGet();
+                assertFalse(permutations.contains(perm));
+                permutations.add(perm);
+            }
+        );
+        assertEquals(i.get(), 13699);
     }
 
 }

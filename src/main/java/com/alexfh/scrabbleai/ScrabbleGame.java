@@ -131,6 +131,9 @@ public class ScrabbleGame {
     private final boolean[][][] perpHori;
     private final PermuteTree permuteTree;
     private final List<Placement> validPlacements;
+    private final boolean[] possibleCharPlacements;
+    private final boolean[][] canPlaceVert;
+    private final boolean[][] canPlaceHori;
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
@@ -141,6 +144,9 @@ public class ScrabbleGame {
         this.playerTiles = playerTiles;
         this.perpVert = new boolean[this.board.getRows()][this.board.getCols()][];
         this.perpHori = new boolean[this.board.getRows()][this.board.getCols()][];
+        this.possibleCharPlacements = this.getPossiblePlacements();
+        this.canPlaceVert = new boolean[this.board.getRows()][this.board.getCols()];
+        this.canPlaceHori = new boolean[this.board.getRows()][this.board.getCols()];
         this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
 
         ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
@@ -151,7 +157,7 @@ public class ScrabbleGame {
     public List<Move> findMoves() {
         // this.permuteTree.forEach(System.out::println);
 
-        //        this.validPlacements.stream().sequential().filter(placement -> !placement.isVertical).forEach(
+//        this.validPlacements.stream().sequential().filter(placement -> placement.isVertical).forEach(
 //            placement -> System.out.println(
 //                "Vert: " + placement.isVertical +
 //                    " Row: " + placement.row +
@@ -168,6 +174,20 @@ public class ScrabbleGame {
         List<Move> ret = new ArrayList<>();
 
         return ret;
+    }
+
+    private boolean[] getPossiblePlacements() {
+        boolean[] placements = new boolean[ScrabbleUtil.alphaChars.length];
+
+        for (char c : this.playerTiles) {
+            if (c == ScrabbleUtil.wildCardTile) {
+                return ScrabbleGame.allValid;
+            }
+
+            placements[ScrabbleUtil.charToInt(c)] = true;
+        }
+
+        return placements;
     }
 
     private List<Placement> findValidPlacements() {
@@ -200,7 +220,7 @@ public class ScrabbleGame {
             boolean isBlank = this.board.isEmptyAt(current, col);
 
             if (isBlank) {
-                if (blanks == this.playerTiles.length) break;
+                if (blanks == this.playerTiles.length || !this.canPlaceVert[current][col]) break;
 
                 blanks++;
             }
@@ -274,7 +294,7 @@ public class ScrabbleGame {
             boolean isBlank = this.board.isEmptyAt(row, current);
 
             if (isBlank) {
-                if (blanks == this.playerTiles.length) break;
+                if (blanks == this.playerTiles.length || !this.canPlaceHori[row][current]) break;
 
                 blanks++;
             }
@@ -351,12 +371,14 @@ public class ScrabbleGame {
 
                 if (leftEmpty && rightEmpty) { // nothing to left or right, anything is valid for vertical placement
                     this.perpVert[row][col] = ScrabbleGame.allValid;
+                    this.canPlaceVert[row][col] = true;
                 } else {
                     this.perpVert[row][col] = this.getValidReplacementsVert(row, col);
                 }
 
                 if (topEmpty && bottomEmpty) { // nothing above or below, anything is valid for horizontal placement
                     this.perpHori[row][col] = ScrabbleGame.allValid;
+                    this.canPlaceHori[row][col] = true;
                 } else {
                     this.perpHori[row][col] = this.getValidReplacementsHori(row, col);
                 }
@@ -389,7 +411,11 @@ public class ScrabbleGame {
             while (right + 1 < this.board.getCols() && !this.board.isEmptyAt(row, right + 1))
                 right++;
 
+            boolean hasAny = false;
+
             for (Character c : currentPath.getPaths()) {
+                if (!this.possibleCharPlacements[ScrabbleUtil.charToInt(c)]) continue;
+
                 WordGraphDictionary.WGNode rightPath = currentPath.getPath(c);
                 current = col + 1;
 
@@ -401,8 +427,13 @@ public class ScrabbleGame {
                     current++;
                 }
 
-                if (rightPath != null && rightPath.wordHere) result[ScrabbleUtil.charToInt(c)] = true;
+                if (rightPath != null && rightPath.wordHere) {
+                    result[ScrabbleUtil.charToInt(c)] = true;
+                    hasAny = true;
+                }
             }
+
+            if (hasAny) this.canPlaceVert[row][col] = true;
         } else {
             result = ScrabbleGame.allInvalid;
         }
@@ -435,7 +466,11 @@ public class ScrabbleGame {
             while (bottom + 1 < this.board.getRows() && !this.board.isEmptyAt(bottom + 1, col))
                 bottom++;
 
+            boolean hasAny = false;
+
             for (Character c : currentPath.getPaths()) {
+                if (!this.possibleCharPlacements[ScrabbleUtil.charToInt(c)]) continue;
+
                 WordGraphDictionary.WGNode bottomPath = currentPath.getPath(c);
                 current = row + 1;
 
@@ -447,8 +482,13 @@ public class ScrabbleGame {
                     current++;
                 }
 
-                if (bottomPath != null && bottomPath.wordHere) result[ScrabbleUtil.charToInt(c)] = true;
+                if (bottomPath != null && bottomPath.wordHere) {
+                    result[ScrabbleUtil.charToInt(c)] = true;
+                    hasAny = true;
+                }
             }
+
+            if (hasAny) this.canPlaceHori[row][col] = true;
         } else {
             result = ScrabbleGame.allInvalid;
         }

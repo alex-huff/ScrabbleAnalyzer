@@ -9,7 +9,6 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScrabbleGame {
 
@@ -65,11 +64,10 @@ public class ScrabbleGame {
     private final PermuteTree permuteTree;
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
+        if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
+
         this.letterScoreMap = letterScoreMap;
         this.dictionary = dictionary;
-
-        if (this.dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
-
         this.board = board;
         this.playerTiles = playerTiles;
         this.perpVert = new boolean[this.board.getRows()][this.board.getCols()][];
@@ -81,9 +79,6 @@ public class ScrabbleGame {
 
     public List<Move> findMoves() {
         // this.permuteTree.forEach(System.out::println);
-
-//        System.out.println(Arrays.deepToString(this.perpVert));
-//        System.out.println(Arrays.deepToString(this.perpHori));
 
         List<Move> ret = new ArrayList<>();
 

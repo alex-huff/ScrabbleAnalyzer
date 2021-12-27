@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 
 public class PermuteTree {
 
-    private static class PTNode {
+    public static class PTNode {
 
         private final PTNode[] nodes = new PTNode[27];
         private final PTNode parent;
@@ -44,6 +44,10 @@ public class PermuteTree {
 
     public PermuteTree(char[] toPermute) {
         this.forAllPerm(this.root, toPermute, 0);
+    }
+
+    public PTNode getRoot() {
+        return this.root;
     }
 
     private void forAllPerm(PTNode permuteNode, char[] toPermute, int i) {

@@ -17,12 +17,14 @@ public class WordGraphDictionary {
 
     public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException {
         WordGraphDictionary dictionary = new WordGraphDictionary();
-        BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8));
-        String line;
 
-        while ((line = reader.readLine()) != null) dictionary.addWord(line.toLowerCase());
+        try (BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8))) {
+            String line;
 
-        reader.close();
+            while ((line = reader.readLine()) != null) dictionary.addWord(line.toLowerCase());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return dictionary;
     }

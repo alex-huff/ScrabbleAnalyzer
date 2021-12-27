@@ -1,8 +1,8 @@
 package com.alexfh.scrabbleai;
 
 import com.alexfh.scrabbleai.ai.PermuteTree;
+import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
 import com.alexfh.scrabbleai.state.IScrabbleBoard;
-import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
@@ -20,7 +20,7 @@ public class ScrabbleGame {
     }
 
     private final ILetterScoreMap letterScoreMap;
-    private final IDictionary dictionary;
+    private final WordGraphDictionary dictionary;
     private final IScrabbleBoard board;
     private final char[] playerTiles;
 
@@ -63,7 +63,7 @@ public class ScrabbleGame {
     private final boolean[][][] perpHori;
     private final PermuteTree permuteTree;
 
-    public ScrabbleGame(ILetterScoreMap letterScoreMap, IDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
+    public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         this.letterScoreMap = letterScoreMap;
         this.dictionary = dictionary;
         this.board = board;

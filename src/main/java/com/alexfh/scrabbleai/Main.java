@@ -1,7 +1,7 @@
 package com.alexfh.scrabbleai;
 
 import com.alexfh.scrabbleai.state.impl.ScrabbleBoardImpl;
-import com.alexfh.scrabbleai.dictionary.impl.WordGraphDictionary;
+import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
 import com.alexfh.scrabbleai.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 

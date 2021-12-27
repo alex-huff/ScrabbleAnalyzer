@@ -1,6 +1,5 @@
-package com.alexfh.scrabbleai.dictionary.impl;
+package com.alexfh.scrabbleai.dictionary;
 
-import com.alexfh.scrabbleai.dictionary.IDictionary;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.File;
@@ -12,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WordGraphDictionary implements IDictionary {
+public class WordGraphDictionary {
 
     public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException {
         WordGraphDictionary dictionary = new WordGraphDictionary();
@@ -99,19 +98,16 @@ public class WordGraphDictionary implements IDictionary {
         return this.root;
     }
 
-    @Override
     public boolean hasWord(String word) {
         WGNode path = this.followPath(word);
 
         return path != null && path.wordHere;
     }
 
-    @Override
     public boolean hasPrefix(String prefix) {
         return this.followPath(prefix) != null;
     }
 
-    @Override
     public void addWord(String word) {
         WGNode current = this.getOrCreateRoot();
 
@@ -122,7 +118,6 @@ public class WordGraphDictionary implements IDictionary {
         current.wordHere = true;
     }
 
-    @Override
     public void removeWord(String word) {
         WGNode path = this.followPath(word);
 
@@ -145,7 +140,6 @@ public class WordGraphDictionary implements IDictionary {
         if (path.paths.size() == 0 && !path.wordHere) this.root = null;
     }
 
-    @Override
     public void forEach(Consumer<String> consumer) {
         if (this.root == null) return;
 

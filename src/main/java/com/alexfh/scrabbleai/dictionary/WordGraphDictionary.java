@@ -25,7 +25,7 @@ public class WordGraphDictionary {
         return dictionary;
     }
 
-    private static class WGNode {
+    public static class WGNode {
 
         private final WGNode[] nodes = new WGNode[26];
         public boolean wordHere;
@@ -42,6 +42,10 @@ public class WordGraphDictionary {
             this.parent = parent;
             this.paths = new LinkedList<>();
             this.word = word;
+        }
+
+        public List<Character> getPaths() {
+            return this.paths;
         }
 
         public void removePath(char c) {
@@ -75,6 +79,10 @@ public class WordGraphDictionary {
     }
 
     private WGNode root = null;
+
+    public WGNode getRoot() {
+        return this.root;
+    }
 
     private WGNode followPath(String path) {
         if (this.root == null) return null;

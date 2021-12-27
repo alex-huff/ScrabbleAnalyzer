@@ -9,6 +9,7 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScrabbleGame {
 
@@ -66,6 +67,9 @@ public class ScrabbleGame {
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
         this.letterScoreMap = letterScoreMap;
         this.dictionary = dictionary;
+
+        if (this.dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
+
         this.board = board;
         this.playerTiles = playerTiles;
         this.perpVert = new boolean[this.board.getRows()][this.board.getCols()][];
@@ -78,19 +82,12 @@ public class ScrabbleGame {
     public List<Move> findMoves() {
         // this.permuteTree.forEach(System.out::println);
 
+//        System.out.println(Arrays.deepToString(this.perpVert));
+//        System.out.println(Arrays.deepToString(this.perpHori));
+
         List<Move> ret = new ArrayList<>();
 
         return ret;
-    }
-
-    private boolean[] determineValidChars(String perpWord) {
-        boolean[] result = new boolean[ScrabbleUtil.alphaChars.length];
-
-        for (int i = 0; i < ScrabbleUtil.alphaChars.length; i++) {
-            result[i] = this.dictionary.hasWord(perpWord.replace(' ', ScrabbleUtil.alphaChars[i]));
-        }
-
-        return result;
     }
 
     private void initializeValidPerpendicularPlacements() {
@@ -111,50 +108,108 @@ public class ScrabbleGame {
                 if (leftEmpty && rightEmpty) { // nothing to left or right, anything is valid for vertical placement
                     this.perpVert[row][col] = ScrabbleGame.allValid;
                 } else {
-                    int left = col, right = col;
-
-                    while (left - 1 >= 0 && !this.board.isEmptyAt(row, left - 1))
-                        left--;
-
-                    while (right + 1 < this.board.getCols() && !this.board.isEmptyAt(row, right + 1))
-                        right++;
-
-                    StringBuilder builder = new StringBuilder();
-                    int current = left;
-
-                    while (current <= right) {
-                        builder.append(this.board.isEmptyAt(row, current) ? ' ' : this.board.getCharAt(row, current));
-
-                        current++;
-                    }
-
-                    this.perpVert[row][col] = this.determineValidChars(builder.toString());
+                    this.perpVert[row][col] = this.getValidReplacementsVert(row, col);
                 }
 
                 if (topEmpty && bottomEmpty) { // nothing above or below, anything is valid for horizontal placement
                     this.perpHori[row][col] = ScrabbleGame.allValid;
                 } else {
-                    int top = row, bottom = row;
-
-                    while (top - 1 >= 0 && !this.board.isEmptyAt(top - 1, col))
-                        top--;
-
-                    while (bottom + 1 < this.board.getRows() && !this.board.isEmptyAt(bottom + 1, col))
-                        bottom++;
-
-                    StringBuilder builder = new StringBuilder();
-                    int current = top;
-
-                    while (current <= bottom) {
-                        builder.append(this.board.isEmptyAt(current, col) ? ' ' : this.board.getCharAt(current, col));
-
-                        current++;
-                    }
-
-                    this.perpHori[row][col] = this.determineValidChars(builder.toString());
+                    this.perpHori[row][col] = this.getValidReplacementsHori(row, col);
                 }
             }
         }
+    }
+
+    private boolean[] getValidReplacementsVert(int row, int col) {
+        int left = col, right = col;
+
+        while (left - 1 >= 0 && !this.board.isEmptyAt(row, left - 1))
+            left--;
+
+        WordGraphDictionary.WGNode currentPath = this.dictionary.getRoot();
+        int current = left;
+
+        while (current < col) {
+            currentPath = currentPath.getPath(this.board.getCharAt(row, current));
+
+            if (currentPath == null) break;
+
+            current++;
+        }
+
+        boolean[] result;
+
+        if (current == col) { // left of tile is valid prefix
+            result = new boolean[ScrabbleUtil.alphaChars.length];
+
+            while (right + 1 < this.board.getCols() && !this.board.isEmptyAt(row, right + 1))
+                right++;
+
+            for (Character c : currentPath.getPaths()) {
+                WordGraphDictionary.WGNode rightPath = currentPath.getPath(c);
+                current = col + 1;
+
+                while (current <= right) {
+                    rightPath = rightPath.getPath(this.board.getCharAt(row, current));
+
+                    if (rightPath == null) break;
+
+                    current++;
+                }
+
+                if (rightPath != null && rightPath.wordHere) result[ScrabbleUtil.charToInt(c)] = true;
+            }
+        } else {
+            result = ScrabbleGame.allInvalid;
+        }
+
+        return result;
+    }
+
+    private boolean[] getValidReplacementsHori(int row, int col) {
+        int top = row, bottom = row;
+
+        while (top - 1 >= 0 && !this.board.isEmptyAt(top - 1, col))
+            top--;
+
+        WordGraphDictionary.WGNode currentPath = this.dictionary.getRoot();
+        int current = top;
+
+        while (current < row) {
+            currentPath = currentPath.getPath(this.board.getCharAt(current, col));
+
+            if (currentPath == null) break;
+
+            current++;
+        }
+
+        boolean[] result;
+
+        if (current == row) { // top of tile is valid prefix
+            result = new boolean[ScrabbleUtil.alphaChars.length];
+
+            while (bottom + 1 < this.board.getRows() && !this.board.isEmptyAt(bottom + 1, col))
+                bottom++;
+
+            for (Character c : currentPath.getPaths()) {
+                WordGraphDictionary.WGNode bottomPath = currentPath.getPath(c);
+                current = row + 1;
+
+                while (current <= bottom) {
+                    bottomPath = bottomPath.getPath(this.board.getCharAt(current, col));
+
+                    if (bottomPath == null) break;
+
+                    current++;
+                }
+
+                if (bottomPath != null && bottomPath.wordHere) result[ScrabbleUtil.charToInt(c)] = true;
+            }
+        } else {
+            result = ScrabbleGame.allInvalid;
+        }
+
+        return result;
     }
 
 }

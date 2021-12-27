@@ -2,7 +2,9 @@ package com.alexfh.scrabbleai.dictionary;
 
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,12 +17,12 @@ public class WordGraphDictionary {
 
     public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException {
         WordGraphDictionary dictionary = new WordGraphDictionary();
+        BufferedReader reader = new BufferedReader(new FileReader(dictionaryFile, StandardCharsets.UTF_8));
+        String line;
 
-        Arrays.stream(
-            Files.readString(dictionaryFile.toPath(), StandardCharsets.UTF_8).split(ScrabbleUtil.newLineRegex)
-        ).forEach(
-            line -> dictionary.addWord(line.toLowerCase().strip())
-        );
+        while ((line = reader.readLine()) != null) dictionary.addWord(line.toLowerCase());
+
+        reader.close();
 
         return dictionary;
     }

@@ -19,6 +19,8 @@ public class ScrabbleGame {
         Arrays.fill(ScrabbleGame.allValid, true);
     }
 
+    public record Move(String playedWord, char[] playedTiles, boolean isVertical, int row, int col) { }
+
     private final ILetterScoreMap letterScoreMap;
     private final WordGraphDictionary dictionary;
     private final IScrabbleBoard board;

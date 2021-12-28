@@ -26,6 +26,10 @@ public class ScrabbleGame {
             move -> move.playedWord.length()
         ).thenComparing(
             Move::playedWord
+        ).thenComparingInt(
+            Move::row
+        ).thenComparingInt(
+            Move::col
         );
 
         @Override

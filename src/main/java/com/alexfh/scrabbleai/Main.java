@@ -15,6 +15,7 @@ public class Main {
 
     public static void main(String[] args) {
         ScrabbleUtil.timeIt(Main::start, "main");
+        ScrabbleGame.threadPool.shutdown();
     }
 
     private static void start() {

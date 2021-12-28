@@ -7,9 +7,12 @@ import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ScrabbleGame {
 
+    public static final ExecutorService threadPool = Executors.newCachedThreadPool();
     private static final boolean[] allValid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final boolean[] allInvalid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final PerpScoreData invalidPerpWordScore = new PerpScoreData(false, 0);

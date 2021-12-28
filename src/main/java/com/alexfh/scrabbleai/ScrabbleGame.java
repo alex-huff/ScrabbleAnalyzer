@@ -6,10 +6,7 @@ import com.alexfh.scrabbleai.state.IScrabbleBoard;
 import com.alexfh.scrabbleai.rule.ILetterScoreMap;
 import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ScrabbleGame {
 
@@ -20,7 +17,22 @@ public class ScrabbleGame {
         Arrays.fill(ScrabbleGame.allValid, true);
     }
 
-    public record Move(String playedWord, char[] playedTiles, boolean isVertical, int row, int col) { }
+    public record Move(String playedWord, char[] playedTiles, boolean isVertical, int row, int col, int score) implements Comparable<Move> {
+
+        private static final Comparator<Move> moveComparator = Comparator.comparingInt(
+            Move::score
+        ).reversed().thenComparingInt(
+            move -> move.playedWord.length()
+        ).thenComparing(
+            Move::playedWord
+        );
+
+        @Override
+        public int compareTo(Move o) {
+            return moveComparator.compare(this, o);
+        }
+
+    }
 
     public class Placement {
 
@@ -54,6 +66,10 @@ public class ScrabbleGame {
                     ScrabbleGame.this.perpVert[row + spotInWord][col] :
                     ScrabbleGame.this.perpHori[row][col + spotInWord];
             }
+        }
+
+        public int getScore() {
+            return 0;
         }
 
         public boolean canPlace(char tile) {
@@ -154,22 +170,6 @@ public class ScrabbleGame {
     }
 
     public List<Move> findMoves() {
-        // this.permuteTree.forEach(System.out::println);
-
-//        this.validPlacements.stream().sequential().filter(placement -> placement.isVertical).forEach(
-//            placement -> System.out.println(
-//                "Vert: " + placement.isVertical +
-//                    " Row: " + placement.row +
-//                    " Col: " + placement.col +
-////                    " MinPlaced: " + placement.minTilesPlaced +
-////                    " MaxPlaced: " + placement.maxTilesPlaced +
-////                    " MaxWordSize: " + placement.maxWordSize +
-//                    " EffectiveWord: " + Arrays.toString(placement.effectiveWord) +
-//                    " PosInWord: " + Arrays.toString(placement.posInEffectiveWordMap) +
-//                    " WordSize: " + Arrays.toString(placement.effectiveWordSizeMap)
-//            )
-//        );
-
         List<Move> moves = new ArrayList<>();
 
         this.validPlacements.stream().sequential().forEach(
@@ -181,19 +181,20 @@ public class ScrabbleGame {
 
     private List<Move> getMovesFromPlacement(Placement placement) {
         List<Move> moves = new LinkedList<>();
+        WordGraphDictionary.WGNode startPath = this.initializePath(placement);
 
-        this.permuteOnPlacement(placement, this.permuteTree.getRoot(), this.dictionary.getRoot(), moves);
+        if (startPath == null) {
+            System.out.println("PANIC: placement with invalid prefix");
+
+            return moves;
+        }
+
+        this.permuteOnPlacement(placement, this.permuteTree.getRoot(), startPath, moves);
 
         return moves;
     }
 
     private void permuteOnPlacement(Placement placement, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
-        if (placement.numPlacedTiles == 0) {
-            path = this.initializePath(placement, path);
-
-            if (path == null) throw new IllegalStateException("Panic: placement with invalid prefix");
-        }
-
         if (placement.numPlacedTiles >= placement.minTilesPlaced && path.wordHere) {
             char[] playedTilesCopy = new char[placement.numPlacedTiles];
 
@@ -204,7 +205,8 @@ public class ScrabbleGame {
                     playedTilesCopy,
                     placement.isVertical,
                     placement.row,
-                    placement.col
+                    placement.col,
+                    placement.getScore()
                 )
             );
         }
@@ -240,11 +242,11 @@ public class ScrabbleGame {
         }
     }
 
-    private WordGraphDictionary.WGNode initializePath(Placement placement, WordGraphDictionary.WGNode root) {
+    private WordGraphDictionary.WGNode initializePath(Placement placement) {
         int start = 0;
         int finish = placement.posInEffectiveWordMap[0];
         int current = start;
-        WordGraphDictionary.WGNode newPath = root;
+        WordGraphDictionary.WGNode newPath = this.dictionary.getRoot();
 
         while (current < finish) {
             newPath = newPath.getPath(placement.effectiveWord[current]);

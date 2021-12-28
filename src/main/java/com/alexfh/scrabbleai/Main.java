@@ -8,6 +8,7 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -17,9 +18,11 @@ public class Main {
     }
 
     private static void start() {
+        ScrabbleGame scrabbleGame;
+
         try {
             String gameFolder = "src/main/resources/games/game1/";
-            ScrabbleGame scrabbleGame = new ScrabbleGame(
+            scrabbleGame = new ScrabbleGame(
                 LetterScoreMapImpl.fromFile(
                     new File("src/main/resources/scoremap.txt")
                 ),
@@ -34,22 +37,26 @@ public class Main {
                     new File(gameFolder + "currentletters.txt")
                 )
             );
-
-            List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
-
-            System.out.println(moves.size());
-            moves.forEach(
-                move -> System.out.println(
-                    "Vert: " + move.isVertical() +
-                        " Row: " + move.row() +
-                        " Col: " + move.col() +
-                        " Word: " + move.playedWord() +
-                        " Tiles: " + Arrays.toString(move.playedTiles())
-                )
-            );
         } catch (IOException e) {
             e.printStackTrace();
+
+            return;
         }
+
+        List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
+
+        System.out.println(moves.size());
+        ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");
+        moves.forEach(
+            move -> System.out.println(
+                "Score: " + move.score() +
+                    " Vert: " + move.isVertical() +
+                    " Row: " + move.row() +
+                    " Col: " + move.col() +
+                    " Word: " + move.playedWord() +
+                    " Tiles: " + Arrays.toString(move.playedTiles())
+            )
+        );
     }
 
 }

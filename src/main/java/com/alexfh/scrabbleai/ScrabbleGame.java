@@ -138,28 +138,23 @@ public class ScrabbleGame {
             return playScore;
         }
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         private boolean canPlace(char tile) {
             return this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(tile)];
         }
 
-        private boolean placeTile(char tile) {
-            return this.placeTileAs(tile, tile);
+        private void placeTile(char tile) {
+            this.placeTileAs(tile, tile);
         }
 
-        private boolean placeWildcardTileAs(char as) {
-            return this.placeTileAs(ScrabbleUtil.wildCardTile, as);
+        private void placeWildcardTileAs(char as) {
+            this.placeTileAs(ScrabbleUtil.wildCardTile, as);
         }
 
-        private boolean placeTileAs(char tile, char as) {
-            if (!this.canPlace(as)) {
-                return false;
-            }
-
+        private void placeTileAs(char tile, char as) {
             this.currentlyPlacedTiles[this.numPlacedTiles] = tile;
             this.effectiveWord[this.posInEffectiveWordMap[this.numPlacedTiles]] = as;
             this.numPlacedTiles++;
-
-            return true;
         }
 
         private void removeTile() {

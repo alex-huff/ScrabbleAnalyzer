@@ -48,19 +48,19 @@ public class Main {
 
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");
 
-        for (int i = 0; i < moves.size(); i++) {
-            ScrabbleGame.Move move = moves.get(i);
-
-            System.out.println(
-                i + 1 +
-                " Score: " + move.score() +
-                " Vert: " + move.isVertical() +
-                " Row: " + move.row() +
-                " Col: " + move.col() +
-                " Word: " + move.playedWord() +
-                " Tiles: " + Arrays.toString(move.playedTiles())
-            );
-        }
+//        for (int i = 0; i < moves.size(); i++) {
+//            ScrabbleGame.Move move = moves.get(i);
+//
+//            System.out.println(
+//                i + 1 +
+//                " Score: " + move.score() +
+//                " Vert: " + move.isVertical() +
+//                " Row: " + move.row() +
+//                " Col: " + move.col() +
+//                " Word: " + move.playedWord() +
+//                " Tiles: " + Arrays.toString(move.playedTiles())
+//            );
+//        }
     }
 
 }

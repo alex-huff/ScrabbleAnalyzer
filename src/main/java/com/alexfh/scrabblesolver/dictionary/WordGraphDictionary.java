@@ -1,6 +1,6 @@
-package com.alexfh.scrabbleai.dictionary;
+package com.alexfh.scrabblesolver.dictionary;
 
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.io.BufferedReader;
 import java.io.File;

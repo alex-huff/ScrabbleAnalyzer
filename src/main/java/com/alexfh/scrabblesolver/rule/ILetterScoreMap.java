@@ -1,4 +1,4 @@
-package com.alexfh.scrabbleai.rule;
+package com.alexfh.scrabblesolver.rule;
 
 public interface ILetterScoreMap {
 

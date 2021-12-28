@@ -1,4 +1,4 @@
-package com.alexfh.scrabbleai.util;
+package com.alexfh.scrabblesolver.util;
 
 import java.io.File;
 import java.io.IOException;

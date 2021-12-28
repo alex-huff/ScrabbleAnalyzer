@@ -1,9 +1,9 @@
-package com.alexfh.scrabbleai.state.impl;
+package com.alexfh.scrabblesolver.state.impl;
 
-import com.alexfh.scrabbleai.state.IScrabbleBoard;
-import com.alexfh.scrabbleai.util.structure.ImmutablePair;
-import com.alexfh.scrabbleai.util.structure.Pair;
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.util.structure.ImmutablePair;
+import com.alexfh.scrabblesolver.util.structure.Pair;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;

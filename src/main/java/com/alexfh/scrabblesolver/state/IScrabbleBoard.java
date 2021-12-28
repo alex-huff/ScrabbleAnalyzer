@@ -1,4 +1,4 @@
-package com.alexfh.scrabbleai.state;
+package com.alexfh.scrabblesolver.state;
 
 public interface IScrabbleBoard {
 

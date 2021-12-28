@@ -2,13 +2,13 @@ package com.alexfh.test.dictionary;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.alexfh.scrabbleai.ScrabbleGame;
-import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
-import com.alexfh.scrabbleai.rule.ILetterScoreMap;
-import com.alexfh.scrabbleai.rule.impl.LetterScoreMapImpl;
-import com.alexfh.scrabbleai.state.IScrabbleBoard;
-import com.alexfh.scrabbleai.state.impl.ScrabbleBoardImpl;
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
+import com.alexfh.scrabblesolver.rule.ILetterScoreMap;
+import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
+import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

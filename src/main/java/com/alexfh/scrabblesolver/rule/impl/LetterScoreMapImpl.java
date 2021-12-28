@@ -1,7 +1,7 @@
-package com.alexfh.scrabbleai.rule.impl;
+package com.alexfh.scrabblesolver.rule.impl;
 
-import com.alexfh.scrabbleai.rule.ILetterScoreMap;
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.rule.ILetterScoreMap;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

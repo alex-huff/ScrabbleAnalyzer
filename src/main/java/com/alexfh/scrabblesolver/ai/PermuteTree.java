@@ -1,6 +1,6 @@
-package com.alexfh.scrabbleai.ai;
+package com.alexfh.scrabblesolver.ai;
 
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.util.LinkedList;
 import java.util.List;

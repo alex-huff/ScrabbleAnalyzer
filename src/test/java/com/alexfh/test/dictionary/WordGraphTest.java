@@ -2,7 +2,7 @@ package com.alexfh.test.dictionary;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
+import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

@@ -1,9 +1,9 @@
-package com.alexfh.scrabbleai;
+package com.alexfh.scrabblesolver;
 
-import com.alexfh.scrabbleai.state.impl.ScrabbleBoardImpl;
-import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
-import com.alexfh.scrabbleai.rule.impl.LetterScoreMapImpl;
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
+import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
+import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;

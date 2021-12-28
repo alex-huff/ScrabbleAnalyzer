@@ -1,10 +1,10 @@
-package com.alexfh.scrabbleai;
+package com.alexfh.scrabblesolver;
 
-import com.alexfh.scrabbleai.ai.PermuteTree;
-import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
-import com.alexfh.scrabbleai.state.IScrabbleBoard;
-import com.alexfh.scrabbleai.rule.ILetterScoreMap;
-import com.alexfh.scrabbleai.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.ai.PermuteTree;
+import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
+import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.rule.ILetterScoreMap;
+import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;

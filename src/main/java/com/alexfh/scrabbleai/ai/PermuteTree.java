@@ -27,7 +27,7 @@ public class PermuteTree {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        public void createPathIfNull(char c) {
+        private void createPathIfNull(char c) {
             int i = ScrabbleUtil.charToInt(c);
             PTNode current = this.nodes[i];
 
@@ -39,7 +39,7 @@ public class PermuteTree {
 
         }
 
-        public PTNode createPath(char c) {
+        private PTNode createPath(char c) {
             int i = ScrabbleUtil.charToInt(c);
             this.nodes[i] = new PTNode(this.permutation.concat(String.valueOf(c)));
 

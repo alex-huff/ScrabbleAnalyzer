@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -32,7 +30,7 @@ public class WordGraphDictionary {
     public static class WGNode {
 
         private final WGNode[] nodes = new WGNode[26];
-        public boolean wordHere;
+        private boolean wordHere;
         private final WGNode parent;
         private final List<Character> paths;
         private final String word;
@@ -52,11 +50,15 @@ public class WordGraphDictionary {
             return this.word;
         }
 
+        public boolean isWordHere() {
+            return this.wordHere;
+        }
+
         public List<Character> getPaths() {
             return this.paths;
         }
 
-        public void removePath(char c) {
+        private void removePath(char c) {
             int i = ScrabbleUtil.charToInt(c);
             WGNode path = this.nodes[i];
 
@@ -71,7 +73,7 @@ public class WordGraphDictionary {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        public WGNode getOrCreatePath(char c) {
+        private WGNode getOrCreatePath(char c) {
             int i = ScrabbleUtil.charToInt(c);
             WGNode current = this.nodes[i];
 

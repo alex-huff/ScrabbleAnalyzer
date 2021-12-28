@@ -53,9 +53,9 @@ public class ScrabbleGame {
 
     }
 
-    public record PerpScoreData(boolean hasPerpWord, int score) { }
+    private record PerpScoreData(boolean hasPerpWord, int score) { }
 
-    public class Placement {
+    private class Placement {
 
         private final int row;
         private final int col;
@@ -71,7 +71,7 @@ public class ScrabbleGame {
         private final PerpScoreData[][] perpScoreDataSource;
         private final Offset offset;
 
-        public Placement(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
+        private Placement(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
             this.row = row;
             this.col = col;
             this.isVertical = isVertical;
@@ -93,7 +93,7 @@ public class ScrabbleGame {
             }
         }
 
-        public int getScore() {
+        private int getScore() {
             int playScore = 0;
             int mainWordScore = 0;
             int mainWordMultiplier = 1;
@@ -138,15 +138,15 @@ public class ScrabbleGame {
             return playScore;
         }
 
-        public boolean canPlace(char tile) {
+        private boolean canPlace(char tile) {
             return this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(tile)];
         }
 
-        public boolean placeTile(char tile) {
+        private boolean placeTile(char tile) {
             return this.placeTileAs(tile, tile);
         }
 
-        public boolean placeWildcardTileAs(char as) {
+        private boolean placeWildcardTileAs(char as) {
             return this.placeTileAs(ScrabbleUtil.wildCardTile, as);
         }
 
@@ -162,7 +162,7 @@ public class ScrabbleGame {
             return true;
         }
 
-        public void removeTile() {
+        private void removeTile() {
             this.numPlacedTiles--;
         }
 
@@ -267,7 +267,7 @@ public class ScrabbleGame {
     }
 
     private void permuteOnPlacement(Placement placement, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
-        if (placement.numPlacedTiles >= placement.minTilesPlaced && path.wordHere) {
+        if (placement.numPlacedTiles >= placement.minTilesPlaced && path.isWordHere()) {
             char[] playedTilesCopy = new char[placement.numPlacedTiles];
 
             System.arraycopy(placement.currentlyPlacedTiles, 0, playedTilesCopy, 0, playedTilesCopy.length);
@@ -552,7 +552,7 @@ public class ScrabbleGame {
                     i++;
                 }
 
-                if (afterPath != null && afterPath.wordHere) {
+                if (afterPath != null && afterPath.isWordHere()) {
                     result[ScrabbleUtil.charToInt(c)] = true;
                     hasAny = true;
                 }

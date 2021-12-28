@@ -50,6 +50,7 @@ public class ScrabbleUtil {
 
     public static char[] readPlayerTiles(File file) throws IOException {
         String playerTiles = Files.readString(file.toPath(), StandardCharsets.UTF_8)
+            .strip()
             .toLowerCase()
             .replaceAll(String.valueOf(ScrabbleUtil.wildCardMarker), String.valueOf(ScrabbleUtil.wildCardTile));
 

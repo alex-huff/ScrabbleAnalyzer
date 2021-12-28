@@ -12,6 +12,7 @@ public class ScrabbleGame {
 
     private static final boolean[] allValid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final boolean[] allInvalid = new boolean[ScrabbleUtil.alphaChars.length];
+    private static final PerpScoreData invalidPerpWord = new PerpScoreData(false, 0);
 
     static {
         Arrays.fill(ScrabbleGame.allValid, true);
@@ -33,6 +34,8 @@ public class ScrabbleGame {
         }
 
     }
+
+    public record PerpScoreData(boolean hasPerpWord, int score) { }
 
     public class Placement {
 
@@ -69,7 +72,93 @@ public class ScrabbleGame {
         }
 
         public int getScore() {
-            return 0;
+            return this.isVertical ? this.getScoreVert() : this.getScoreHori();
+        }
+
+        private int getScoreVert() {
+            int playScore = 0;
+            int mainWordScore = 0;
+            int mainWordMultiplier = 1;
+            int currentTile = 0;
+
+            for (int i = 0; i < this.effectiveWordSizeMap[this.numPlacedTiles - 1]; i++) {
+                int perpWordScore = 0;
+
+                if (ScrabbleGame.this.board.isEmptyAt(row + i, col)) {
+                    mainWordMultiplier *= ScrabbleGame.this.board.getWordMultiplierAt(row + i, col);
+                    char placedTile = this.currentlyPlacedTiles[currentTile];
+
+                    if (placedTile != ScrabbleUtil.wildCardTile) {
+                        int letterScore = ScrabbleGame.this.letterScoreMap.getScore(placedTile) * ScrabbleGame.this.board.getLetterMultiplierAt(row + i, col);
+                        mainWordScore += letterScore;
+                        perpWordScore += letterScore;
+                    }
+
+                    currentTile++;
+                } else {
+                    if (!ScrabbleGame.this.board.isWildcardAt(row + i, col))
+                        mainWordScore += ScrabbleGame.this.letterScoreMap.getScore(ScrabbleGame.this.board.getCharAt(row + i, col));
+
+                    continue;
+                }
+
+                PerpScoreData perpScoreData = ScrabbleGame.this.perpScoreDataVert[row + i][col];
+
+                if (!perpScoreData.hasPerpWord) continue;
+
+                int perpWordMultiplier = ScrabbleGame.this.board.getWordMultiplierAt(row + i, col);
+                perpWordScore += perpScoreData.score();
+                playScore += perpWordScore * perpWordMultiplier;
+            }
+
+            playScore += mainWordScore * mainWordMultiplier;
+
+            if (this.numPlacedTiles == ScrabbleGame.this.handSize) playScore += 35;
+
+            return playScore;
+        }
+
+        private int getScoreHori() {
+            int playScore = 0;
+            int mainWordScore = 0;
+            int mainWordMultiplier = 1;
+            int currentTile = 0;
+
+            for (int i = 0; i < this.effectiveWordSizeMap[this.numPlacedTiles - 1]; i++) {
+                int perpWordScore = 0;
+
+                if (ScrabbleGame.this.board.isEmptyAt(row, col + i)) {
+                    mainWordMultiplier *= ScrabbleGame.this.board.getWordMultiplierAt(row, col + i);
+                    char placedTile = this.currentlyPlacedTiles[currentTile];
+
+                    if (placedTile != ScrabbleUtil.wildCardTile) {
+                        int letterScore = ScrabbleGame.this.letterScoreMap.getScore(placedTile) * ScrabbleGame.this.board.getLetterMultiplierAt(row, col + i);
+                        mainWordScore += letterScore;
+                        perpWordScore += letterScore;
+                    }
+
+                    currentTile++;
+                } else {
+                    if (!ScrabbleGame.this.board.isWildcardAt(row, col + i))
+                        mainWordScore += ScrabbleGame.this.letterScoreMap.getScore(ScrabbleGame.this.board.getCharAt(row, col + i));
+
+                    continue;
+                }
+
+                PerpScoreData perpScoreData = ScrabbleGame.this.perpScoreDataHori[row][col + i];
+
+                if (!perpScoreData.hasPerpWord) continue;
+
+                int perpWordMultiplier = ScrabbleGame.this.board.getWordMultiplierAt(row, col + i);
+                perpWordScore += perpScoreData.score();
+                playScore += perpWordScore * perpWordMultiplier;
+            }
+
+            playScore += mainWordScore * mainWordMultiplier;
+
+            if (this.numPlacedTiles == ScrabbleGame.this.handSize) playScore += 35;
+
+            return playScore;
         }
 
         public boolean canPlace(char tile) {
@@ -149,19 +238,25 @@ public class ScrabbleGame {
     private final boolean[] possibleCharPlacements;
     private final boolean[][] canPlaceVert;
     private final boolean[][] canPlaceHori;
+    private final int handSize;
+    private final PerpScoreData[][] perpScoreDataVert;
+    private final PerpScoreData[][] perpScoreDataHori;
 
-    public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles) {
+    public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles, int handSize) {
         if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
 
         this.letterScoreMap = letterScoreMap;
         this.dictionary = dictionary;
         this.board = board;
         this.playerTiles = playerTiles;
+        this.handSize = handSize;
         this.perpVert = new boolean[this.board.getRows()][this.board.getCols()][];
         this.perpHori = new boolean[this.board.getRows()][this.board.getCols()][];
         this.possibleCharPlacements = this.getPossiblePlacements();
         this.canPlaceVert = new boolean[this.board.getRows()][this.board.getCols()];
         this.canPlaceHori = new boolean[this.board.getRows()][this.board.getCols()];
+        this.perpScoreDataVert = new PerpScoreData[this.board.getRows()][this.board.getCols()];
+        this.perpScoreDataHori = new PerpScoreData[this.board.getRows()][this.board.getCols()];
         this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
 
         ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
@@ -462,6 +557,8 @@ public class ScrabbleGame {
                 if (!this.board.isEmptyAt(row, col)) { // tile already placed, nothing valid
                     this.perpVert[row][col] = ScrabbleGame.allInvalid;
                     this.perpHori[row][col] = ScrabbleGame.allInvalid;
+                    this.perpScoreDataVert[row][col] = ScrabbleGame.invalidPerpWord;
+                    this.perpScoreDataHori[row][col] = ScrabbleGame.invalidPerpWord;
 
                     continue;
                 }
@@ -474,25 +571,32 @@ public class ScrabbleGame {
                 if (leftEmpty && rightEmpty) { // nothing to left or right, anything is valid for vertical placement
                     this.perpVert[row][col] = ScrabbleGame.allValid;
                     this.canPlaceVert[row][col] = true;
+                    this.perpScoreDataVert[row][col] = ScrabbleGame.invalidPerpWord;
                 } else {
-                    this.perpVert[row][col] = this.getValidReplacementsVert(row, col);
+                    this.generateValidReplacementsVert(row, col);
                 }
 
                 if (topEmpty && bottomEmpty) { // nothing above or below, anything is valid for horizontal placement
                     this.perpHori[row][col] = ScrabbleGame.allValid;
                     this.canPlaceHori[row][col] = true;
+                    this.perpScoreDataHori[row][col] = ScrabbleGame.invalidPerpWord;
                 } else {
-                    this.perpHori[row][col] = this.getValidReplacementsHori(row, col);
+                    this.generateValidReplacementsHori(row, col);
                 }
             }
         }
     }
 
-    private boolean[] getValidReplacementsVert(int row, int col) {
+    private void generateValidReplacementsVert(int row, int col) {
+        int score = 0;
         int left = col, right = col;
 
-        while (left - 1 >= 0 && !this.board.isEmptyAt(row, left - 1))
+        while (left - 1 >= 0 && !this.board.isEmptyAt(row, left - 1)) {
+            if (!this.board.isWildcardAt(row, left - 1))
+                score += this.letterScoreMap.getScore(this.board.getCharAt(row, left - 1));
+
             left--;
+        }
 
         WordGraphDictionary.WGNode currentPath = this.dictionary.getRoot();
         int current = left;
@@ -505,13 +609,16 @@ public class ScrabbleGame {
             current++;
         }
 
-        boolean[] result;
-
         if (current == col) { // left of tile is valid prefix
-            result = new boolean[ScrabbleUtil.alphaChars.length];
+            boolean[] result = new boolean[ScrabbleUtil.alphaChars.length];
+            PerpScoreData scoreData;
 
-            while (right + 1 < this.board.getCols() && !this.board.isEmptyAt(row, right + 1))
+            while (right + 1 < this.board.getCols() && !this.board.isEmptyAt(row, right + 1)) {
+                if (!this.board.isWildcardAt(row, right + 1))
+                    score += this.letterScoreMap.getScore(this.board.getCharAt(row, right + 1));
+
                 right++;
+            }
 
             boolean hasAny = false;
 
@@ -535,19 +642,31 @@ public class ScrabbleGame {
                 }
             }
 
-            if (hasAny) this.canPlaceVert[row][col] = true;
-        } else {
-            result = ScrabbleGame.allInvalid;
-        }
+            if (hasAny) {
+                this.canPlaceVert[row][col] = true;
+                scoreData = new PerpScoreData(true, score);
+            } else {
+                scoreData = ScrabbleGame.invalidPerpWord;
+            }
 
-        return result;
+            this.perpVert[row][col] = result;
+            this.perpScoreDataVert[row][col] = scoreData;
+        } else {
+            this.perpVert[row][col] = ScrabbleGame.allInvalid;
+            this.perpScoreDataVert[row][col] = ScrabbleGame.invalidPerpWord;
+        }
     }
 
-    private boolean[] getValidReplacementsHori(int row, int col) {
+    private void generateValidReplacementsHori(int row, int col) {
+        int score = 0;
         int top = row, bottom = row;
 
-        while (top - 1 >= 0 && !this.board.isEmptyAt(top - 1, col))
+        while (top - 1 >= 0 && !this.board.isEmptyAt(top - 1, col)) {
+            if (!this.board.isWildcardAt(top - 1, col))
+                score += this.letterScoreMap.getScore(this.board.getCharAt(top - 1, col));
+
             top--;
+        }
 
         WordGraphDictionary.WGNode currentPath = this.dictionary.getRoot();
         int current = top;
@@ -560,42 +679,52 @@ public class ScrabbleGame {
             current++;
         }
 
-        boolean[] result;
-
         if (current == row) { // top of tile is valid prefix
-            result = new boolean[ScrabbleUtil.alphaChars.length];
+            boolean[] result = new boolean[ScrabbleUtil.alphaChars.length];
+            PerpScoreData scoreData;
 
-            while (bottom + 1 < this.board.getRows() && !this.board.isEmptyAt(bottom + 1, col))
+            while (bottom + 1 < this.board.getRows() && !this.board.isEmptyAt(bottom + 1, col)) {
+                if (!this.board.isWildcardAt(bottom + 1, col))
+                    score += this.letterScoreMap.getScore(this.board.getCharAt(bottom + 1, col));
+
                 bottom++;
+            }
 
             boolean hasAny = false;
 
             for (Character c : currentPath.getPaths()) {
                 if (!this.possibleCharPlacements[ScrabbleUtil.charToInt(c)]) continue;
 
-                WordGraphDictionary.WGNode bottomPath = currentPath.getPath(c);
+                WordGraphDictionary.WGNode rightPath = currentPath.getPath(c);
                 current = row + 1;
 
                 while (current <= bottom) {
-                    bottomPath = bottomPath.getPath(this.board.getCharAt(current, col));
+                    rightPath = rightPath.getPath(this.board.getCharAt(current, col));
 
-                    if (bottomPath == null) break;
+                    if (rightPath == null) break;
 
                     current++;
                 }
 
-                if (bottomPath != null && bottomPath.wordHere) {
+                if (rightPath != null && rightPath.wordHere) {
                     result[ScrabbleUtil.charToInt(c)] = true;
                     hasAny = true;
                 }
             }
 
-            if (hasAny) this.canPlaceHori[row][col] = true;
-        } else {
-            result = ScrabbleGame.allInvalid;
-        }
+            if (hasAny) {
+                this.canPlaceHori[row][col] = true;
+                scoreData = new PerpScoreData(true, score);
+            } else {
+                scoreData = ScrabbleGame.invalidPerpWord;
+            }
 
-        return result;
+            this.perpHori[row][col] = result;
+            this.perpScoreDataHori[row][col] = scoreData;
+        } else {
+            this.perpHori[row][col] = ScrabbleGame.allInvalid;
+            this.perpScoreDataHori[row][col] = ScrabbleGame.invalidPerpWord;
+        }
     }
 
 }

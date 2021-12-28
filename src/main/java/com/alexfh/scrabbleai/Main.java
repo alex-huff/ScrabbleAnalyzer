@@ -35,7 +35,8 @@ public class Main {
                 ),
                 ScrabbleUtil.readPlayerTiles(
                     new File(gameFolder + "currentletters.txt")
-                )
+                ),
+                7
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,16 +48,20 @@ public class Main {
 
         System.out.println(moves.size());
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");
-        moves.forEach(
-            move -> System.out.println(
-                "Score: " + move.score() +
-                    " Vert: " + move.isVertical() +
-                    " Row: " + move.row() +
-                    " Col: " + move.col() +
-                    " Word: " + move.playedWord() +
-                    " Tiles: " + Arrays.toString(move.playedTiles())
-            )
-        );
+
+        for (int i = 0; i < moves.size(); i++) {
+            ScrabbleGame.Move move = moves.get(i);
+
+            System.out.println(
+                i + 1 +
+                " Score: " + move.score() +
+                " Vert: " + move.isVertical() +
+                " Row: " + move.row() +
+                " Col: " + move.col() +
+                " Word: " + move.playedWord() +
+                " Tiles: " + Arrays.toString(move.playedTiles())
+            );
+        }
     }
 
 }

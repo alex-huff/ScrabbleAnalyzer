@@ -21,6 +21,10 @@ public class PermuteTree {
             this.permutation = permutation;
         }
 
+        public List<Character> getPaths() {
+            return this.paths;
+        }
+
         public PTNode getPath(char c) {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }

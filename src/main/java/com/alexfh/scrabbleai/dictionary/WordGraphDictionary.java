@@ -48,6 +48,10 @@ public class WordGraphDictionary {
             this.word = word;
         }
 
+        public String getWord() {
+            return this.word;
+        }
+
         public List<Character> getPaths() {
             return this.paths;
         }

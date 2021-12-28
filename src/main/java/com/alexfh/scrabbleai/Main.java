@@ -7,6 +7,7 @@ import com.alexfh.scrabbleai.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -35,6 +36,17 @@ public class Main {
             );
 
             List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
+
+            System.out.println(moves.size());
+            moves.forEach(
+                move -> System.out.println(
+                    "Vert: " + move.isVertical() +
+                        " Row: " + move.row() +
+                        " Col: " + move.col() +
+                        " Word: " + move.playedWord() +
+                        " Tiles: " + Arrays.toString(move.playedTiles())
+                )
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }

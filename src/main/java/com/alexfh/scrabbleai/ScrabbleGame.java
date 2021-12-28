@@ -23,7 +23,7 @@ public class ScrabbleGame {
         private static final Comparator<Move> moveComparator = Comparator.comparingInt(
             Move::score
         ).reversed().thenComparingInt(
-            move -> move.playedWord.length()
+            move -> move.playedTiles.length
         ).thenComparing(
             Move::playedWord
         ).thenComparingInt(

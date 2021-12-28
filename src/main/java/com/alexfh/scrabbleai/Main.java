@@ -46,7 +46,6 @@ public class Main {
 
         List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
 
-        System.out.println(moves.size());
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");
 
         for (int i = 0; i < moves.size(); i++) {

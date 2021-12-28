@@ -20,7 +20,7 @@ public class ScrabbleGame {
         Arrays.fill(ScrabbleGame.allValid, true);
     }
 
-    private record Offseter(int moveRowBy, int moveColBy) {
+    private static record Offseter(int moveRowBy, int moveColBy) {
 
         int newRow(int row, int offset) {
             return row + this.moveRowBy * offset;

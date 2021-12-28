@@ -369,65 +369,70 @@ public class ScrabbleGame {
 
         for (int row = 0; row < this.board.getRows(); row++) {
             for (int col = 0; col < this.board.getCols(); col++) {
-                Placement vert = this.getVertPlacement(row, col), hori = this.getHoriPlacement(row, col);
-
-                if (vert != null) placements.add(vert);
-
-                if (hori != null) placements.add(hori);
+                this.addPlacementIfValid(row, col, true, placements);
+                this.addPlacementIfValid(row, col, false, placements);
             }
         }
 
         return placements;
     }
 
-    private Placement getVertPlacement(int row, int col) {
-        boolean topEmpty = row == 0 || this.board.isEmptyAt(row - 1, col);
+    private void addPlacementIfValid(int row, int col, boolean isVertical, List<Placement> placements) {
+        int wordStart = isVertical ? row : col;
+        Offseter offseter = isVertical ? ScrabbleGame.vertOffseter : ScrabbleGame.horiOffseter;
+        boolean beforeEmpty = wordStart == 0 || this.board.isEmptyAt(offseter.newRow(row, -1), offseter.newCol(col, -1));
 
-        if (!topEmpty) return null; // letter above this position
+        if (!beforeEmpty) return; // letter before this position
 
+        int wordStartPerp = isVertical ? col : row;
+        Offseter offseterPerp = isVertical ? ScrabbleGame.horiOffseter : ScrabbleGame.vertOffseter;
+        int lineBound = isVertical ? this.board.getRows() : this.board.getCols();
+        int lineBoundPerp = isVertical ? this.board.getCols() : this.board.getRows();
+        boolean[][] canPlaceSource = isVertical ? this.canPlaceVert : this.canPlaceHori;
         int blanks = 0;
-        int current = row;
+        int tillBound = lineBound - wordStart;
         boolean hasAnchor = false;
         int blanksTillAnchor = 0;
+        int w;
 
-        while (current < this.board.getRows()) {
-            boolean isBlank = this.board.isEmptyAt(current, col);
+        for (w = 0; w < tillBound; w++) {
+            int newRow = offseter.newRow(row, w);
+            int newCol = offseter.newCol(col, w);
+            boolean isBlank = this.board.isEmptyAt(newRow, newCol);
 
             if (isBlank) {
-                if (blanks == this.playerTiles.length || !this.canPlaceVert[current][col]) break;
+                if (blanks == this.playerTiles.length || !canPlaceSource[newRow][newCol]) break;
 
                 blanks++;
             }
 
             if (!hasAnchor) {
-                boolean onLeft = col > 0 && !this.board.isEmptyAt(current, col - 1);
-                boolean onRight = col < this.board.getCols() - 1 && !this.board.isEmptyAt(current, col + 1);
-                boolean onAnchor = current == this.board.getAnchorRow() && col == this.board.getAnchorCol();
-                boolean anchorable = !isBlank || onLeft || onRight || onAnchor;
+                boolean onBeforeSide = wordStartPerp > 0 && !this.board.isEmptyAt(offseterPerp.newRow(newRow, -1), offseterPerp.newCol(newCol, -1));
+                boolean onAfterSide = wordStartPerp < lineBoundPerp - 1 && !this.board.isEmptyAt(offseterPerp.newRow(newRow, 1), offseterPerp.newCol(newCol, 1));
+                boolean onAnchor = newRow == this.board.getAnchorRow() && newCol == this.board.getAnchorCol();
+                boolean anchorable = !isBlank || onBeforeSide || onAfterSide || onAnchor;
 
                 if (anchorable) {
                     hasAnchor = true;
                     blanksTillAnchor = blanks;
                 }
             }
-
-            current++;
         }
 
-        if (!hasAnchor || blanks == 0) return null;
+        if (!hasAnchor || blanks == 0) return;
 
-        int maxWordLength = current - row;
+        int maxWordLength = w;
         char[] effectiveWord = new char[maxWordLength];
         int[] posInEffectiveWordMap = new int[blanks];
         int[] effectiveWordSizeMap = new int[blanks];
-        current = row;
-        int stop = row + maxWordLength;
         int i = 0;
         int b = 0;
 
-        while (current < stop) {
-            effectiveWord[i] = this.board.getCharAt(current, col);
-            boolean isBlank = this.board.isEmptyAt(current, col);
+        for (int f = 0; f < maxWordLength; f++) {
+            int newRow = offseter.newRow(row, f);
+            int newCol = offseter.newCol(col, f);
+            effectiveWord[i] = this.board.getCharAt(newRow, newCol);
+            boolean isBlank = this.board.isEmptyAt(newRow, newCol);
 
             if (isBlank) {
                 posInEffectiveWordMap[b] = i;
@@ -435,96 +440,23 @@ public class ScrabbleGame {
             }
 
             i++;
-            current++;
         }
 
         System.arraycopy(posInEffectiveWordMap, 1, effectiveWordSizeMap, 0, effectiveWordSizeMap.length - 1);
 
         effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
 
-        return new Placement(
-            row,
-            col,
-            true,
-            Math.max(1, blanksTillAnchor),
-            blanks,
-            effectiveWord,
-            posInEffectiveWordMap,
-            effectiveWordSizeMap
-        );
-    }
-
-    private Placement getHoriPlacement(int row, int col) {
-        boolean leftEmpty = col == 0 || this.board.isEmptyAt(row, col - 1);
-
-        if (!leftEmpty) return null; // letter to the left of this position
-
-        int blanks = 0;
-        int current = col;
-        boolean hasAnchor = false;
-        int blanksTillAnchor = 0;
-
-        while (current < this.board.getCols()) {
-            boolean isBlank = this.board.isEmptyAt(row, current);
-
-            if (isBlank) {
-                if (blanks == this.playerTiles.length || !this.canPlaceHori[row][current]) break;
-
-                blanks++;
-            }
-
-            if (!hasAnchor) {
-                boolean onTop = row > 0 && !this.board.isEmptyAt(row - 1, current);
-                boolean onBot = row < this.board.getRows() - 1 && !this.board.isEmptyAt(row + 1, current);
-                boolean onAnchor = current == this.board.getAnchorCol() && row == this.board.getAnchorRow();
-                boolean anchorable = !isBlank || onTop || onBot || onAnchor;
-
-                if (anchorable) {
-                    hasAnchor = true;
-                    blanksTillAnchor = blanks;
-                }
-            }
-
-            current++;
-        }
-
-        if (!hasAnchor || blanks == 0) return null;
-
-        int maxWordLength = current - col;
-        char[] effectiveWord = new char[maxWordLength];
-        int[] posInEffectiveWordMap = new int[blanks];
-        int[] effectiveWordSizeMap = new int[blanks];
-        current = col;
-        int stop = col + maxWordLength;
-        int i = 0;
-        int b = 0;
-
-        while (current < stop) {
-            effectiveWord[i] = this.board.getCharAt(row, current);
-            boolean isBlank = this.board.isEmptyAt(row, current);
-
-            if (isBlank) {
-                posInEffectiveWordMap[b] = i;
-                b++;
-            }
-
-            i++;
-            current++;
-        }
-
-        System.arraycopy(posInEffectiveWordMap, 1, effectiveWordSizeMap, 0, effectiveWordSizeMap.length - 1);
-
-        effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
-
-        return new Placement(
-            row,
-            col,
-            false,
-            Math.max(1, blanksTillAnchor),
-            blanks,
-            effectiveWord,
-            posInEffectiveWordMap,
-            effectiveWordSizeMap
+        placements.add(
+             new Placement(
+                 row,
+                 col,
+                 isVertical,
+                 Math.max(1, blanksTillAnchor),
+                 blanks,
+                 effectiveWord,
+                 posInEffectiveWordMap,
+                 effectiveWordSizeMap
+             )
         );
     }
 

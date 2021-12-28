@@ -11,12 +11,10 @@ public class PermuteTree {
     public static class PTNode {
 
         private final PTNode[] nodes = new PTNode[27];
-        private final PTNode parent;
         private final List<Character> paths;
         private final String permutation;
 
-        public PTNode(PTNode parent, String permutation) {
-            this.parent = parent;
+        public PTNode(String permutation) {
             this.paths = new LinkedList<>();
             this.permutation = permutation;
         }
@@ -29,22 +27,30 @@ public class PermuteTree {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        public PTNode getOrCreatePath(char c) {
+        public void createPathIfNull(char c) {
             int i = ScrabbleUtil.charToInt(c);
             PTNode current = this.nodes[i];
 
             if (current == null) {
-                this.nodes[i] = new PTNode(this, this.permutation.concat(String.valueOf(c)));
+                this.nodes[i] = new PTNode(this.permutation.concat(String.valueOf(c)));
 
                 this.paths.add(c);
             }
+
+        }
+
+        public PTNode createPath(char c) {
+            int i = ScrabbleUtil.charToInt(c);
+            this.nodes[i] = new PTNode(this.permutation.concat(String.valueOf(c)));
+
+            this.paths.add(c);
 
             return this.nodes[i];
         }
 
     }
 
-    private final PTNode root = new PTNode(null, "");
+    private final PTNode root = new PTNode("");
 
     public PermuteTree(char[] toPermute) {
         this.forAllPerm(this.root, toPermute, 0);
@@ -56,17 +62,18 @@ public class PermuteTree {
 
     private void forAllPerm(PTNode permuteNode, char[] toPermute, int i) {
         if (i == toPermute.length - 1) {
-            permuteNode.getOrCreatePath(toPermute[i]);
+            permuteNode.createPathIfNull(toPermute[i]);
 
             return;
         }
 
-        forAllPerm(permuteNode.getOrCreatePath(toPermute[i]), toPermute, i + 1);
+        if (permuteNode.getPath(toPermute[i]) == null)
+            forAllPerm(permuteNode.createPath(toPermute[i]), toPermute, i + 1);
 
         for (int w = i + 1; w < toPermute.length; w++) {
-            if (toPermute[i] != toPermute[w]) {
+            if (toPermute[i] != toPermute[w] && permuteNode.getPath(toPermute[w]) == null) {
                 swap(toPermute, i, w);
-                forAllPerm(permuteNode.getOrCreatePath(toPermute[i]), toPermute, i + 1);
+                forAllPerm(permuteNode.createPath(toPermute[i]), toPermute, i + 1);
                 swap(toPermute, w, i);
             }
         }

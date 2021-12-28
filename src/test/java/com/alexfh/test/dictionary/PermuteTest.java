@@ -1,14 +1,13 @@
 package com.alexfh.test.dictionary;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.alexfh.scrabbleai.ai.PermuteTree;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class PermuteTest {
 

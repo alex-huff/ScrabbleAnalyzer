@@ -1,19 +1,13 @@
 package com.alexfh.test.dictionary;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import com.alexfh.scrabbleai.ai.PermuteTree;
 import com.alexfh.scrabbleai.dictionary.WordGraphDictionary;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class WordGraphTest {
 

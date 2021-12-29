@@ -1,5 +1,7 @@
 package com.alexfh.scrabblesolver;
 
+import com.alexfh.scrabblesolver.rule.ILetterScoreMap;
+import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
 import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
@@ -19,25 +21,27 @@ public class Main {
     }
 
     private static void start() {
+        String gameFolder = "src/main/resources/games/game1/";
         ScrabbleGame scrabbleGame;
+        ILetterScoreMap letterScoreMap;
+        WordGraphDictionary dictionary;
+        IScrabbleBoard board;
+        char[] playerTiles;
+        int handSize = 7;
 
         try {
-            String gameFolder = "src/main/resources/games/game1/";
-            scrabbleGame = new ScrabbleGame(
-                LetterScoreMapImpl.fromFile(
-                    new File("src/main/resources/scoremap.txt")
-                ),
-                WordGraphDictionary.fromFile(
-                    new File("src/main/resources/nwl20.txt")
-                ),
-                ScrabbleBoardImpl.fromFiles(
-                    new File(gameFolder + "board.txt"),
-                    new File("src/main/resources/multipliers.txt")
-                ),
-                ScrabbleUtil.readPlayerTiles(
-                    new File(gameFolder + "currentletters.txt")
-                ),
-                7
+            letterScoreMap = LetterScoreMapImpl.fromFile(
+                new File("src/main/resources/scoremap.txt")
+            );
+            dictionary = WordGraphDictionary.fromFile(
+                new File("src/main/resources/nwl20.txt")
+            );
+            board = ScrabbleBoardImpl.fromFiles(
+                new File(gameFolder + "board.txt"),
+                new File("src/main/resources/multipliers.txt")
+            );
+            playerTiles = ScrabbleUtil.readPlayerTiles(
+                new File(gameFolder + "currentletters.txt")
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +49,7 @@ public class Main {
             return;
         }
 
+        scrabbleGame = new ScrabbleGame(letterScoreMap, dictionary, board, playerTiles, handSize);
         List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
 
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");

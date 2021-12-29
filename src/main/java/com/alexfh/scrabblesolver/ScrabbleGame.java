@@ -292,22 +292,22 @@ public class ScrabbleGame {
 
                     WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, as);
 
-                    if (newPath != null) {
-                        placement.placeWildcardTileAs(as);
-                        this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
-                        placement.removeTile();
-                    }
+                    if (newPath == null) continue;
+
+                    placement.placeWildcardTileAs(as);
+                    this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
+                    placement.removeTile();
                 }
             } else {
                 if (!placement.canPlace(c)) continue;
 
                 WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, c);
 
-                if (newPath != null) {
-                    placement.placeTile(c);
-                    this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
-                    placement.removeTile();
-                }
+                if (newPath == null) continue;
+
+                placement.placeTile(c);
+                this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
+                placement.removeTile();
             }
         }
     }

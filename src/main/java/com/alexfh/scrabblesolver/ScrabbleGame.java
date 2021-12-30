@@ -141,9 +141,8 @@ public class ScrabbleGame {
             return playScore;
         }
 
-        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-        private boolean canPlace(char tile) {
-            return this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(tile)];
+        private boolean cantPlace(char tile) {
+            return !this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(tile)];
         }
 
         private void placeTile(char tile) {
@@ -283,7 +282,7 @@ public class ScrabbleGame {
         for (Character c : perm.getPaths()) {
             if (c == ScrabbleUtil.wildCardTile) {
                 for (char as : ScrabbleUtil.alphaChars) {
-                    if (!placement.canPlace(as)) continue;
+                    if (placement.cantPlace(as)) continue;
 
                     WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, as);
 
@@ -294,7 +293,7 @@ public class ScrabbleGame {
                     placement.removeTile();
                 }
             } else {
-                if (!placement.canPlace(c)) continue;
+                if (placement.cantPlace(c)) continue;
 
                 WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, c);
 

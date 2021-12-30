@@ -15,7 +15,7 @@ public class ScrabbleGame {
     public static final ExecutorService threadPool = Executors.newCachedThreadPool();
     private static final boolean[] allValid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final boolean[] allInvalid = new boolean[ScrabbleUtil.alphaChars.length];
-    private static final PerpScoreData invalidPerpWordScore = new PerpScoreData(false, 0);
+    private static final int invalidPerpWordScore = -1;
     private static final Offset vertOffset = new Offset(1, 0);
     private static final Offset horiOffset = new Offset(0, 1);
 
@@ -56,8 +56,6 @@ public class ScrabbleGame {
 
     }
 
-    private record PerpScoreData(boolean hasPerpWord, int score) { }
-
     private class WordStart {
 
         private final int row;
@@ -71,7 +69,7 @@ public class ScrabbleGame {
         private final int[] effectiveWordSizeMap;
         private int numPlacedTiles;
         private final boolean[][] validPerpTilesForPlacement;
-        private final PerpScoreData[][] perpScoreDataSource;
+        private final int[][] perpScoreDataSource;
         private final Offset offset;
 
         private WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
@@ -125,12 +123,12 @@ public class ScrabbleGame {
                     continue;
                 }
 
-                PerpScoreData perpScoreData = this.perpScoreDataSource[newRow][newCol];
+                int perpScoreData = this.perpScoreDataSource[newRow][newCol];
 
-                if (!perpScoreData.hasPerpWord) continue;
+                if (perpScoreData == ScrabbleGame.invalidPerpWordScore) continue;
 
                 int perpWordMultiplier = ScrabbleGame.this.board.getWordMultiplierAt(newRow, newCol);
-                perpWordScore += perpScoreData.score();
+                perpWordScore += perpScoreData;
                 playScore += perpWordScore * perpWordMultiplier;
             }
 
@@ -213,8 +211,8 @@ public class ScrabbleGame {
     private final boolean[][] canPlaceVert;
     private final boolean[][] canPlaceHori;
     private final int handSize;
-    private final PerpScoreData[][] perpScoreDataVert;
-    private final PerpScoreData[][] perpScoreDataHori;
+    private final int[][] perpScoreDataVert; // -1 for invalid
+    private final int[][] perpScoreDataHori; // -1 for invalid
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles, int handSize) {
         if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
@@ -229,8 +227,8 @@ public class ScrabbleGame {
         this.possibleCharPlacements = this.getPossiblePlacements();
         this.canPlaceVert = new boolean[this.board.getRows()][this.board.getCols()];
         this.canPlaceHori = new boolean[this.board.getRows()][this.board.getCols()];
-        this.perpScoreDataVert = new PerpScoreData[this.board.getRows()][this.board.getCols()];
-        this.perpScoreDataHori = new PerpScoreData[this.board.getRows()][this.board.getCols()];
+        this.perpScoreDataVert = new int[this.board.getRows()][this.board.getCols()];
+        this.perpScoreDataHori = new int[this.board.getRows()][this.board.getCols()];
         this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
 
         ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
@@ -469,7 +467,7 @@ public class ScrabbleGame {
 
     private void initializeValidPerpendicularPlacementAt(int row, int col, boolean isVertical) {
         boolean[][][] perpSource = isVertical ? this.perpVert : this.perpHori;
-        PerpScoreData[][] perpScoreDataSource = isVertical ? this.perpScoreDataVert : this.perpScoreDataHori;
+        int[][] perpScoreDataSource = isVertical ? this.perpScoreDataVert : this.perpScoreDataHori;
         boolean[][] canPlaceSource = isVertical ? this.canPlaceVert : this.canPlaceHori;
         int wordStartPerp = isVertical ? col : row;
         int lineBoundPerp = isVertical ? this.board.getCols() : this.board.getRows();
@@ -513,7 +511,7 @@ public class ScrabbleGame {
 
         if (current == wordStartPerp) { // before tile is valid prefix
             boolean[] result = new boolean[ScrabbleUtil.alphaChars.length];
-            PerpScoreData scoreData;
+            int scoreData;
             i = 0;
 
             while (after + 1 < lineBoundPerp && !this.board.isEmptyAt(offsetPerp.newRow(row, i + 1), offsetPerp.newCol(col, i + 1))) {
@@ -552,7 +550,7 @@ public class ScrabbleGame {
 
             if (hasAny) {
                 canPlaceSource[row][col] = true;
-                scoreData = new PerpScoreData(true, score);
+                scoreData = score;
             } else {
                 scoreData = ScrabbleGame.invalidPerpWordScore;
             }

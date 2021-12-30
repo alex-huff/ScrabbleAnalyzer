@@ -200,7 +200,7 @@ public class ScrabbleGame {
     .....t
 
     perpVert and perpHori work to limit what permutations of the playerTiles are used to create words, since
-    words will only be valid if they only form valid words in the perpendicular direction
+    words will only be valid if they form only valid words in the perpendicular direction
 
     when it is being considered whether to place a playerTile at a position,
     this.perp(Vert|Hori)[row][col][ScrabbleUtil.charToInt(char)] will show if it is a valid placement perpendicularly

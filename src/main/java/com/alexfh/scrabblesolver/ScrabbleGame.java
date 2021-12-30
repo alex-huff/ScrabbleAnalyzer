@@ -58,7 +58,7 @@ public class ScrabbleGame {
 
     private record PerpScoreData(boolean hasPerpWord, int score) { }
 
-    private class Placement {
+    private class WordStart {
 
         private final int row;
         private final int col;
@@ -74,7 +74,7 @@ public class ScrabbleGame {
         private final PerpScoreData[][] perpScoreDataSource;
         private final Offset offset;
 
-        private Placement(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
+        private WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
             this.row = row;
             this.col = col;
             this.isVertical = isVertical;
@@ -208,7 +208,7 @@ public class ScrabbleGame {
     private final boolean[][][] perpVert;
     private final boolean[][][] perpHori;
     private final PermuteTree permuteTree;
-    private final List<Placement> validPlacements;
+    private final List<WordStart> validWordStarts;
     private final boolean[] possibleCharPlacements;
     private final boolean[][] canPlaceVert;
     private final boolean[][] canPlaceHori;
@@ -235,85 +235,85 @@ public class ScrabbleGame {
 
         ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
 
-        this.validPlacements = ScrabbleUtil.timeRetrieval(this::findValidPlacements, "findValidPlacements");
+        this.validWordStarts = ScrabbleUtil.timeRetrieval(this::findValidWordStarts, "findValidPlacements");
     }
 
     public List<Move> findMoves() {
         List<Move> moves = new ArrayList<>();
 
-        this.validPlacements.forEach(placement -> this.addAllMovesFromPlacement(placement, moves));
+        this.validWordStarts.forEach(wordStart -> this.addAllMovesFromWordStart(wordStart, moves));
 
         return moves;
     }
 
-    private void addAllMovesFromPlacement(Placement placement, List<Move> moves) {
-        WordGraphDictionary.WGNode startPath = this.initializePath(placement);
+    private void addAllMovesFromWordStart(WordStart wordStart, List<Move> moves) {
+        WordGraphDictionary.WGNode startPath = this.initializePath(wordStart);
 
         if (startPath == null) {
-            System.out.println("PANIC: placement with invalid prefix | " + Arrays.toString(placement.effectiveWord));
+            System.out.println("PANIC: placement with invalid prefix | " + Arrays.toString(wordStart.effectiveWord));
 
             return;
         }
 
-        this.permuteOnPlacement(placement, this.permuteTree.getRoot(), startPath, moves);
+        this.permuteOnWordStart(wordStart, this.permuteTree.getRoot(), startPath, moves);
     }
 
-    private void permuteOnPlacement(Placement placement, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
-        if (placement.numPlacedTiles >= placement.minTilesPlaced && path.isWordHere()) {
-            char[] playedTilesCopy = new char[placement.numPlacedTiles];
+    private void permuteOnWordStart(WordStart wordStart, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
+        if (wordStart.numPlacedTiles >= wordStart.minTilesPlaced && path.isWordHere()) {
+            char[] playedTilesCopy = new char[wordStart.numPlacedTiles];
 
-            System.arraycopy(placement.currentlyPlacedTiles, 0, playedTilesCopy, 0, playedTilesCopy.length);
+            System.arraycopy(wordStart.currentlyPlacedTiles, 0, playedTilesCopy, 0, playedTilesCopy.length);
             moves.add(
                 new Move(
                     path.getWord(),
                     playedTilesCopy,
-                    placement.isVertical,
-                    placement.row,
-                    placement.col,
-                    placement.getScore()
+                    wordStart.isVertical,
+                    wordStart.row,
+                    wordStart.col,
+                    wordStart.getScore()
                 )
             );
         }
 
-        if (placement.numPlacedTiles == placement.maxTilesPlaced) {
+        if (wordStart.numPlacedTiles == wordStart.maxTilesPlaced) {
             return;
         }
 
         for (Character c : perm.getPaths()) {
             if (c == ScrabbleUtil.wildCardTile) {
                 for (char as : ScrabbleUtil.alphaChars) {
-                    if (placement.cantPlace(as)) continue;
+                    if (wordStart.cantPlace(as)) continue;
 
-                    WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, as);
+                    WordGraphDictionary.WGNode newPath = this.followPathToNextBlank(wordStart, path, as);
 
                     if (newPath == null) continue;
 
-                    placement.placeWildcardTileAs(as);
-                    this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
-                    placement.removeTile();
+                    wordStart.placeWildcardTileAs(as);
+                    this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);
+                    wordStart.removeTile();
                 }
             } else {
-                if (placement.cantPlace(c)) continue;
+                if (wordStart.cantPlace(c)) continue;
 
-                WordGraphDictionary.WGNode newPath = this.followPlacementPath(placement, path, c);
+                WordGraphDictionary.WGNode newPath = this.followPathToNextBlank(wordStart, path, c);
 
                 if (newPath == null) continue;
 
-                placement.placeTile(c);
-                this.permuteOnPlacement(placement, perm.getPath(c), newPath, moves);
-                placement.removeTile();
+                wordStart.placeTile(c);
+                this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);
+                wordStart.removeTile();
             }
         }
     }
 
-    private WordGraphDictionary.WGNode initializePath(Placement placement) {
+    private WordGraphDictionary.WGNode initializePath(WordStart wordStart) {
         int start = 0;
-        int finish = placement.posInEffectiveWordMap[0];
+        int finish = wordStart.posInEffectiveWordMap[0];
         int current = start;
         WordGraphDictionary.WGNode newPath = this.dictionary.getRoot();
 
         while (current < finish) {
-            newPath = newPath.getPath(placement.effectiveWord[current]);
+            newPath = newPath.getPath(wordStart.effectiveWord[current]);
 
             if (newPath == null) break;
 
@@ -323,16 +323,16 @@ public class ScrabbleGame {
         return newPath;
     }
 
-    private WordGraphDictionary.WGNode followPlacementPath(Placement placement, WordGraphDictionary.WGNode currentPath, char toPlace) {
-        int start = placement.posInEffectiveWordMap[placement.numPlacedTiles];
-        int finish = placement.effectiveWordSizeMap[placement.numPlacedTiles];
+    private WordGraphDictionary.WGNode followPathToNextBlank(WordStart wordStart, WordGraphDictionary.WGNode currentPath, char toPlace) {
+        int start = wordStart.posInEffectiveWordMap[wordStart.numPlacedTiles];
+        int finish = wordStart.effectiveWordSizeMap[wordStart.numPlacedTiles];
         int current = start + 1;
         WordGraphDictionary.WGNode newPath = currentPath.getPath(toPlace);
 
         if (newPath == null) return null;
 
         while (current < finish) {
-            newPath = newPath.getPath(placement.effectiveWord[current]);
+            newPath = newPath.getPath(wordStart.effectiveWord[current]);
 
             if (newPath == null) break;
 
@@ -356,20 +356,20 @@ public class ScrabbleGame {
         return placements;
     }
 
-    private List<Placement> findValidPlacements() {
-        List<Placement> placements = new LinkedList<>();
+    private List<WordStart> findValidWordStarts() {
+        List<WordStart> wordStarts = new LinkedList<>();
 
         for (int row = 0; row < this.board.getRows(); row++) {
             for (int col = 0; col < this.board.getCols(); col++) {
-                this.addPlacementIfValid(row, col, true, placements);
-                this.addPlacementIfValid(row, col, false, placements);
+                this.addWordStartIfValid(row, col, true, wordStarts);
+                this.addWordStartIfValid(row, col, false, wordStarts);
             }
         }
 
-        return placements;
+        return wordStarts;
     }
 
-    private void addPlacementIfValid(int row, int col, boolean isVertical, List<Placement> placements) {
+    private void addWordStartIfValid(int row, int col, boolean isVertical, List<WordStart> wordStarts) {
         int wordStart = isVertical ? row : col;
         Offset offset = isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
         boolean beforeEmpty = wordStart == 0 || this.board.isEmptyAt(offset.newRow(row, -1), offset.newCol(col, -1));
@@ -435,8 +435,8 @@ public class ScrabbleGame {
 
         effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
 
-        placements.add(
-             new Placement(
+        wordStarts.add(
+             new WordStart(
                  row,
                  col,
                  isVertical,

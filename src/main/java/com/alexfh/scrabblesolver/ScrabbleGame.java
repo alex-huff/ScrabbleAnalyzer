@@ -242,26 +242,21 @@ public class ScrabbleGame {
     public List<Move> findMoves() {
         List<Move> moves = new ArrayList<>();
 
-        this.validPlacements.stream().sequential().forEach(
-            placement -> moves.addAll(this.getMovesFromPlacement(placement))
-        );
+        this.validPlacements.forEach(placement -> this.addAllMovesFromPlacement(placement, moves));
 
         return moves;
     }
 
-    private List<Move> getMovesFromPlacement(Placement placement) {
-        List<Move> moves = new LinkedList<>();
+    private void addAllMovesFromPlacement(Placement placement, List<Move> moves) {
         WordGraphDictionary.WGNode startPath = this.initializePath(placement);
 
         if (startPath == null) {
-            System.out.println("PANIC: placement with invalid prefix");
+            System.out.println("PANIC: placement with invalid prefix | " + Arrays.toString(placement.effectiveWord));
 
-            return moves;
+            return;
         }
 
         this.permuteOnPlacement(placement, this.permuteTree.getRoot(), startPath, moves);
-
-        return moves;
     }
 
     private void permuteOnPlacement(Placement placement, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
@@ -467,13 +462,13 @@ public class ScrabbleGame {
                     continue;
                 }
 
-                this.initializeValidReplacements(row, col, true);
-                this.initializeValidReplacements(row, col, false);
+                this.initializeValidPerpendicularPlacementAt(row, col, true);
+                this.initializeValidPerpendicularPlacementAt(row, col, false);
             }
         }
     }
 
-    private void initializeValidReplacements(int row, int col, boolean isVertical) {
+    private void initializeValidPerpendicularPlacementAt(int row, int col, boolean isVertical) {
         boolean[][][] perpSource = isVertical ? this.perpVert : this.perpHori;
         PerpScoreData[][] perpScoreDataSource = isVertical ? this.perpScoreDataVert : this.perpScoreDataHori;
         boolean[][] canPlaceSource = isVertical ? this.canPlaceVert : this.canPlaceHori;

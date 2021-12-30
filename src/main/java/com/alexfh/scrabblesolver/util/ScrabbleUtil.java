@@ -1,5 +1,8 @@
 package com.alexfh.scrabblesolver.util;
 
+import com.alexfh.scrabblesolver.util.structure.ImmutablePair;
+import com.alexfh.scrabblesolver.util.structure.Pair;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +16,17 @@ public class ScrabbleUtil {
     public static final String newLineRegex = "\\R";
     public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
     public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
+
+    @SuppressWarnings("unused")
+    public static <T> Pair<T, Long> getTimeToRetrieve(Supplier<T> supplier) {
+        long start = System.nanoTime();
+
+        T t = supplier.get();
+
+        long finish = System.nanoTime();
+
+        return new ImmutablePair<>(t, finish - start);
+    }
 
     public static <T> T timeRetrieval(Supplier<T> supplier, String message) {
         long start = System.nanoTime();
@@ -44,6 +58,7 @@ public class ScrabbleUtil {
         return c - 97;
     }
 
+    @SuppressWarnings("unused")
     public static char intToChar(int i) {
         return (char) (i + 97);
     }

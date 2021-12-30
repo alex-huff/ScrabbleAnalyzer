@@ -1,14 +1,6 @@
 package com.alexfh.scrabblesolver.util.structure;
 
-public class ImmutablePair<L, R> implements Pair<L, R> {
-
-    private final L left;
-    private final R right;
-
-    public ImmutablePair(L left, R right) {
-        this.left = left;
-        this.right = right;
-    }
+public record ImmutablePair<L, R>(L left, R right) implements Pair<L, R> {
 
     @Override
     public L getLeft() {

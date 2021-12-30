@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class LetterScoreMapImpl implements ILetterScoreMap {
 
     public static LetterScoreMapImpl fromFile(File scoreMapFile) throws IOException {

@@ -69,8 +69,10 @@ public class ScrabbleGame {
         private final int[] effectiveWordSizeMap;
         private int numPlacedTiles;
         private final boolean[][] validPerpTilesForPlacement;
-        private final int[][] scoringData;
-        private final int prefixScore;
+        private final int[][][] scoreDataSource;
+        private final int[][] perpScoreDataSource;
+        private final int[][] cumulativeScoringData;
+        private final Offset offset;
 
         private WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
             this.row = row;
@@ -83,51 +85,72 @@ public class ScrabbleGame {
             this.posInEffectiveWordMap = posInEffectiveWordMap;
             this.effectiveWordSizeMap = effectiveWordSizeMap;
             this.validPerpTilesForPlacement = new boolean[this.maxTilesPlaced][];
-            int[][][] scoreDataSource = this.isVertical ? ScrabbleGame.this.scoreDataVert : ScrabbleGame.this.scoreDataHori;
-            int[][] perpScoreDataSource = this.isVertical ? ScrabbleGame.this.perpScoreDataVert : ScrabbleGame.this.perpScoreDataHori;
-            this.scoringData = new int[this.maxTilesPlaced][4]; // letterMultiplier, wordMultiplier, suffixScore, perpWordScore
-            Offset offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+            this.scoreDataSource = this.isVertical ? ScrabbleGame.this.scoreDataVert : ScrabbleGame.this.scoreDataHori;
+            this.perpScoreDataSource = this.isVertical ? ScrabbleGame.this.perpScoreDataVert : ScrabbleGame.this.perpScoreDataHori;
+            this.cumulativeScoringData = new int[this.maxTilesPlaced][]; // letterMultiplier, perpWordMultiplier, cumulativePlayScore, cumulativeMainWordScore, cumulativeMainWordMultiplier
+            this.offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
             boolean[][][] validPerpTilesSource = this.isVertical ? ScrabbleGame.this.perpVert : ScrabbleGame.this.perpHori;
-            this.prefixScore = scoreDataSource[offset.newRow(this.row, this.posInEffectiveWordMap[0])][offset.newCol(this.col, this.posInEffectiveWordMap[0])][2];
 
-            for (int i = 0; i < this.maxTilesPlaced; i++) {
+            for (int i = 0; i < validPerpTilesForPlacement.length; i++) {
                 int spotInWord = this.posInEffectiveWordMap[i];
                 int newRow = offset.newRow(this.row, spotInWord);
                 int newCol = offset.newCol(this.col, spotInWord);
-                int[] normalScoreData = scoreDataSource[newRow][newCol];
-                int perpScoreData = perpScoreDataSource[newRow][newCol];
-                this.scoringData[i][0] = normalScoreData[0]; // letterMultiplier
-                this.scoringData[i][1] = normalScoreData[1]; // wordMultiplier
-                this.scoringData[i][2] = normalScoreData[3]; // suffixScore
-                this.scoringData[i][3] = perpScoreData;      // perpWordScore
                 this.validPerpTilesForPlacement[i] = validPerpTilesSource[newRow][newCol];
             }
         }
 
+        // lazily cache scoring data for words with based on number of tiles
+        private int[] getScoreDataForTile(int tile) {
+            if (this.cumulativeScoringData[tile] != null) return this.cumulativeScoringData[tile];
+
+            int spotInWord = this.posInEffectiveWordMap[tile];
+            int newRow = offset.newRow(this.row, spotInWord);
+            int newCol = offset.newCol(this.col, spotInWord);
+            int[] normalScoreData = this.scoreDataSource[newRow][newCol];
+            int perpScoreData = this.perpScoreDataSource[newRow][newCol];
+            int letterMultiplier = normalScoreData[0];
+            int wordMultiplier = ScrabbleGame.this.board.getWordMultiplierAt(newRow, newCol);
+            int prefixScore = normalScoreData[2];
+            int suffixScore = normalScoreData[3];
+            int[] current = new int[5];
+            current[0] = letterMultiplier;
+            current[1] = (perpScoreData == ScrabbleGame.invalidPerpWordScore) ? 0 : wordMultiplier;
+
+            if (tile == 0) {
+                current[2] = current[1] * perpScoreData;
+                current[3] = prefixScore + suffixScore;
+                current[4] = wordMultiplier;
+            } else {
+                int[] last = this.getScoreDataForTile(tile - 1);
+                current[2] = last[2] + current[1] * perpScoreData;
+                current[3] = last[3] + suffixScore;
+                current[4] = last[4] * wordMultiplier;
+
+                if (tile + 1 == ScrabbleGame.this.handSize) current[2] += 35;
+            }
+
+            this.cumulativeScoringData[tile] = current;
+
+            return this.cumulativeScoringData[tile];
+        }
+
         private int getScore() {
-            int playScore = 0;
-            int mainWordScore = this.prefixScore;
-            int mainWordMultiplier = 1;
+            int[] cumulativeData = this.getScoreDataForTile(this.numPlacedTiles - 1);
+            int playScore = cumulativeData[2];
+            int mainWordScore = cumulativeData[3];
+            int mainWordMultiplier = cumulativeData[4];
 
             for (int i = 0; i < this.numPlacedTiles; i++) {
                 char placedTile = this.currentlyPlacedTiles[i];
-                int[] tileScoringData = this.scoringData[i];
+                int[] tileScoringData = this.getScoreDataForTile(i);
                 int letterMultiplier = tileScoringData[0];
-                int wordMultiplier = tileScoringData[1];
-                int suffixScore = tileScoringData[2];
-                int perpScore = tileScoringData[3];
+                int perpWordMultiplier = tileScoringData[1];
                 int letterScore = (placedTile == ScrabbleUtil.wildCardTile) ? 0 : letterMultiplier * ScrabbleGame.this.letterScoreMap.getScore(placedTile);
-
-                if (perpScore != ScrabbleGame.invalidPerpWordScore)
-                    playScore += (letterScore + perpScore) * wordMultiplier;
-
-                mainWordScore += letterScore + suffixScore;
-                mainWordMultiplier *= wordMultiplier;
+                playScore += letterScore * perpWordMultiplier;
+                mainWordScore += letterScore;
             }
 
             playScore += mainWordMultiplier * mainWordScore;
-
-            if (this.numPlacedTiles == ScrabbleGame.this.handSize) playScore += 35;
 
             return playScore;
         }

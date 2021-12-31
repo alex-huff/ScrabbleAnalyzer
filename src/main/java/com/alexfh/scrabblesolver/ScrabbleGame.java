@@ -142,7 +142,7 @@ public class ScrabbleGame {
 
             for (int i = 0; i < this.numPlacedTiles; i++) {
                 char placedTile = this.currentlyPlacedTiles[i];
-                int[] tileScoringData = this.getScoreDataForTile(i);
+                int[] tileScoringData = this.cumulativeScoringData[i]; // won't be null because this.getScoreDataForTile(this.numPlacedTiles - 1); will recursively initialize all the way to 0
                 int letterMultiplier = tileScoringData[0];
                 int perpWordMultiplier = tileScoringData[1];
                 int letterScore = (placedTile == ScrabbleUtil.wildCardTile) ? 0 : letterMultiplier * ScrabbleGame.this.letterScoreMap.getScore(placedTile);

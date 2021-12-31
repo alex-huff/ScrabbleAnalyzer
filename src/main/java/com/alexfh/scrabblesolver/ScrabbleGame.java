@@ -69,8 +69,8 @@ public class ScrabbleGame {
         private final int[] effectiveWordSizeMap;
         private int numPlacedTiles;
         private final boolean[][] validPerpTilesForPlacement;
-        private final int[][] perpScoreDataSource;
-        private final Offset offset;
+        private final int[][] scoringData;
+        private int prefixScore;
 
         private WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
             this.row = row;
@@ -83,56 +83,52 @@ public class ScrabbleGame {
             this.posInEffectiveWordMap = posInEffectiveWordMap;
             this.effectiveWordSizeMap = effectiveWordSizeMap;
             this.validPerpTilesForPlacement = new boolean[this.maxTilesPlaced][];
-            this.perpScoreDataSource = this.isVertical ? ScrabbleGame.this.perpScoreDataVert : ScrabbleGame.this.perpScoreDataHori;
-            this.offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+            int[][][] scoreDataSource = this.isVertical ? ScrabbleGame.this.scoreDataVert : ScrabbleGame.this.scoreDataHori;
+            int[][] perpScoreDataSource = this.isVertical ? ScrabbleGame.this.perpScoreDataVert : ScrabbleGame.this.perpScoreDataHori;
+            this.scoringData = new int[this.maxTilesPlaced][4]; // letterMultiplier, wordMultiplier, suffixScore, perpWordScore
+            Offset offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
 
-            for (int i = 0; i < this.validPerpTilesForPlacement.length; i++) {
+            boolean[][][] validPerpTilesSource = this.isVertical ? ScrabbleGame.this.perpVert : ScrabbleGame.this.perpHori;
+
+            for (int i = 0; i < this.maxTilesPlaced; i++) {
                 int spotInWord = this.posInEffectiveWordMap[i];
-                this.validPerpTilesForPlacement[i] = this.isVertical ?
-                    ScrabbleGame.this.perpVert[row + spotInWord][col] :
-                    ScrabbleGame.this.perpHori[row][col + spotInWord];
+                int newRow = offset.newRow(this.row, spotInWord);
+                int newCol = offset.newCol(this.col, spotInWord);
+                int[] normalScoreData = scoreDataSource[newRow][newCol];
+                int perpScoreData = perpScoreDataSource[newRow][newCol];
+
+                if (i == 0) this.prefixScore = normalScoreData[2];
+
+                this.scoringData[i][0] = normalScoreData[0]; // letterMultiplier
+                this.scoringData[i][1] = normalScoreData[1]; // wordMultiplier
+                this.scoringData[i][2] = normalScoreData[3]; // suffixScore
+                this.scoringData[i][3] = perpScoreData;      // perpWordScore
+                this.validPerpTilesForPlacement[i] = validPerpTilesSource[newRow][newCol];
             }
         }
 
         private int getScore() {
             int playScore = 0;
-            int mainWordScore = 0;
+            int mainWordScore = this.prefixScore;
             int mainWordMultiplier = 1;
-            int currentTile = 0;
 
-            for (int i = 0; i < this.effectiveWordSizeMap[this.numPlacedTiles - 1]; i++) {
-                int perpWordScore = 0;
-                int newRow = this.offset.newRow(this.row, i);
-                int newCol = this.offset.newCol(this.col, i);
+            for (int i = 0; i < this.numPlacedTiles; i++) {
+                char placedTile = this.currentlyPlacedTiles[i];
+                int[] tileScoringData = this.scoringData[i];
+                int letterMultiplier = tileScoringData[0];
+                int wordMultiplier = tileScoringData[1];
+                int suffixScore = tileScoringData[2];
+                int perpScore = tileScoringData[3];
+                int letterScore = (placedTile == ScrabbleUtil.wildCardTile) ? 0 : letterMultiplier * ScrabbleGame.this.letterScoreMap.getScore(placedTile);
 
-                if (ScrabbleGame.this.board.isEmptyAt(newRow, newCol)) {
-                    mainWordMultiplier *= ScrabbleGame.this.board.getWordMultiplierAt(newRow, newCol);
-                    char placedTile = this.currentlyPlacedTiles[currentTile];
+                if (perpScore != ScrabbleGame.invalidPerpWordScore)
+                    playScore += (letterScore + perpScore) * wordMultiplier;
 
-                    if (placedTile != ScrabbleUtil.wildCardTile) {
-                        int letterScore = ScrabbleGame.this.letterScoreMap.getScore(placedTile) * ScrabbleGame.this.board.getLetterMultiplierAt(newRow, newCol);
-                        mainWordScore += letterScore;
-                        perpWordScore += letterScore;
-                    }
-
-                    currentTile++;
-                } else {
-                    if (!ScrabbleGame.this.board.isWildcardAt(newRow, newCol))
-                        mainWordScore += ScrabbleGame.this.letterScoreMap.getScore(ScrabbleGame.this.board.getCharAt(newRow, newCol));
-
-                    continue;
-                }
-
-                int perpScoreData = this.perpScoreDataSource[newRow][newCol];
-
-                if (perpScoreData == ScrabbleGame.invalidPerpWordScore) continue;
-
-                int perpWordMultiplier = ScrabbleGame.this.board.getWordMultiplierAt(newRow, newCol);
-                perpWordScore += perpScoreData;
-                playScore += perpWordScore * perpWordMultiplier;
+                mainWordScore += letterScore + suffixScore;
+                mainWordMultiplier *= wordMultiplier;
             }
 
-            playScore += mainWordScore * mainWordMultiplier;
+            playScore += mainWordMultiplier * mainWordScore;
 
             if (this.numPlacedTiles == ScrabbleGame.this.handSize) playScore += 35;
 
@@ -211,6 +207,8 @@ public class ScrabbleGame {
     private final boolean[][] canPlaceVert;
     private final boolean[][] canPlaceHori;
     private final int handSize;
+    private final int[][][] scoreDataVert; // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
+    private final int[][][] scoreDataHori; // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
     private final int[][] perpScoreDataVert; // -1 for invalid
     private final int[][] perpScoreDataHori; // -1 for invalid
 
@@ -227,11 +225,13 @@ public class ScrabbleGame {
         this.possibleCharPlacements = this.getPossiblePlacements();
         this.canPlaceVert = new boolean[this.board.getRows()][this.board.getCols()];
         this.canPlaceHori = new boolean[this.board.getRows()][this.board.getCols()];
+        this.scoreDataVert = new int[this.board.getRows()][this.board.getCols()][];
+        this.scoreDataHori = new int[this.board.getRows()][this.board.getCols()][];
         this.perpScoreDataVert = new int[this.board.getRows()][this.board.getCols()];
         this.perpScoreDataHori = new int[this.board.getRows()][this.board.getCols()];
         this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
 
-        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacements, "initializeValidPerpendicularPlacements");
+        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacementsAndScoringData, "initializeValidPerpendicularPlacements");
 
         this.validWordStarts = ScrabbleUtil.timeRetrieval(this::findValidWordStarts, "findValidPlacements");
     }
@@ -447,7 +447,7 @@ public class ScrabbleGame {
         );
     }
 
-    private void initializeValidPerpendicularPlacements() {
+    private void initializeValidPerpendicularPlacementsAndScoringData() {
         for (int row = 0; row < this.board.getRows(); row++) {
             for (int col = 0; col < this.board.getCols(); col++) {
                 if (!this.board.isEmptyAt(row, col)) { // tile already placed, nothing valid
@@ -459,42 +459,63 @@ public class ScrabbleGame {
                     continue;
                 }
 
-                this.initializeValidPerpendicularPlacementAt(row, col, true);
-                this.initializeValidPerpendicularPlacementAt(row, col, false);
+                this.initializeValidPerpendicularPlacementAndScoringDataAt(row, col, true);
+                this.initializeValidPerpendicularPlacementAndScoringDataAt(row, col, false);
             }
         }
     }
 
-    private void initializeValidPerpendicularPlacementAt(int row, int col, boolean isVertical) {
+    private void initializeValidPerpendicularPlacementAndScoringDataAt(int row, int col, boolean isVertical) {
         boolean[][][] perpSource = isVertical ? this.perpVert : this.perpHori;
         int[][] perpScoreDataSource = isVertical ? this.perpScoreDataVert : this.perpScoreDataHori;
+        int[][][] scoreDataSource = isVertical ? this.scoreDataHori : this.scoreDataVert;
         boolean[][] canPlaceSource = isVertical ? this.canPlaceVert : this.canPlaceHori;
         int wordStartPerp = isVertical ? col : row;
         int lineBoundPerp = isVertical ? this.board.getCols() : this.board.getRows();
         Offset offsetPerp = isVertical ? ScrabbleGame.horiOffset : ScrabbleGame.vertOffset;
         boolean beforeEmpty = wordStartPerp == 0 || this.board.isEmptyAt(offsetPerp.newRow(row, -1), offsetPerp.newCol(col, -1));
         boolean afterEmpty = wordStartPerp == lineBoundPerp - 1 || this.board.isEmptyAt(offsetPerp.newRow(row, 1), offsetPerp.newCol(col, 1));
-
-        if (beforeEmpty && afterEmpty) { // nothing before or after, anything is valid for placement
-            perpSource[row][col] = ScrabbleGame.allValid;
-            canPlaceSource[row][col] = true;
-            perpScoreDataSource[row][col] = ScrabbleGame.invalidPerpWordScore;
-
-            return;
-        }
-
-        int score = 0;
         int before = wordStartPerp, after = wordStartPerp;
         int i = 0;
+        int score = 0;
+        int prefixScore = 0;
+        int suffixScore = 0;
+
+        while (after + 1 < lineBoundPerp && !this.board.isEmptyAt(offsetPerp.newRow(row, i + 1), offsetPerp.newCol(col, i + 1))) {
+            int newRow = offsetPerp.newRow(row, i + 1), newCol = offsetPerp.newCol(col, i + 1);
+
+            if (!this.board.isWildcardAt(newRow, newCol)) {
+                int s = this.letterScoreMap.getScore(this.board.getCharAt(newRow, newCol));
+                score += s;
+                suffixScore += s;
+            }
+
+            after++;
+            i++;
+        }
+
+        i = 0;
 
         while (before - 1 >= 0 && !this.board.isEmptyAt(offsetPerp.newRow(row, i - 1), offsetPerp.newCol(col, i - 1))) {
             int newRow = offsetPerp.newRow(row, i - 1), newCol = offsetPerp.newCol(col, i - 1);
 
-            if (!this.board.isWildcardAt(newRow, newCol))
-                score += this.letterScoreMap.getScore(this.board.getCharAt(newRow, newCol));
+            if (!this.board.isWildcardAt(newRow, newCol)) {
+                int s = this.letterScoreMap.getScore(this.board.getCharAt(newRow, newCol));
+                score += s;
+                prefixScore += s;
+            }
 
             before--;
             i--;
+        }
+
+        if (beforeEmpty && afterEmpty) { // nothing before or after, anything is valid for placement
+            canPlaceSource[row][col] = true;
+            perpSource[row][col] = ScrabbleGame.allValid;
+            perpScoreDataSource[row][col] = ScrabbleGame.invalidPerpWordScore;
+            scoreDataSource[row][col] = new int[] { this.board.getLetterMultiplierAt(row, col), this.board.getWordMultiplierAt(row, col), prefixScore, suffixScore };
+
+            return;
         }
 
         WordGraphDictionary.WGNode currentPath = this.dictionary.getRoot();
@@ -512,18 +533,6 @@ public class ScrabbleGame {
         if (current == wordStartPerp) { // before tile is valid prefix
             boolean[] result = new boolean[ScrabbleUtil.alphaChars.length];
             int scoreData;
-            i = 0;
-
-            while (after + 1 < lineBoundPerp && !this.board.isEmptyAt(offsetPerp.newRow(row, i + 1), offsetPerp.newCol(col, i + 1))) {
-                int newRow = offsetPerp.newRow(row, i + 1), newCol = offsetPerp.newCol(col, i + 1);
-
-                if (!this.board.isWildcardAt(newRow, newCol))
-                    score += this.letterScoreMap.getScore(this.board.getCharAt(newRow, newCol));
-
-                after++;
-                i++;
-            }
-
             boolean hasAny = false;
 
             for (Character c : currentPath.getPaths()) {
@@ -561,6 +570,8 @@ public class ScrabbleGame {
             perpSource[row][col] = ScrabbleGame.allInvalid;
             perpScoreDataSource[row][col] = ScrabbleGame.invalidPerpWordScore;
         }
+
+        scoreDataSource[row][col] = new int[] { this.board.getLetterMultiplierAt(row, col), this.board.getWordMultiplierAt(row, col), prefixScore, suffixScore };
     }
 
 }

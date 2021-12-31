@@ -88,7 +88,7 @@ public class ScrabbleGame {
             this.scoringData = new int[this.maxTilesPlaced][4]; // letterMultiplier, wordMultiplier, suffixScore, perpWordScore
             Offset offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
             boolean[][][] validPerpTilesSource = this.isVertical ? ScrabbleGame.this.perpVert : ScrabbleGame.this.perpHori;
-            this.prefixScore = scoreDataSource[row][col][2];
+            this.prefixScore = scoreDataSource[offset.newRow(this.row, this.posInEffectiveWordMap[0])][offset.newCol(this.col, this.posInEffectiveWordMap[0])][2];
 
             for (int i = 0; i < this.maxTilesPlaced; i++) {
                 int spotInWord = this.posInEffectiveWordMap[i];

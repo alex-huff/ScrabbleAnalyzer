@@ -70,7 +70,7 @@ public class ScrabbleGame {
         private int numPlacedTiles;
         private final boolean[][] validPerpTilesForPlacement;
         private final int[][] scoringData;
-        private int prefixScore;
+        private final int prefixScore;
 
         private WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord, int[] posInEffectiveWordMap, int[] effectiveWordSizeMap) {
             this.row = row;
@@ -87,8 +87,8 @@ public class ScrabbleGame {
             int[][] perpScoreDataSource = this.isVertical ? ScrabbleGame.this.perpScoreDataVert : ScrabbleGame.this.perpScoreDataHori;
             this.scoringData = new int[this.maxTilesPlaced][4]; // letterMultiplier, wordMultiplier, suffixScore, perpWordScore
             Offset offset = this.isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
-
             boolean[][][] validPerpTilesSource = this.isVertical ? ScrabbleGame.this.perpVert : ScrabbleGame.this.perpHori;
+            this.prefixScore = scoreDataSource[row][col][2];
 
             for (int i = 0; i < this.maxTilesPlaced; i++) {
                 int spotInWord = this.posInEffectiveWordMap[i];
@@ -96,9 +96,6 @@ public class ScrabbleGame {
                 int newCol = offset.newCol(this.col, spotInWord);
                 int[] normalScoreData = scoreDataSource[newRow][newCol];
                 int perpScoreData = perpScoreDataSource[newRow][newCol];
-
-                if (i == 0) this.prefixScore = normalScoreData[2];
-
                 this.scoringData[i][0] = normalScoreData[0]; // letterMultiplier
                 this.scoringData[i][1] = normalScoreData[1]; // wordMultiplier
                 this.scoringData[i][2] = normalScoreData[3]; // suffixScore

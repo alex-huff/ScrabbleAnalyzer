@@ -1,7 +1,4 @@
 <svg version="1.1" id="scrabble" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 412.74 412.74" style="enable-background:new 0 0 412.74 412.74" xml:space="preserve">
-    <style>
-        .st0{display:none}.st4{fill:#414042}.st4,.st5{display:inline}
-    </style>
     <g id="scrabbleTile">
         <g id="tile">
             <path id="top" d="M383.41 0c16.29 0 29.45 13.21 29.44 29.51l-.11 353.79c-.01 16.29-13.17 29.45-29.46 29.45H29.5C13.21 412.75 0 399.59 0 383.3L.11 29.51C.11 13.21 13.33 0 29.62 0h353.79z" style="fill:#e8d7ba"/>

@@ -297,25 +297,19 @@ public class ScrabbleGame {
             return;
         }
 
+        WordGraphDictionary.WGNode newPath;
+
         for (Character c : perm.getPaths()) {
             if (c == ScrabbleUtil.wildCardTile) {
                 for (char as : ScrabbleUtil.alphaChars) {
-                    if (wordStart.cantPlace(as)) continue;
-
-                    WordGraphDictionary.WGNode newPath = this.followPathToNextBlank(wordStart, path, as);
-
-                    if (newPath == null) continue;
+                    if (wordStart.cantPlace(as) || (newPath = this.followPathToNextBlank(wordStart, path, as)) == null) continue;
 
                     wordStart.placeWildcardTileAs(as);
                     this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);
                     wordStart.removeTile();
                 }
             } else {
-                if (wordStart.cantPlace(c)) continue;
-
-                WordGraphDictionary.WGNode newPath = this.followPathToNextBlank(wordStart, path, c);
-
-                if (newPath == null) continue;
+                if (wordStart.cantPlace(c) || (newPath = this.followPathToNextBlank(wordStart, path, c)) == null) continue;
 
                 wordStart.placeTile(c);
                 this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);

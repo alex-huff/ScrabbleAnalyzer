@@ -17,6 +17,10 @@ public class ScrabbleUtil {
     public static final String alpha = "abcdefghijklmnopqrstuvwxyz";
     public static final char[] alphaChars = ScrabbleUtil.alpha.toCharArray();
 
+    public static void checkInterrupted() throws InterruptedException {
+        if (Thread.interrupted()) throw new InterruptedException();
+    }
+
     @SuppressWarnings("unused")
     public static <T> Pair<T, Long> getTimeToRetrieve(Supplier<T> supplier) {
         long start = System.nanoTime();
@@ -26,6 +30,32 @@ public class ScrabbleUtil {
         long finish = System.nanoTime();
 
         return new ImmutablePair<>(t, finish - start);
+    }
+
+    @FunctionalInterface
+    public interface InterruptableSupplier<T> {
+
+        T get() throws InterruptedException;
+
+    }
+
+    @FunctionalInterface
+    public interface InterruptableRunnable {
+
+        void run() throws InterruptedException;
+
+    }
+
+    public static <T> T timeRetrievalInterruptable(InterruptableSupplier<T> supplier, String message) throws InterruptedException {
+        long start = System.nanoTime();
+
+        T t = supplier.get();
+
+        long finish = System.nanoTime();
+
+        System.out.println(message + " " + 1.0D * (finish - start) / 1000000000 + "s");
+
+        return t;
     }
 
     public static <T> T timeRetrieval(Supplier<T> supplier, String message) {
@@ -38,6 +68,16 @@ public class ScrabbleUtil {
         System.out.println(message + " " + 1.0D * (finish - start) / 1000000000 + "s");
 
         return t;
+    }
+
+    public static void timeItInterruptable(InterruptableRunnable runnable, String message) throws InterruptedException {
+        long start = System.nanoTime();
+
+        runnable.run();
+
+        long finish = System.nanoTime();
+
+        System.out.println(message + " " + 1.0D * (finish - start) / 1000000000 + "s");
     }
 
     public static void timeIt(Runnable runnable, String message) {

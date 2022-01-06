@@ -19,7 +19,7 @@ import java.util.List;
 public class ScrabbleGameTest {
 
     @Test
-    public void testDistributionForAllGames() throws IOException {
+    public void testDistributionForAllGames() throws IOException, InterruptedException {
         ILetterScoreMap scoreMap = LetterScoreMapImpl.fromFile(
             new File("src/main/resources/scoremap.txt")
         );
@@ -58,7 +58,7 @@ public class ScrabbleGameTest {
         );
     }
 
-    public void testDistribution(int gameNum, int[] expectedDistribution, WordGraphDictionary dictionary, ILetterScoreMap scoreMap) throws IOException {
+    public void testDistribution(int gameNum, int[] expectedDistribution, WordGraphDictionary dictionary, ILetterScoreMap scoreMap) throws IOException, InterruptedException {
         String gameFolder = "src/main/resources/games/game" + gameNum + "/";
         IScrabbleBoard board = ScrabbleBoardImpl.fromFiles(
             new File(gameFolder + "board.txt"),
@@ -68,7 +68,7 @@ public class ScrabbleGameTest {
             new File(gameFolder + "currentletters.txt")
         );
         ScrabbleGame scrabbleGame = new ScrabbleGame(scoreMap, dictionary, board, playerTiles, 7);
-        List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrieval(scrabbleGame::findMoves, "findMoves");
+        List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrievalInterruptable(scrabbleGame::findMoves, "findMoves");
 
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");
 

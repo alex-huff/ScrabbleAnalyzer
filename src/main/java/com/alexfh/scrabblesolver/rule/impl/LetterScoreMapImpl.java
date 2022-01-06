@@ -11,6 +11,37 @@ import java.util.Arrays;
 @SuppressWarnings("ClassCanBeRecord")
 public class LetterScoreMapImpl implements ILetterScoreMap {
 
+    public static final LetterScoreMapImpl defaultScoreMap = new LetterScoreMapImpl(
+        new int[] {
+            1,
+            4,
+            4,
+            2,
+            1,
+            4,
+            3,
+            3,
+            1,
+            10,
+            5,
+            2,
+            4,
+            2,
+            1,
+            4,
+            10,
+            1,
+            1,
+            1,
+            2,
+            5,
+            4,
+            8,
+            3,
+            10
+        }
+    );
+    
     public static LetterScoreMapImpl fromFile(File scoreMapFile) throws IOException {
         String scoreMapData = Files.readString(scoreMapFile.toPath(), StandardCharsets.UTF_8);
         int[] scoreMap = new int[26];

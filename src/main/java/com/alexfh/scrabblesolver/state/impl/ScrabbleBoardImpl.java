@@ -7,10 +7,9 @@ import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class ScrabbleBoardImpl implements IScrabbleBoard {
-
-    private static final char emptyMarker = '.';
 
     public static ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException {
         Pair<char[][], boolean[][]> gameData = ScrabbleBoardImpl.readGameFile(gameFile);
@@ -65,7 +64,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                     letterMultipliers[r][c] = !isUpper ? modifier : 1;
                     wordMultipliers[r][c] = isUpper ? modifier : 1;
                 } else {
-                    if (b != ScrabbleBoardImpl.emptyMarker) throw new IllegalStateException("Invalid character in multipliers board");
+                    if (b != IScrabbleBoard.emptyMarker) throw new IllegalStateException("Invalid character in multipliers board");
 
                     letterMultipliers[r][c] = 1;
                     wordMultipliers[r][c] = 1;
@@ -96,9 +95,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                 boolean isAlpha = Character.isAlphabetic(b);
                 boolean isUpper = Character.isUpperCase(b);
 
-                if (!isAlpha && b != ScrabbleBoardImpl.emptyMarker) throw new IllegalStateException("Invalid character: '" + b + "' in game board");
+                if (!isAlpha && b != IScrabbleBoard.emptyMarker) throw new IllegalStateException("Invalid character: '" + b + "' in game board");
 
-                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : ScrabbleBoardImpl.emptyMarker;
+                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : IScrabbleBoard.emptyMarker;
                 wildcardTiles[r][c] = isAlpha && (!isUpper);
             }
         }
@@ -152,13 +151,27 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     @Override
+    public void setCharAt(int r, int c, char newChar) {
+        if (newChar == IScrabbleBoard.emptyMarker)
+            this.removeCharAt(r, c);
+        else
+            this.playedTiles[r][c] = newChar;
+    }
+
+    @Override
+    public void removeCharAt(int r, int c) {
+        this.playedTiles[r][c] = IScrabbleBoard.emptyMarker;
+        this.wildcardTiles[r][c] = false;
+    }
+
+    @Override
     public boolean isWildcardAt(int r, int c) {
         return this.wildcardTiles[r][c];
     }
 
     @Override
-    public boolean isEmptyAt(int r, int c) {
-        return this.playedTiles[r][c] == ScrabbleBoardImpl.emptyMarker;
+    public void setWildcardAt(int r, int c, boolean isWild) {
+        this.wildcardTiles[r][c] = isWild;
     }
 
     @Override
@@ -169,6 +182,18 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     @Override
     public int getAnchorCol() {
         return this.anchorCol;
+    }
+
+    @Override
+    public IScrabbleBoard copy() {
+        return new ScrabbleBoardImpl(
+            this.rows,
+            this.cols,
+            Arrays.stream(this.letterMultipliers).map(int[]::clone).toArray($ -> this.letterMultipliers.clone()),
+            Arrays.stream(this.wordMultipliers).map(int[]::clone).toArray($ -> this.wordMultipliers.clone()),
+            Arrays.stream(this.playedTiles).map(char[]::clone).toArray($ -> this.playedTiles.clone()),
+            Arrays.stream(this.wildcardTiles).map(boolean[]::clone).toArray($ -> this.wildcardTiles.clone())
+        );
     }
 
 }

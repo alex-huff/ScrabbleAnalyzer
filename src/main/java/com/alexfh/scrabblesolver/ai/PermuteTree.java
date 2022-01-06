@@ -52,7 +52,9 @@ public class PermuteTree {
 
     private final PTNode root = new PTNode("");
 
-    public PermuteTree(char[] toPermute) {
+    public PermuteTree(char[] toPermute) throws InterruptedException {
+        if (toPermute.length == 0) return;
+
         this.forAllPerm(this.root, toPermute, 0);
     }
 
@@ -60,7 +62,9 @@ public class PermuteTree {
         return this.root;
     }
 
-    private void forAllPerm(PTNode permuteNode, char[] toPermute, int i) {
+    private void forAllPerm(PTNode permuteNode, char[] toPermute, int i) throws InterruptedException {
+        ScrabbleUtil.checkInterrupted();
+
         if (i == toPermute.length - 1) {
             permuteNode.createPathIfNull(toPermute[i]);
 

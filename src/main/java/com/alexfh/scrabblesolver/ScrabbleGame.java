@@ -16,26 +16,26 @@ public class ScrabbleGame {
     private static final boolean[] allValid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final boolean[] allInvalid = new boolean[ScrabbleUtil.alphaChars.length];
     private static final int invalidPerpWordScore = -1;
-    private static final Offset vertOffset = new Offset(1, 0);
-    private static final Offset horiOffset = new Offset(0, 1);
+    public static final Offset vertOffset = new Offset(1, 0);
+    public static final Offset horiOffset = new Offset(0, 1);
 
     static {
         Arrays.fill(ScrabbleGame.allValid, true);
     }
 
-    private static record Offset(int moveRowBy, int moveColBy) {
+    public static record Offset(int moveRowBy, int moveColBy) {
 
-        int newRow(int row, int offset) {
+        public int newRow(int row, int offset) {
             return row + this.moveRowBy * offset;
         }
 
-        int newCol(int col, int offset) {
+        public int newCol(int col, int offset) {
             return col + this.moveColBy * offset;
         }
 
     }
 
-    public record Move(String playedWord, char[] playedTiles, boolean isVertical, int row, int col, int score) implements Comparable<Move> {
+    public record Move(String playedWord, char[] playedTiles, int[] tileSpotsInWord, boolean isVertical, int row, int col, int score) implements Comparable<Move> {
 
         private static final Comparator<Move> moveComparator = Comparator.comparingInt(
             Move::score
@@ -221,8 +221,8 @@ public class ScrabbleGame {
      */
     private final boolean[][][] perpVert;
     private final boolean[][][] perpHori;
-    private final PermuteTree permuteTree;
-    private final List<WordStart> validWordStarts;
+    private PermuteTree permuteTree;
+    private List<WordStart> validWordStarts;
     private final boolean[] possibleCharPlacements;
     private final boolean[][] canPlaceVert;
     private final boolean[][] canPlaceHori;
@@ -231,6 +231,7 @@ public class ScrabbleGame {
     private final int[][][] scoreDataHori; // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
     private final int[][] perpScoreDataVert; // -1 for invalid
     private final int[][] perpScoreDataHori; // -1 for invalid
+    private boolean initialized = false;
 
     public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleBoard board, char[] playerTiles, int handSize) {
         if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
@@ -249,17 +250,26 @@ public class ScrabbleGame {
         this.scoreDataHori = new int[this.board.getRows()][this.board.getCols()][];
         this.perpScoreDataVert = new int[this.board.getRows()][this.board.getCols()];
         this.perpScoreDataHori = new int[this.board.getRows()][this.board.getCols()];
-        this.permuteTree = ScrabbleUtil.timeRetrieval(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
-
-        ScrabbleUtil.timeIt(this::initializeValidPerpendicularPlacementsAndScoringData, "initializeValidPerpendicularPlacements");
-
-        this.validWordStarts = ScrabbleUtil.timeRetrieval(this::findValidWordStarts, "findValidPlacements");
     }
 
-    public List<Move> findMoves() {
+    private void initialize() throws InterruptedException {
+        this.permuteTree = ScrabbleUtil.timeRetrievalInterruptable(() -> new PermuteTree(this.playerTiles), "generatePermuteTree");
+
+        ScrabbleUtil.timeItInterruptable(this::initializeValidPerpendicularPlacementsAndScoringData, "initializeValidPerpendicularPlacements");
+
+        this.validWordStarts = ScrabbleUtil.timeRetrievalInterruptable(this::findValidWordStarts, "findValidPlacements");
+        this.initialized = true;
+    }
+
+    public List<Move> findMoves() throws InterruptedException {
+        if (!this.initialized) this.initialize();
+
         List<Move> moves = new ArrayList<>();
 
-        this.validWordStarts.forEach(wordStart -> this.addAllMovesFromWordStart(wordStart, moves));
+        for (WordStart wordStart : this.validWordStarts) {
+            ScrabbleUtil.checkInterrupted();
+            this.addAllMovesFromWordStart(wordStart, moves);
+        }
 
         return moves;
     }
@@ -279,12 +289,15 @@ public class ScrabbleGame {
     private void permuteOnWordStart(WordStart wordStart, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves) {
         if (wordStart.numPlacedTiles >= wordStart.minTilesPlaced && path.isWordHere()) {
             char[] playedTilesCopy = new char[wordStart.numPlacedTiles];
+            int[] tileSpotsInWord = new int[wordStart.numPlacedTiles];
 
             System.arraycopy(wordStart.currentlyPlacedTiles, 0, playedTilesCopy, 0, playedTilesCopy.length);
+            System.arraycopy(wordStart.posInEffectiveWordMap, 0, tileSpotsInWord, 0, tileSpotsInWord.length);
             moves.add(
                 new Move(
                     path.getWord(),
                     playedTilesCopy,
+                    tileSpotsInWord,
                     wordStart.isVertical,
                     wordStart.row,
                     wordStart.col,
@@ -368,11 +381,12 @@ public class ScrabbleGame {
         return placements;
     }
 
-    private List<WordStart> findValidWordStarts() {
+    private List<WordStart> findValidWordStarts() throws InterruptedException {
         List<WordStart> wordStarts = new LinkedList<>();
 
         for (int row = 0; row < this.board.getRows(); row++) {
             for (int col = 0; col < this.board.getCols(); col++) {
+                ScrabbleUtil.checkInterrupted();
                 this.addWordStartIfValid(row, col, true, wordStarts);
                 this.addWordStartIfValid(row, col, false, wordStarts);
             }
@@ -461,9 +475,11 @@ public class ScrabbleGame {
         );
     }
 
-    private void initializeValidPerpendicularPlacementsAndScoringData() {
+    private void initializeValidPerpendicularPlacementsAndScoringData() throws InterruptedException {
         for (int row = 0; row < this.board.getRows(); row++) {
             for (int col = 0; col < this.board.getCols(); col++) {
+                ScrabbleUtil.checkInterrupted();
+
                 if (!this.board.isEmptyAt(row, col)) { // tile already placed, nothing valid
                     this.perpVert[row][col] = ScrabbleGame.allInvalid;
                     this.perpHori[row][col] = ScrabbleGame.allInvalid;

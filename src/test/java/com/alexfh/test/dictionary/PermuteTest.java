@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PermuteTest {
 
     @Test
-    public void testPermuteTree() {
+    public void testPermuteTree() throws InterruptedException {
         PermuteTree permuteTree = new PermuteTree(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g' });
         AtomicInteger i = new AtomicInteger(-1); // -1 to ignore 0-perm
         Set<String> permutations = new TreeSet<>();

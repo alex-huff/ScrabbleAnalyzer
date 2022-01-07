@@ -115,6 +115,7 @@ public class ScrabbleGrid extends JPanel {
             this.updateAndRepaintTileAt(newRow, newCol);
         }
 
+        this.clearSelectedMove();
         this.onMovesInvalidated.run();
     }
 

@@ -20,7 +20,7 @@ public class MoveScroller extends JScrollPane {
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
     private final Runnable onMoveUnselected;
     private final Consumer<ScrabbleGame.Move> onPlayMove;
-    private final String[] colNames = new String[] { "Num", "Score", "Word" };
+    private final String[] colNames = new String[] { "Number", "Score", "Word" };
 
     public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Consumer<ScrabbleGame.Move> onPlayMove) {
         this.onMoveSelected = onMoveSelected;

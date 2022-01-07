@@ -3,42 +3,49 @@ package com.alexfh.scrabblesolver.gui;
 import com.alexfh.scrabblesolver.ScrabbleGame;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.List;
 
 public class MoveScroller extends JScrollPane {
 
+    private static final Font FONT = new Font("Courier New", Font.BOLD, 16);
+
     private final Dimension size = new Dimension(ScrabbleFrame.defaultTileSize * 8, ScrabbleFrame.defaultTileSize * 14);
-    private final JList<String> jList;
+    private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
     private final Runnable onMoveUnselected;
     private final Consumer<ScrabbleGame.Move> onPlayMove;
+    private final String[] colNames = new String[] { "Num", "Score", "Word" };
 
     public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Consumer<ScrabbleGame.Move> onPlayMove) {
         this.onMoveSelected = onMoveSelected;
         this.onMoveUnselected = onMoveUnselected;
         this.onPlayMove = onPlayMove;
-        this.jList = new JList<>();
+        this.table = new JTable(this.getModelFromData(new String[0][0]));
 
-        this.jList.setLayoutOrientation(JList.VERTICAL);
-        this.jList.addFocusListener(
+        this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.table.setFont(MoveScroller.FONT);
+        this.table.getTableHeader().setFont(MoveScroller.FONT);
+        this.table.setFillsViewportHeight(true);
+        this.table.addFocusListener(
             new FocusAdapter() {
                 @Override
                 public void focusLost(FocusEvent e) {
-                    MoveScroller.this.jList.clearSelection();
+                    MoveScroller.this.table.clearSelection();
                 }
             }
         );
-        this.jList.addKeyListener(
+        this.table.addKeyListener(
             new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        int index = MoveScroller.this.jList.getSelectedIndex();
+                        int index = MoveScroller.this.table.getSelectedRow();
 
                         if (index >= 0) {
                             MoveScroller.this.onPlayMove.accept(MoveScroller.this.currentMoves.get(index));
@@ -47,10 +54,10 @@ public class MoveScroller extends JScrollPane {
                 }
             }
         );
-        this.jList.addListSelectionListener(
+        this.table.getSelectionModel().addListSelectionListener(
             listSelectionEvent -> {
                 if (!listSelectionEvent.getValueIsAdjusting()) {
-                    int index = this.jList.getSelectedIndex();
+                    int index = this.table.getSelectedRow();
 
                     if (index >= 0) {
                         this.onMoveSelected.accept(this.currentMoves.get(index));
@@ -60,21 +67,21 @@ public class MoveScroller extends JScrollPane {
                 }
             }
         );
-        this.setViewportView(this.jList);
-        this.makeScrollbarsFocusList();
+        this.setViewportView(this.table);
+        this.makeScrollbarsFocusTable();
     }
 
-    private void makeScrollbarsFocusList() {
-        this.makeScrollbarFocusList(this.getVerticalScrollBar());
-        this.makeScrollbarFocusList(this.getHorizontalScrollBar());
+    private void makeScrollbarsFocusTable() {
+        this.makeScrollbarFocusTable(this.getVerticalScrollBar());
+        this.makeScrollbarFocusTable(this.getHorizontalScrollBar());
     }
 
-    private void makeScrollbarFocusList(JScrollBar scrollBar) {
+    private void makeScrollbarFocusTable(JScrollBar scrollBar) {
         scrollBar.addMouseListener(
             new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) MoveScroller.this.jList.requestFocusInWindow();
+                    if (e.getButton() == MouseEvent.BUTTON1) MoveScroller.this.table.requestFocusInWindow();
                 }
             }
         );
@@ -82,21 +89,27 @@ public class MoveScroller extends JScrollPane {
 
     public void createListForMoves(List<ScrabbleGame.Move> moves) {
         this.currentMoves = moves;
-        String[] listData = new String[this.currentMoves.size()];
+        String[][] tableData = new String[this.currentMoves.size()][];
 
         for (int i = 0; i < this.currentMoves.size(); i++) {
             ScrabbleGame.Move move = this.currentMoves.get(i);
-            listData[i] =
-                i + 1 +
-                    " Score: " + move.score() +
-                    " Vert: " + move.isVertical() +
-                    " Row: " + move.row() +
-                    " Col: " + move.col() +
-                    " Word: " + move.playedWord() +
-                    " Tiles: " + Arrays.toString(move.playedTiles());
+            tableData[i] = new String[] {
+                String.valueOf(i + 1),
+                String.valueOf(move.score()),
+                move.playedWord()
+            };
         }
 
-        this.jList.setListData(listData);
+        this.table.setModel(this.getModelFromData(tableData));
+    }
+
+    private TableModel getModelFromData(String[][] data) {
+        return new DefaultTableModel(data, this.colNames) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
     }
 
     public void newSize(int width, int height) {

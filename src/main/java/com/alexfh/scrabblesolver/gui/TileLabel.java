@@ -23,7 +23,6 @@ public class TileLabel extends JLabel {
         this.onClicked = onClicked;
         this.letterPressed = letterPressed;
 
-        this.setFocusable(true);
         this.addMouseListener(
             new MouseAdapter() {
                 @Override

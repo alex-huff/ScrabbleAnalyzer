@@ -4,10 +4,7 @@ import com.alexfh.scrabblesolver.ScrabbleGame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.List;
@@ -19,10 +16,12 @@ public class MoveScroller extends JScrollPane {
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
     private final Runnable onMoveUnselected;
+    private final Runnable onPlayMove;
 
-    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected) {
+    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Runnable onPlayMove) {
         this.onMoveSelected = onMoveSelected;
         this.onMoveUnselected = onMoveUnselected;
+        this.onPlayMove = onPlayMove;
         this.jList = new JList<>();
 
         this.jList.setLayoutOrientation(JList.VERTICAL);
@@ -31,6 +30,20 @@ public class MoveScroller extends JScrollPane {
                 @Override
                 public void focusLost(FocusEvent e) {
                     MoveScroller.this.jList.clearSelection();
+                }
+            }
+        );
+        this.jList.addKeyListener(
+            new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        int index = MoveScroller.this.jList.getSelectedIndex();
+
+                        if (index >= 0) {
+                            MoveScroller.this.onPlayMove.run();
+                        }
+                    }
                 }
             }
         );

@@ -41,12 +41,16 @@ public class ScrabblePanel extends JPanel {
 
         this.grid = new ScrabbleGrid(board, this::boardInvalidated);
         this.playerTileGrid = new PlayerTileGrid(playerTiles, this::playerTilesInvalidated);
-        this.moveScroller = new MoveScroller(this.grid::showMove, this.grid::clearSelectedMove);
+        this.moveScroller = new MoveScroller(this::showMove, this.grid::clearSelectedMove, this.grid::playSelectedMove);
         this.layout = new ScrabbleLayout();
 
         this.setLayout(this.layout);
         this.initializeLayout();
         this.updateMoves();
+    }
+
+    private void showMove(ScrabbleGame.Move move) {
+        if (this.updateNum == this.lastUpdateReceived) this.grid.showMove(move);
     }
 
     private void boardInvalidated() {

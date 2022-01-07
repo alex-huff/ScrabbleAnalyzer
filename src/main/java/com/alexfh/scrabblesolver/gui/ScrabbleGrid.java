@@ -92,6 +92,32 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
+    public void playSelectedMove() {
+        if (this.previewedMove == null) return;
+
+        ScrabbleGame.Offset offset = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+        int startRow = this.previewedMove.row();
+        int startCol = this.previewedMove.col();
+
+        for (int i = 0; i < this.previewedMove.playedTiles().length; i++) {
+            char placedChar = this.previewedMove.playedTiles()[i];
+            int spotInWord = this.previewedMove.tileSpotsInWord()[i];
+            int newRow = offset.newRow(startRow, spotInWord);
+            int newCol = offset.newCol(startCol, spotInWord);
+
+            if (placedChar == ScrabbleUtil.wildCardTile) {
+                this.board.setCharAt(newRow, newCol, this.previewedMove.playedWord().charAt(spotInWord));
+                this.board.setWildcardAt(newRow, newCol, true);
+            } else {
+                this.board.setCharAt(newRow, newCol, placedChar);
+            }
+
+            this.updateAndRepaintTileAt(newRow, newCol);
+        }
+
+        this.onMovesInvalidated.run();
+    }
+
     public void clearSelectedMove() {
         if (this.previewedMove == null) return;
 
@@ -107,6 +133,8 @@ public class ScrabbleGrid extends JPanel {
 
             this.updateAndRepaintTileAt(newRow, newCol);
         }
+
+        this.previewedMove = null;
     }
 
     private void updateAndRepaintTileAtCursor() {

@@ -104,6 +104,7 @@ public class ScrabbleGrid extends JPanel {
             int spotInWord = this.previewedMove.tileSpotsInWord()[i];
             int newRow = offset.newRow(startRow, spotInWord);
             int newCol = offset.newCol(startCol, spotInWord);
+            this.playedWordPreviewChars[newRow][newCol] = IScrabbleBoard.emptyMarker;
 
             if (placedChar == ScrabbleUtil.wildCardTile) {
                 this.board.setCharAt(newRow, newCol, this.previewedMove.playedWord().charAt(spotInWord));
@@ -115,7 +116,7 @@ public class ScrabbleGrid extends JPanel {
             this.updateAndRepaintTileAt(newRow, newCol);
         }
 
-        this.clearSelectedMove();
+        this.previewedMove = null;
         this.onMovesInvalidated.run();
     }
 

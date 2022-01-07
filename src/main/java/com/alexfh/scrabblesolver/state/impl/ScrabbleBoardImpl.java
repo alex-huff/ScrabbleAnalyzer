@@ -11,6 +11,53 @@ import java.util.Arrays;
 
 public class ScrabbleBoardImpl implements IScrabbleBoard {
 
+    private static final int[][] defaultLetterMultipliers = new int[][] {
+        new int[] { 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1 },
+        new int[] { 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1 },
+        new int[] { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[] { 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1 },
+        new int[] { 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3 },
+        new int[] { 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1 },
+        new int[] { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[] { 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1 },
+        new int[] { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1 },
+    };
+
+    private static final int[][] defaultWordMultipliers = new int[][] {
+        new int[] { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3 },
+        new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1 },
+        new int[] { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+    };
+
+    public static ScrabbleBoardImpl blankBoard() {
+        return new ScrabbleBoardImpl(
+            15,
+            15,
+            ScrabbleBoardImpl.defaultLetterMultipliers,
+            ScrabbleBoardImpl.defaultWordMultipliers,
+            IScrabbleBoard.getNewEmptyBoard(15, 15),
+            new boolean[15][15]
+        );
+    }
+
     public static ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException {
         Pair<char[][], boolean[][]> gameData = ScrabbleBoardImpl.readGameFile(gameFile);
         Pair<int[][], int[][]> multipliersData = ScrabbleBoardImpl.readMultipliersFile(multipliersFile);

@@ -5,7 +5,6 @@ import com.alexfh.scrabblesolver.gui.ScrabbleFrame;
 import com.alexfh.scrabblesolver.gui.tile.DocumentProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
-import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import javax.swing.*;
 import java.io.File;
@@ -31,13 +30,15 @@ public class Main {
         DocumentProvider.INSTANCE.init();
 
         String gameFolder = "src/main/resources/games/game6/";
-        IScrabbleBoard board = ScrabbleBoardImpl.fromFiles(
-            new File(gameFolder + "board.txt"),
-            new File("src/main/resources/multipliers.txt")
-        );
-        char[] playerTiles = ScrabbleUtil.readPlayerTiles(
-            new File(gameFolder + "currentletters.txt")
-        );
+//        IScrabbleBoard board = ScrabbleBoardImpl.fromFiles(
+//            new File(gameFolder + "board.txt"),
+//            new File("src/main/resources/multipliers.txt")
+//        );
+//        char[] playerTiles = ScrabbleUtil.readPlayerTiles(
+//            new File(gameFolder + "currentletters.txt")
+//        );
+        IScrabbleBoard board = ScrabbleBoardImpl.blankBoard();
+        char[] playerTiles = new char[0];
 
         SwingUtilities.invokeLater(
             () -> {

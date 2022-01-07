@@ -16,9 +16,9 @@ public class MoveScroller extends JScrollPane {
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
     private final Runnable onMoveUnselected;
-    private final Runnable onPlayMove;
+    private final Consumer<ScrabbleGame.Move> onPlayMove;
 
-    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Runnable onPlayMove) {
+    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Consumer<ScrabbleGame.Move> onPlayMove) {
         this.onMoveSelected = onMoveSelected;
         this.onMoveUnselected = onMoveUnselected;
         this.onPlayMove = onPlayMove;
@@ -41,7 +41,7 @@ public class MoveScroller extends JScrollPane {
                         int index = MoveScroller.this.jList.getSelectedIndex();
 
                         if (index >= 0) {
-                            MoveScroller.this.onPlayMove.run();
+                            MoveScroller.this.onPlayMove.accept(MoveScroller.this.currentMoves.get(index));
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.alexfh.scrabblesolver.gui;
 
+import com.alexfh.scrabblesolver.ScrabbleGame;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
@@ -26,13 +27,9 @@ public class PlayerTileGrid extends JPanel {
     public PlayerTileGrid(List<Character> playerTiles, Runnable onMovesInvalidated) {
         this.playerTiles = playerTiles;
         this.placedTiles = new char[7];
-
-        for (int i = 0; i < 7; i++) {
-            this.placedTiles[i] = (i < this.playerTiles.size()) ? this.playerTiles.get(i) : IScrabbleBoard.emptyMarker;
-        }
-
         this.onMovesInvalidated = onMovesInvalidated;
 
+        this.setPlacedTilesToPlayerTiles();
         this.setLayout(new GridLayout(1, 7));
         this.addKeyListener(
             new KeyAdapter() {
@@ -63,6 +60,27 @@ public class PlayerTileGrid extends JPanel {
 
             this.add(label);
         }
+    }
+
+    private void setPlacedTilesToPlayerTiles() {
+        for (int i = 0; i < 7; i++) {
+            char oldChar = this.placedTiles[i];
+            char newChar = (i < this.playerTiles.size()) ? this.playerTiles.get(i) : IScrabbleBoard.emptyMarker;
+
+            if (oldChar != newChar) {
+                this.placedTiles[i] = newChar;
+
+                if (this.labels[i] != null) this.updateAndRepaintTileAt(i);
+            }
+        }
+    }
+
+    public void playMove(ScrabbleGame.Move move) {
+        for (char c : move.playedTiles()) {
+            this.playerTiles.remove((Character) c);
+        }
+
+        this.setPlacedTilesToPlayerTiles();
     }
 
     private void onCharPressed(Character character) {
@@ -119,8 +137,12 @@ public class PlayerTileGrid extends JPanel {
     }
 
     private void updateAndRepaintTileAtCursor() {
-        this.labels[this.cursor].getIcon().setImage(this.getTileAt(this.cursor));
-        this.labels[this.cursor].repaint();
+        this.updateAndRepaintTileAt(this.cursor);
+    }
+
+    private void updateAndRepaintTileAt(int i) {
+        this.labels[i].getIcon().setImage(this.getTileAt(i));
+        this.labels[i].repaint();
     }
 
     private void onTileClicked(int i, boolean isLeft) {

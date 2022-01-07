@@ -92,22 +92,21 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    public void playSelectedMove() {
-        if (this.previewedMove == null) return;
+    public void playMove(ScrabbleGame.Move move) {
+        this.clearSelectedMove();
 
-        ScrabbleGame.Offset offset = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
-        int startRow = this.previewedMove.row();
-        int startCol = this.previewedMove.col();
+        ScrabbleGame.Offset offset = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+        int startRow = move.row();
+        int startCol = move.col();
 
-        for (int i = 0; i < this.previewedMove.playedTiles().length; i++) {
-            char placedChar = this.previewedMove.playedTiles()[i];
-            int spotInWord = this.previewedMove.tileSpotsInWord()[i];
+        for (int i = 0; i < move.playedTiles().length; i++) {
+            char placedChar = move.playedTiles()[i];
+            int spotInWord = move.tileSpotsInWord()[i];
             int newRow = offset.newRow(startRow, spotInWord);
             int newCol = offset.newCol(startCol, spotInWord);
-            this.playedWordPreviewChars[newRow][newCol] = IScrabbleBoard.emptyMarker;
 
             if (placedChar == ScrabbleUtil.wildCardTile) {
-                this.board.setCharAt(newRow, newCol, this.previewedMove.playedWord().charAt(spotInWord));
+                this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord));
                 this.board.setWildcardAt(newRow, newCol, true);
             } else {
                 this.board.setCharAt(newRow, newCol, placedChar);
@@ -115,9 +114,6 @@ public class ScrabbleGrid extends JPanel {
 
             this.updateAndRepaintTileAt(newRow, newCol);
         }
-
-        this.previewedMove = null;
-        this.onMovesInvalidated.run();
     }
 
     public void clearSelectedMove() {

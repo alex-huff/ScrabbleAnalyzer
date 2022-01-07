@@ -7,6 +7,8 @@ import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 public class ScrabbleGrid extends JPanel {
@@ -29,6 +31,24 @@ public class ScrabbleGrid extends JPanel {
         this.onMovesInvalidated = onMovesInvalidated;
 
         this.setLayout(new GridLayout(15, 15));
+        this.addKeyListener(
+            new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+
+                    if (Character.isAlphabetic(c))
+                        ScrabbleGrid.this.onCharPressed(Character.toLowerCase(c), e.isShiftDown());
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                        ScrabbleGrid.this.onCharPressed(ScrabblePanel.backspaceChar, e.isShiftDown());
+                    }
+                }
+            }
+        );
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
@@ -36,8 +56,7 @@ public class ScrabbleGrid extends JPanel {
                 int finalC = c;
                 TileLabel label = new TileLabel(
                     new ImageIcon(this.getTileAt(r, c)),
-                    isLeft -> this.onTileClicked(finalR, finalC, isLeft),
-                    this::onCharPressed
+                    isLeft -> this.onTileClicked(finalR, finalC, isLeft)
                 );
                 labels[r][c] = label;
 
@@ -100,8 +119,6 @@ public class ScrabbleGrid extends JPanel {
     }
 
     private void onCharPressed(Character character, boolean isShiftDown) {
-        if (character == ScrabbleUtil.wildCardMarker) return;
-
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || (isShiftDown && this.cursorR > 0) || (!isShiftDown && this.cursorC > 0)) {
                 if (!this.cursorJustSet) {
@@ -183,6 +200,7 @@ public class ScrabbleGrid extends JPanel {
             this.cursorJustSet = true;
             this.wasLastMovementForwardVert = false;
             this.wasLastMovementForwardHori = false;
+            this.requestFocusInWindow();
         } else {
             if (!this.board.isEmptyAt(r, c)) {
                 this.board.setWildcardAt(r, c, !this.board.isWildcardAt(r, c));

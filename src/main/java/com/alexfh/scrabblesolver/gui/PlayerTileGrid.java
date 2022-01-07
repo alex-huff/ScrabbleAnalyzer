@@ -6,6 +6,8 @@ import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,13 +34,30 @@ public class PlayerTileGrid extends JPanel {
         this.onMovesInvalidated = onMovesInvalidated;
 
         this.setLayout(new GridLayout(1, 7));
+        this.addKeyListener(
+            new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+
+                    if (Character.isAlphabetic(c) || c == ScrabbleUtil.wildCardMarker)
+                        PlayerTileGrid.this.onCharPressed(Character.toLowerCase(c));
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                        PlayerTileGrid.this.onCharPressed(ScrabblePanel.backspaceChar);
+                    }
+                }
+            }
+        );
 
         for (int i = 0; i < 7; i++) {
             int finalI = i;
             TileLabel label = new TileLabel(
                 new ImageIcon(this.getTileAt(i)),
-                isLeft -> this.onTileClicked(finalI, isLeft),
-                this::onCharPressed
+                isLeft -> this.onTileClicked(finalI, isLeft)
             );
             labels[i] = label;
 
@@ -46,7 +65,7 @@ public class PlayerTileGrid extends JPanel {
         }
     }
 
-    private void onCharPressed(Character character, boolean isShiftDown) {
+    private void onCharPressed(Character character) {
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || this.cursor > 0) {
                 if (!this.cursorJustSet) this.cursor--;
@@ -108,6 +127,7 @@ public class PlayerTileGrid extends JPanel {
         if (isLeft) {
             this.cursor = i;
             this.cursorJustSet = true;
+            this.requestFocusInWindow();
         }
     }
 

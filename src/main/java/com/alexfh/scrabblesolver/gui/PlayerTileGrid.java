@@ -75,6 +75,18 @@ public class PlayerTileGrid extends JPanel {
         }
     }
 
+    public void clearPlayerTileGrid() {
+        this.playerTiles.clear();
+
+        for (int i = 0; i < 7; i++) {
+            if (this.placedTiles[i] == IScrabbleBoard.emptyMarker) continue;
+
+            this.placedTiles[i] = IScrabbleBoard.emptyMarker;
+
+            this.updateAndRepaintTileAt(i);
+        }
+    }
+
     public void playMove(ScrabbleGame.Move move) {
         for (char c : move.playedTiles()) {
             this.playerTiles.remove((Character) c);

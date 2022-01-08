@@ -65,6 +65,19 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
+    public void clearGrid() {
+        this.clearSelectedMove();
+
+        for (int r = 0; r < 15; r++) {
+            for (int c = 0; c < 15; c++) {
+                if (this.board.isEmptyAt(r, c)) continue;
+
+                this.board.removeCharAt(r, c);
+                this.updateAndRepaintTileAt(r, c);
+            }
+        }
+    }
+
     public void showMove(ScrabbleGame.Move move) {
         this.clearSelectedMove();
 

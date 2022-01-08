@@ -49,6 +49,12 @@ public class ScrabblePanel extends JPanel {
         this.updateMoves();
     }
 
+    public void clearBoard() {
+        this.grid.clearGrid();
+        this.playerTileGrid.clearPlayerTileGrid();
+        this.updateMoves();
+    }
+
     private void playMove(ScrabbleGame.Move move) {
         if (this.updateNum == this.lastUpdateReceived) {
             this.grid.playMove(move);

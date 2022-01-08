@@ -18,13 +18,11 @@ public class MoveScroller extends JScrollPane {
     private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
-    private final Runnable onMoveUnselected;
     private final Consumer<ScrabbleGame.Move> onPlayMove;
     private final String[] colNames = new String[] { "Number", "Score", "Word" };
 
-    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Runnable onMoveUnselected, Consumer<ScrabbleGame.Move> onPlayMove) {
+    public MoveScroller(Consumer<ScrabbleGame.Move> onMoveSelected, Consumer<ScrabbleGame.Move> onPlayMove) {
         this.onMoveSelected = onMoveSelected;
-        this.onMoveUnselected = onMoveUnselected;
         this.onPlayMove = onPlayMove;
         this.table = new JTable(this.getModelFromData(new String[0][0]));
 
@@ -32,14 +30,6 @@ public class MoveScroller extends JScrollPane {
         this.table.setFont(MoveScroller.FONT);
         this.table.getTableHeader().setFont(MoveScroller.FONT);
         this.table.setFillsViewportHeight(true);
-        this.table.addFocusListener(
-            new FocusAdapter() {
-                @Override
-                public void focusLost(FocusEvent e) {
-                    MoveScroller.this.table.clearSelection();
-                }
-            }
-        );
         this.table.addKeyListener(
             new KeyAdapter() {
                 @Override
@@ -61,8 +51,6 @@ public class MoveScroller extends JScrollPane {
 
                     if (index >= 0) {
                         this.onMoveSelected.accept(this.currentMoves.get(index));
-                    } else {
-                        this.onMoveUnselected.run();
                     }
                 }
             }

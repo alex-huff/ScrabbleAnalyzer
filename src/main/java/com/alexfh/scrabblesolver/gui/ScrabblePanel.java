@@ -2,6 +2,7 @@ package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.Main;
 import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
@@ -14,11 +15,13 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ScrabblePanel extends JPanel {
 
     public static final char backspaceChar = '}';
 
+    private final Consumer<Action> onAction;
     private final ScrabbleGrid grid;
     private final PlayerTileGrid playerTileGrid;
     private final MoveScroller moveScroller;
@@ -29,7 +32,13 @@ public class ScrabblePanel extends JPanel {
     private Future<?> pendingUpdate;
     private final ScrabbleLayout layout;
 
-    public ScrabblePanel(IScrabbleBoard board, List<Character> playerTiles) {
+    public ScrabblePanel(Consumer<Action> onAction, IScrabbleBoard board, List<Character> playerTiles) {
+        this.onAction = onAction;
+        this.grid = new ScrabbleGrid(this.onAction, board, this::boardInvalidated);
+        this.playerTileGrid = new PlayerTileGrid(this.onAction, playerTiles, this::playerTilesInvalidated);
+        this.moveScroller = new MoveScroller(this::showMove, this::playMove);
+        this.layout = new ScrabbleLayout();
+
         this.addMouseListener(
             new MouseAdapter() {
                 @Override
@@ -38,12 +47,6 @@ public class ScrabblePanel extends JPanel {
                 }
             }
         );
-
-        this.grid = new ScrabbleGrid(board, this::boardInvalidated);
-        this.playerTileGrid = new PlayerTileGrid(playerTiles, this::playerTilesInvalidated);
-        this.moveScroller = new MoveScroller(this::showMove, this.grid::clearSelectedMove, this::playMove);
-        this.layout = new ScrabbleLayout();
-
         this.setLayout(this.layout);
         this.initializeLayout();
         this.updateMoves();
@@ -76,6 +79,8 @@ public class ScrabblePanel extends JPanel {
     }
 
     private void updateMoves() {
+        this.grid.clearSelectedMove();
+
         if (this.pendingUpdate != null) this.pendingUpdate.cancel(true);
 
         IScrabbleBoard boardCopy = this.grid.getBoardCopy();

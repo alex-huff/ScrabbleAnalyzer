@@ -1,6 +1,7 @@
 package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
@@ -10,9 +11,11 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 public class ScrabbleGrid extends JPanel {
 
+    private final Consumer<Action> onAction;
     private final TileLabel[][] labels = new TileLabel[15][15];
     private int tileSize = ScrabbleFrame.defaultTileSize;
     private final Dimension size = new Dimension(this.tileSize * 15, this.tileSize * 15);
@@ -26,7 +29,8 @@ public class ScrabbleGrid extends JPanel {
     private final char[][] playedWordPreviewChars = IScrabbleBoard.getNewEmptyBoard(15, 15);
     private ScrabbleGame.Move previewedMove;
 
-    public ScrabbleGrid(IScrabbleBoard board, Runnable onMovesInvalidated) {
+    public ScrabbleGrid(Consumer<Action> onAction, IScrabbleBoard board, Runnable onMovesInvalidated) {
+        this.onAction = onAction;
         this.board = board;
         this.onMovesInvalidated = onMovesInvalidated;
 

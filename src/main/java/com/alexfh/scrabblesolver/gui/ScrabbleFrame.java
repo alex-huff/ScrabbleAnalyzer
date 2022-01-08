@@ -1,6 +1,7 @@
 package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
@@ -12,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class ScrabbleFrame extends JFrame {
 
@@ -21,7 +23,7 @@ public class ScrabbleFrame extends JFrame {
     private final ScrabbleAnalyzer scrabbleAnalyzer;
     private final ScrabblePanel scrabblePanel;
 
-    public ScrabbleFrame(ScrabbleAnalyzer scrabbleAnalyzer, IScrabbleBoard board, char[] playerTiles) {
+    public ScrabbleFrame(ScrabbleAnalyzer scrabbleAnalyzer, Consumer<Action> onAction, IScrabbleBoard board, char[] playerTiles) {
         this.scrabbleAnalyzer = scrabbleAnalyzer;
         BufferedImage iconImage = TileProvider.INSTANCE.getTile(
             'a',
@@ -59,6 +61,7 @@ public class ScrabbleFrame extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         this.scrabblePanel = new ScrabblePanel(
+            onAction,
             board,
             new ArrayList<>(
                 Arrays.asList(

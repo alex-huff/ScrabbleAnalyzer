@@ -4,6 +4,10 @@ public interface Action {
 
     void undo();
 
-    void redo();
+    default void redo() {
+        this.execute();
+    }
+
+    void execute();
 
 }

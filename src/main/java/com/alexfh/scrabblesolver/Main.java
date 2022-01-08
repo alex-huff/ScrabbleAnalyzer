@@ -1,7 +1,7 @@
 package com.alexfh.scrabblesolver;
 
 import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
-import com.alexfh.scrabblesolver.gui.ScrabbleAnalyzer;
+import com.alexfh.scrabblesolver.gui.ScrabbleFrame;
 import com.alexfh.scrabblesolver.gui.tile.DocumentProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
@@ -41,7 +41,7 @@ public class Main {
 //        IScrabbleBoard board = ScrabbleBoardImpl.blankBoard();
 //        char[] playerTiles = new char[0];
 
-        SwingUtilities.invokeLater(() -> new ScrabbleAnalyzer(board, playerTiles));
+        SwingUtilities.invokeLater(() -> new ScrabbleFrame(board, playerTiles));
     }
 
 }

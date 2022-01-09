@@ -111,8 +111,6 @@ public class ScrabbleGrid extends JPanel {
     }
 
     public void playMove(ScrabbleGame.Move move) {
-        this.clearSelectedMove();
-
         ScrabbleGame.Offset offset = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
         int startRow = move.row();
         int startCol = move.col();
@@ -162,79 +160,89 @@ public class ScrabbleGrid extends JPanel {
         this.labels[r][c].repaint();
     }
 
+    private void doBackspace(boolean isShiftDown) {
+        if (!this.cursorJustSet) {
+            if (isShiftDown) {
+                if (this.wasLastMovementForwardHori) {
+                    this.cursorC--;
+                } else {
+                    this.cursorR--;
+                }
+            } else {
+                if (this.wasLastMovementForwardVert) {
+                    this.cursorR--;
+                } else {
+                    this.cursorC--;
+                }
+            }
+
+            this.wasLastMovementForwardVert = false;
+            this.wasLastMovementForwardHori = false;
+        } else {
+            this.cursorJustSet = false;
+        }
+
+        if (!this.board.isEmptyAt(this.cursorR, this.cursorC)) {
+            this.board.removeCharAt(this.cursorR, this.cursorC);
+            this.updateAndRepaintTileAtCursor();
+            this.onMovesInvalidated.run();
+        }
+    }
+
+    private void placeCharAtCursor(boolean isShiftDown, Character character) {
+        this.cursorJustSet = false;
+
+        if (isShiftDown) {
+            if (this.wasLastMovementForwardHori) {
+                if (this.cursorR == 14) return;
+
+                this.cursorR++;
+                this.cursorC--;
+            }
+
+            this.wasLastMovementForwardVert = true;
+            this.wasLastMovementForwardHori = false;
+        } else {
+            if (this.wasLastMovementForwardVert) {
+                if (this.cursorC == 14) return;
+
+                this.cursorR--;
+                this.cursorC++;
+            }
+
+            this.wasLastMovementForwardHori = true;
+            this.wasLastMovementForwardVert = false;
+        }
+
+        if (
+            !(
+                !this.board.isEmptyAt(this.cursorR, this.cursorC) &&
+                    (this.board.getCharAt(this.cursorR, this.cursorC) == character) &&
+                    (!this.board.isWildcardAt(this.cursorR, this.cursorC))
+            )
+        ) {
+            this.board.setCharAt(this.cursorR, this.cursorC, character);
+            this.board.setWildcardAt(this.cursorR, this.cursorC, false);
+            this.updateAndRepaintTileAtCursor();
+            this.onMovesInvalidated.run();
+        }
+
+        if (isShiftDown)
+            this.cursorR++;
+        else
+            this.cursorC++;
+    }
+
     private void onCharPressed(Character character, boolean isShiftDown) {
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || (isShiftDown && this.cursorR > 0) || (!isShiftDown && this.cursorC > 0)) {
-                if (!this.cursorJustSet) {
-                    if (isShiftDown) {
-                        if (this.wasLastMovementForwardHori) {
-                            this.cursorC--;
-                        } else {
-                            this.cursorR--;
-                        }
-                    } else {
-                        if (this.wasLastMovementForwardVert) {
-                            this.cursorR--;
-                        } else {
-                            this.cursorC--;
-                        }
-                    }
-
-                    this.wasLastMovementForwardVert = false;
-                    this.wasLastMovementForwardHori = false;
-                }
-
-                if (!this.board.isEmptyAt(this.cursorR, this.cursorC)) {
-                    this.board.removeCharAt(this.cursorR, this.cursorC);
-                    this.updateAndRepaintTileAtCursor();
-                    this.onMovesInvalidated.run();
-                }
+                this.doBackspace(isShiftDown);
             }
         } else {
             if ((isShiftDown && this.cursorR < 15) || (!isShiftDown && this.cursorC < 15)) {
-                if (isShiftDown) {
-                    if (this.wasLastMovementForwardHori) {
-                        if (this.cursorR == 14) return;
-
-                        this.cursorR++;
-                        this.cursorC--;
-                    }
-
-                    this.wasLastMovementForwardVert = true;
-                    this.wasLastMovementForwardHori = false;
-                } else {
-                    if (this.wasLastMovementForwardVert) {
-                        if (this.cursorC == 14) return;
-
-                        this.cursorR--;
-                        this.cursorC++;
-                    }
-
-                    this.wasLastMovementForwardHori = true;
-                    this.wasLastMovementForwardVert = false;
-                }
-
-                if (
-                    !(
-                        !this.board.isEmptyAt(this.cursorR, this.cursorC) &&
-                            (this.board.getCharAt(this.cursorR, this.cursorC) == character) &&
-                            (!this.board.isWildcardAt(this.cursorR, this.cursorC))
-                    )
-                ) {
-                    this.board.setCharAt(this.cursorR, this.cursorC, character);
-                    this.board.setWildcardAt(this.cursorR, this.cursorC, false);
-                    this.updateAndRepaintTileAtCursor();
-                    this.onMovesInvalidated.run();
-                }
-
-                if (isShiftDown)
-                    this.cursorR++;
-                else
-                    this.cursorC++;
+                this.placeCharAtCursor(isShiftDown, character);
             }
         }
-
-        this.cursorJustSet = false;
     }
 
     private void onTileClicked(int r, int c, boolean isLeft) {

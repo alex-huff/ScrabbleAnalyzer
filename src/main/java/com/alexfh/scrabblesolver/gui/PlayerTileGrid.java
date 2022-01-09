@@ -39,8 +39,10 @@ public class PlayerTileGrid extends JPanel {
                 public void keyTyped(KeyEvent e) {
                     char c = e.getKeyChar();
 
-                    if (Character.isAlphabetic(c) || c == IScrabbleGameState.wildCardMarker)
+                    if (Character.isAlphabetic(c))
                         PlayerTileGrid.this.onCharPressed(Character.toLowerCase(c));
+                    else if (c == IScrabbleGameState.wildCardMarker)
+                        PlayerTileGrid.this.onCharPressed(IScrabbleGameState.wildCardTile);
                 }
 
                 @Override
@@ -97,36 +99,41 @@ public class PlayerTileGrid extends JPanel {
         }
     }
 
+    private void doBackspace() {
+        if (!this.cursorJustSet)
+            this.cursor--;
+        else
+            this.cursorJustSet = false;
+
+        if (!this.tileRack.isTileInRackEmptyAt(this.cursor)) {
+            this.tileRack.removeTileInRackAt(this.cursor);
+            this.updateAndRepaintTileAtCursor();
+            this.onMovesInvalidated.run();
+        }
+    }
+
+    private void placeCharAtCursor(Character character) {
+        this.cursorJustSet = false;
+
+        if (this.tileRack.getTileInRackAt(this.cursor) != character) {
+            this.tileRack.setTileInRackAt(this.cursor, character);
+            this.updateAndRepaintTileAtCursor();
+            this.onMovesInvalidated.run();
+        }
+
+        this.cursor++;
+    }
+
     private void onCharPressed(Character character) {
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || this.cursor > 0) {
-                if (!this.cursorJustSet) this.cursor--;
-
-                if (!this.tileRack.isTileInRackEmptyAt(this.cursor)) {
-                    this.tileRack.removeTileInRackAt(this.cursor);
-                    this.updateAndRepaintTileAtCursor();
-                    this.onMovesInvalidated.run();
-                }
+                this.doBackspace();
             }
         } else {
             if (this.cursor < 7) {
-                if (character == IScrabbleGameState.wildCardMarker) {
-                    if (!this.tileRack.isTileInRackWildcardAt(this.cursor)) {
-                        this.tileRack.setTileInRackWildcardAt(this.cursor);
-                        this.updateAndRepaintTileAtCursor();
-                        this.onMovesInvalidated.run();
-                    }
-                } else if (this.tileRack.getTileInRackAt(this.cursor) != character) {
-                    this.tileRack.setTileInRackAt(this.cursor, character);
-                    this.updateAndRepaintTileAtCursor();
-                    this.onMovesInvalidated.run();
-                }
-
-                this.cursor++;
+                this.placeCharAtCursor(character);
             }
         }
-
-        this.cursorJustSet = false;
     }
 
     private void updateAndRepaintTileAtCursor() {

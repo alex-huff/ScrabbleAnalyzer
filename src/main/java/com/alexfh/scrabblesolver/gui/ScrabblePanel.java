@@ -5,7 +5,7 @@ import com.alexfh.scrabblesolver.ScrabbleGame;
 import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
-import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import javax.swing.*;
@@ -22,6 +22,7 @@ public class ScrabblePanel extends JPanel {
     public static final char backspaceChar = '}';
 
     private final Consumer<Action> onAction;
+    private final IScrabbleGameState gameState;
     private final ScrabbleGrid grid;
     private final PlayerTileGrid playerTileGrid;
     private final MoveScroller moveScroller;
@@ -32,10 +33,11 @@ public class ScrabblePanel extends JPanel {
     private Future<?> pendingUpdate;
     private final ScrabbleLayout layout;
 
-    public ScrabblePanel(Consumer<Action> onAction, IScrabbleBoard board, List<Character> playerTiles) {
+    public ScrabblePanel(Consumer<Action> onAction, IScrabbleGameState gameState) {
         this.onAction = onAction;
-        this.grid = new ScrabbleGrid(this.onAction, board, this::boardInvalidated);
-        this.playerTileGrid = new PlayerTileGrid(this.onAction, playerTiles, this::playerTilesInvalidated);
+        this.gameState = gameState;
+        this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated);
+        this.playerTileGrid = new PlayerTileGrid(this.onAction, this.gameState, this::playerTilesInvalidated);
         this.moveScroller = new MoveScroller(this::showMove, this::playMove);
         this.layout = new ScrabbleLayout();
 
@@ -83,26 +85,23 @@ public class ScrabblePanel extends JPanel {
 
         if (this.pendingUpdate != null) this.pendingUpdate.cancel(true);
 
-        IScrabbleBoard boardCopy = this.grid.getBoardCopy();
-        char[] playerTilesCopy = this.playerTileGrid.getPlayerTilesCopy();
         this.updateNum++;
-        int updateNumCopy = this.updateNum;
+        final IScrabbleGameState gameStateCopy = this.gameState.copyScrabbleGame();
+        final int updateNumCopy = this.updateNum;
         this.pendingUpdate = ScrabbleGame.threadPool.submit(
             () -> {
                 try {
-                    this.getMoves(boardCopy, playerTilesCopy, updateNumCopy);
+                    this.getMoves(gameStateCopy, updateNumCopy);
                 } catch (InterruptedException ignored) { }
             }
         );
     }
 
-    private void getMoves(IScrabbleBoard boardCopy, char[] playerTilesCopy, int updateNumCopy) throws InterruptedException {
+    private void getMoves(IScrabbleGameState gameStateCopy, int updateNumCopy) throws InterruptedException {
         ScrabbleGame game = new ScrabbleGame(
             LetterScoreMapImpl.defaultScoreMap,
             Main.dictionary,
-            boardCopy,
-            playerTilesCopy,
-            7
+            gameStateCopy
         );
         List<ScrabbleGame.Move> moves = game.findMoves();
 

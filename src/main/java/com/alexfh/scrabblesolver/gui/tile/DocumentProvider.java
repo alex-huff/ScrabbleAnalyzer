@@ -1,5 +1,6 @@
 package com.alexfh.scrabblesolver.gui.tile;
 
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.util.XMLResourceDescriptor;
@@ -14,7 +15,7 @@ public class DocumentProvider {
     public static DocumentProvider INSTANCE = new DocumentProvider();
 
     private final SAXSVGDocumentFactory documentFactory = new SAXSVGDocumentFactory(XMLResourceDescriptor.getXMLParserClassName());
-    private final Document[][][][] tileDocuments = new Document[ScrabbleUtil.alphaChars.length][2][2][2];
+    private final Document[][][][] tileDocuments = new Document[IScrabbleGameState.alphaChars.length][2][2][2];
     private final Document[] wildcardDocuments = new Document[2];
     private final Document[][] blankTileDocuments = new Document[2][2];
     private Document defaultBlankDocument;
@@ -27,8 +28,8 @@ public class DocumentProvider {
     }
 
     private void initTileDocuments() throws IOException {
-        for (int c = 0; c < ScrabbleUtil.alphaChars.length; c++) {
-            char letter = ScrabbleUtil.alphaChars[c];
+        for (int c = 0; c < IScrabbleGameState.alphaChars.length; c++) {
+            char letter = IScrabbleGameState.alphaChars[c];
 
             for (int w = 0; w < 2; w++) {
                 boolean isWild = w != 0;

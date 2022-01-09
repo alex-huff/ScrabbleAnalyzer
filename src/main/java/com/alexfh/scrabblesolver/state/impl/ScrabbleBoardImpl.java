@@ -1,6 +1,7 @@
 package com.alexfh.scrabblesolver.state.impl;
 
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.structure.ImmutablePair;
 import com.alexfh.scrabblesolver.util.structure.Pair;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
@@ -47,13 +48,25 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
         new int[] { 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
     };
 
-    public static ScrabbleBoardImpl blankBoard() {
+    public static char[][] getNewEmptyBoard(int row, int col) {
+        char[][] emptyBoard = new char[row][col];
+
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                emptyBoard[r][c] = IScrabbleGameState.emptyMarker;
+            }
+        }
+
+        return emptyBoard;
+    }
+
+    public static IScrabbleBoard defaultBlankBoard() {
         return new ScrabbleBoardImpl(
             15,
             15,
             ScrabbleBoardImpl.defaultLetterMultipliers,
             ScrabbleBoardImpl.defaultWordMultipliers,
-            IScrabbleBoard.getNewEmptyBoard(15, 15),
+            ScrabbleBoardImpl.getNewEmptyBoard(15, 15),
             new boolean[15][15]
         );
     }
@@ -111,7 +124,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                     letterMultipliers[r][c] = !isUpper ? modifier : 1;
                     wordMultipliers[r][c] = isUpper ? modifier : 1;
                 } else {
-                    if (b != IScrabbleBoard.emptyMarker) throw new IllegalStateException("Invalid character in multipliers board");
+                    if (b != IScrabbleGameState.emptyMarker) throw new IllegalStateException("Invalid character in multipliers board");
 
                     letterMultipliers[r][c] = 1;
                     wordMultipliers[r][c] = 1;
@@ -142,9 +155,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
                 boolean isAlpha = Character.isAlphabetic(b);
                 boolean isUpper = Character.isUpperCase(b);
 
-                if (!isAlpha && b != IScrabbleBoard.emptyMarker) throw new IllegalStateException("Invalid character: '" + b + "' in game board");
+                if (!isAlpha && b != IScrabbleGameState.emptyMarker) throw new IllegalStateException("Invalid character: '" + b + "' in game board");
 
-                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : IScrabbleBoard.emptyMarker;
+                playedTiles[r][c] = isAlpha ? (isUpper ? Character.toLowerCase(b) : b) : IScrabbleGameState.emptyMarker;
                 wildcardTiles[r][c] = isAlpha && (!isUpper);
             }
         }
@@ -199,7 +212,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
 
     @Override
     public void setCharAt(int r, int c, char newChar) {
-        if (newChar == IScrabbleBoard.emptyMarker)
+        if (newChar == IScrabbleGameState.emptyMarker)
             this.removeCharAt(r, c);
         else
             this.playedTiles[r][c] = newChar;
@@ -207,7 +220,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
 
     @Override
     public void removeCharAt(int r, int c) {
-        this.playedTiles[r][c] = IScrabbleBoard.emptyMarker;
+        this.playedTiles[r][c] = IScrabbleGameState.emptyMarker;
         this.wildcardTiles[r][c] = false;
     }
 
@@ -232,7 +245,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     @Override
-    public IScrabbleBoard copy() {
+    public IScrabbleBoard copyBoard() {
         return new ScrabbleBoardImpl(
             this.rows,
             this.cols,

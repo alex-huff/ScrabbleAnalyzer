@@ -52,8 +52,8 @@ public class PermuteTree {
 
     private final PTNode root = new PTNode("");
 
-    public PermuteTree(char[] toPermute) throws InterruptedException {
-        if (toPermute.length == 0) return;
+    public PermuteTree(List<Character> toPermute) throws InterruptedException {
+        if (toPermute.size() == 0) return;
 
         this.forAllPerm(this.root, toPermute, 0);
     }
@@ -62,31 +62,32 @@ public class PermuteTree {
         return this.root;
     }
 
-    private void forAllPerm(PTNode permuteNode, char[] toPermute, int i) throws InterruptedException {
+    private void forAllPerm(PTNode permuteNode, List<Character> toPermute, int i) throws InterruptedException {
         ScrabbleUtil.checkInterrupted();
 
-        if (i == toPermute.length - 1) {
-            permuteNode.createPathIfNull(toPermute[i]);
+        if (i == toPermute.size() - 1) {
+            permuteNode.createPathIfNull(toPermute.get(i));
 
             return;
         }
 
-        if (permuteNode.getPath(toPermute[i]) == null)
-            forAllPerm(permuteNode.createPath(toPermute[i]), toPermute, i + 1);
+        if (permuteNode.getPath(toPermute.get(i)) == null)
+            forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
 
-        for (int w = i + 1; w < toPermute.length; w++) {
-            if (toPermute[i] != toPermute[w] && permuteNode.getPath(toPermute[w]) == null) {
+        for (int w = i + 1; w < toPermute.size(); w++) {
+            if (toPermute.get(i) != toPermute.get(w) && permuteNode.getPath(toPermute.get(w)) == null) {
                 swap(toPermute, i, w);
-                forAllPerm(permuteNode.createPath(toPermute[i]), toPermute, i + 1);
+                forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
                 swap(toPermute, w, i);
             }
         }
     }
 
-    private void swap(char[] toSwap, int from, int to) {
-        char temp = toSwap[to];
-        toSwap[to] = toSwap[from];
-        toSwap[from] = temp;
+    private void swap(List<Character> toSwap, int from, int to) {
+        char temp = toSwap.get(to);
+
+        toSwap.set(to, toSwap.get(from));
+        toSwap.set(from, temp);
     }
 
     public void forEach(Consumer<String> consumer) {

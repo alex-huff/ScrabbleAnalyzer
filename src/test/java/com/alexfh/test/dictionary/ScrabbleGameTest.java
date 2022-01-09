@@ -6,8 +6,7 @@ import com.alexfh.scrabblesolver.ScrabbleGame;
 import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
 import com.alexfh.scrabblesolver.rule.ILetterScoreMap;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
-import com.alexfh.scrabblesolver.state.IScrabbleBoard;
-import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleGameStateImpl;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 import org.junit.jupiter.api.Test;
 
@@ -60,14 +59,15 @@ public class ScrabbleGameTest {
 
     public void testDistribution(int gameNum, int[] expectedDistribution, WordGraphDictionary dictionary, ILetterScoreMap scoreMap) throws IOException, InterruptedException {
         String gameFolder = "src/main/resources/games/game" + gameNum + "/";
-        IScrabbleBoard board = ScrabbleBoardImpl.fromFiles(
-            new File(gameFolder + "board.txt"),
-            new File("src/main/resources/multipliers.txt")
+        ScrabbleGame scrabbleGame = new ScrabbleGame(
+            scoreMap,
+            dictionary,
+            ScrabbleGameStateImpl.fromFiles(
+                new File(gameFolder + "board.txt"),
+                new File("src/main/resources/multipliers.txt"),
+                new File(gameFolder + "currentletters.txt")
+            )
         );
-        char[] playerTiles = ScrabbleUtil.readPlayerTiles(
-            new File(gameFolder + "currentletters.txt")
-        );
-        ScrabbleGame scrabbleGame = new ScrabbleGame(scoreMap, dictionary, board, playerTiles, 7);
         List<ScrabbleGame.Move> moves = ScrabbleUtil.timeRetrievalInterruptable(scrabbleGame::findMoves, "findMoves");
 
         ScrabbleUtil.timeIt(() -> Collections.sort(moves), "sort");

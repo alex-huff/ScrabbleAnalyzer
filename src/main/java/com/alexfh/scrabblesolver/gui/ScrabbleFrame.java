@@ -4,15 +4,13 @@ import com.alexfh.scrabblesolver.ScrabbleGame;
 import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
-import com.alexfh.scrabblesolver.state.IScrabbleBoard;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Stack;
 
 public class ScrabbleFrame extends JFrame {
@@ -24,7 +22,7 @@ public class ScrabbleFrame extends JFrame {
     private final Stack<Action> redoStack = new Stack<>();
     private final ScrabblePanel scrabblePanel;
 
-    public ScrabbleFrame(IScrabbleBoard board, char[] playerTiles) {
+    public ScrabbleFrame(IScrabbleGameState gameState) {
         BufferedImage iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -63,14 +61,7 @@ public class ScrabbleFrame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         this.scrabblePanel = new ScrabblePanel(
             this::onAction,
-            board,
-            new ArrayList<>(
-                Arrays.asList(
-                    new String(playerTiles).chars().mapToObj(
-                        i -> (char) i
-                    ).toArray(Character[]::new)
-                )
-            )
+            gameState
         );
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");

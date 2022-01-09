@@ -2,20 +2,6 @@ package com.alexfh.scrabblesolver.state;
 
 public interface IScrabbleBoard {
 
-    static char[][] getNewEmptyBoard(int row, int col) {
-        char[][] emptyBoard = new char[row][col];
-
-        for (int r = 0; r < row; r++) {
-            for (int c = 0; c < col; c++) {
-                emptyBoard[r][c] = IScrabbleBoard.emptyMarker;
-            }
-        }
-
-        return emptyBoard;
-    }
-
-    char emptyMarker = '.';
-
     int getRows();
 
     int getCols();
@@ -35,13 +21,13 @@ public interface IScrabbleBoard {
     void setWildcardAt(int r, int c, boolean isWild);
 
     default boolean isEmptyAt(int r, int c) {
-        return this.getCharAt(r, c) == IScrabbleBoard.emptyMarker;
+        return this.getCharAt(r, c) == IScrabbleGameState.emptyMarker;
     }
 
     int getAnchorRow();
 
     int getAnchorCol();
 
-    IScrabbleBoard copy();
+    IScrabbleBoard copyBoard();
 
 }

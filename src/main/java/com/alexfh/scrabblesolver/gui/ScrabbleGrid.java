@@ -4,7 +4,8 @@ import com.alexfh.scrabblesolver.ScrabbleGame;
 import com.alexfh.scrabblesolver.gui.action.Action;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
-import com.alexfh.scrabblesolver.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +27,7 @@ public class ScrabbleGrid extends JPanel {
     private boolean cursorJustSet = false;
     private boolean wasLastMovementForwardVert = false;
     private boolean wasLastMovementForwardHori = false;
-    private final char[][] playedWordPreviewChars = IScrabbleBoard.getNewEmptyBoard(15, 15);
+    private final char[][] playedWordPreviewChars = ScrabbleBoardImpl.getNewEmptyBoard(15, 15);
     private ScrabbleGame.Move previewedMove;
 
     public ScrabbleGrid(Consumer<Action> onAction, IScrabbleBoard board, Runnable onMovesInvalidated) {
@@ -56,8 +57,8 @@ public class ScrabbleGrid extends JPanel {
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
-                int finalR = r;
-                int finalC = c;
+                final int finalR = r;
+                final int finalC = c;
                 TileLabel label = new TileLabel(
                     new ImageIcon(this.getTileAt(r, c)),
                     isLeft -> this.onTileClicked(finalR, finalC, isLeft)
@@ -97,7 +98,7 @@ public class ScrabbleGrid extends JPanel {
             int newCol = offset.newCol(startCol, spotInWord);
             char toPlace;
 
-            if (placedChar == ScrabbleUtil.wildCardTile) {
+            if (placedChar == IScrabbleGameState.wildCardTile) {
                 toPlace = this.previewedMove.playedWord().charAt(spotInWord);
             } else {
                 toPlace = Character.toUpperCase(placedChar);
@@ -122,7 +123,7 @@ public class ScrabbleGrid extends JPanel {
             int newRow = offset.newRow(startRow, spotInWord);
             int newCol = offset.newCol(startCol, spotInWord);
 
-            if (placedChar == ScrabbleUtil.wildCardTile) {
+            if (placedChar == IScrabbleGameState.wildCardTile) {
                 this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord));
                 this.board.setWildcardAt(newRow, newCol, true);
             } else {
@@ -144,7 +145,7 @@ public class ScrabbleGrid extends JPanel {
             int spotInWord = this.previewedMove.tileSpotsInWord()[i];
             int newRow = offset.newRow(startRow, spotInWord);
             int newCol = offset.newCol(startCol, spotInWord);
-            this.playedWordPreviewChars[newRow][newCol] = IScrabbleBoard.emptyMarker;
+            this.playedWordPreviewChars[newRow][newCol] = IScrabbleGameState.emptyMarker;
 
             this.updateAndRepaintTileAt(newRow, newCol);
         }
@@ -253,15 +254,11 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    public IScrabbleBoard getBoardCopy() {
-        return this.board.copy();
-    }
-
     private BufferedImage getTileAt(int r, int c) {
         if (this.board.isEmptyAt(r, c)) {
             char previewChar = this.playedWordPreviewChars[r][c];
 
-            if (previewChar != IScrabbleBoard.emptyMarker) {
+            if (previewChar != IScrabbleGameState.emptyMarker) {
                 char previewCharLower;
                 boolean isWild;
 

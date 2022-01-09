@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.alexfh.scrabblesolver.ai.PermuteTree;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +15,7 @@ public class PermuteTest {
 
     @Test
     public void testPermuteTree() throws InterruptedException {
-        PermuteTree permuteTree = new PermuteTree(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g' });
+        PermuteTree permuteTree = new PermuteTree(new ArrayList<>(List.of('a', 'b', 'c', 'd', 'e', 'f', 'g')));
         AtomicInteger i = new AtomicInteger(-1); // -1 to ignore 0-perm
         Set<String> permutations = new TreeSet<>();
 

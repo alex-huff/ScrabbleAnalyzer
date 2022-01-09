@@ -3,9 +3,8 @@ package com.alexfh.scrabblesolver;
 import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
 import com.alexfh.scrabblesolver.gui.ScrabbleFrame;
 import com.alexfh.scrabblesolver.gui.tile.DocumentProvider;
-import com.alexfh.scrabblesolver.state.IScrabbleBoard;
-import com.alexfh.scrabblesolver.state.impl.ScrabbleBoardImpl;
-import com.alexfh.scrabblesolver.util.ScrabbleUtil;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleGameStateImpl;
 
 import javax.swing.*;
 import java.io.File;
@@ -31,17 +30,14 @@ public class Main {
         DocumentProvider.INSTANCE.init();
 
         String gameFolder = "src/main/resources/games/game6/";
-        IScrabbleBoard board = ScrabbleBoardImpl.fromFiles(
+        IScrabbleGameState gameState = ScrabbleGameStateImpl.fromFiles(
             new File(gameFolder + "board.txt"),
-            new File("src/main/resources/multipliers.txt")
-        );
-        char[] playerTiles = ScrabbleUtil.readPlayerTiles(
+            new File("src/main/resources/multipliers.txt"),
             new File(gameFolder + "currentletters.txt")
         );
-//        IScrabbleBoard board = ScrabbleBoardImpl.blankBoard();
-//        char[] playerTiles = new char[0];
+//        IScrabbleGameState gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
 
-        SwingUtilities.invokeLater(() -> new ScrabbleFrame(board, playerTiles));
+        SwingUtilities.invokeLater(() -> new ScrabbleFrame(gameState));
     }
 
 }

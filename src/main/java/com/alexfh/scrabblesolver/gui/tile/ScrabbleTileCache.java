@@ -1,6 +1,7 @@
 package com.alexfh.scrabblesolver.gui.tile;
 
 import com.alexfh.scrabblesolver.gui.svg.BufferedImageTranscoder;
+import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
 
 import java.awt.image.BufferedImage;
@@ -8,7 +9,7 @@ import java.awt.image.BufferedImage;
 public class ScrabbleTileCache {
 
     private final int tileSize;
-    private final BufferedImage[][][][] letterCache = new BufferedImage[ScrabbleUtil.alphaChars.length][2][2][2];
+    private final BufferedImage[][][][] letterCache = new BufferedImage[IScrabbleGameState.alphaChars.length][2][2][2];
     private final BufferedImage[] wildcardCache = new BufferedImage[2];
     private final BufferedImage[][] blankTileCache = new BufferedImage[2][2];
     private BufferedImage defaultBlankTile;

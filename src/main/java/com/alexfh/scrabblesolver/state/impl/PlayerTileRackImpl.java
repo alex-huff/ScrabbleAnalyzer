@@ -1,5 +1,7 @@
 package com.alexfh.scrabblesolver.state.impl;
 
+import com.alexfh.scrabblesolver.gui.action.CompoundRevertableAction;
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.state.IPlayerTileRack;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class PlayerTileRackImpl implements IPlayerTileRack {
@@ -68,18 +71,24 @@ public class PlayerTileRackImpl implements IPlayerTileRack {
     }
 
     @Override
-    public void setTileInRackAt(int i, char c) {
-        if (!this.isTileInRackEmptyAt(i)) {
-            char oldChar = this.placedTiles[i];
+    public RevertableAction setTileInRackAt(final int i, final char c) {
+        List<RevertableAction> revertableActions = new LinkedList<>();
+        final char oldChar = this.placedTiles[i];
 
+        if (!this.isTileInRackEmptyAt(i)) {
             if (oldChar != c) {
-                this.playerTiles.remove((Character) oldChar);
+                revertableActions.add(RevertableAction.removeElementFromListByEquality(this.playerTiles, oldChar));
             }
         }
 
-        if (c != IScrabbleGameState.emptyMarker) this.playerTiles.add(c);
+        if (c != IScrabbleGameState.emptyMarker) {
+            revertableActions.add(RevertableAction.addToList(this.playerTiles, c));
+        }
 
-        this.placedTiles[i] = c;
+        this.placedTiles[i] = c; // redo
+        this.placedTiles[i] = oldChar; // undo
+
+        return CompoundRevertableAction.compoundActionOf(revertableActions);
     }
 
     @Override

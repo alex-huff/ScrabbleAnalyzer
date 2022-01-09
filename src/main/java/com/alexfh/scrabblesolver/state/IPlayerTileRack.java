@@ -1,5 +1,7 @@
 package com.alexfh.scrabblesolver.state;
 
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
+
 import java.util.List;
 
 public interface IPlayerTileRack {
@@ -10,14 +12,14 @@ public interface IPlayerTileRack {
 
     char getTileInRackAt(int i);
 
-    void setTileInRackAt(int i, char c);
+    RevertableAction setTileInRackAt(int i, char c);
 
-    default void setTileInRackWildcardAt(int i) {
-        this.setTileInRackAt(i, IScrabbleGameState.wildCardTile);
+    default RevertableAction setTileInRackWildcardAt(int i) {
+        return this.setTileInRackAt(i, IScrabbleGameState.wildCardTile);
     }
 
-    default void removeTileInRackAt(int i) {
-        this.setTileInRackAt(i, IScrabbleGameState.emptyMarker);
+    default RevertableAction removeTileInRackAt(int i) {
+        return this.setTileInRackAt(i, IScrabbleGameState.emptyMarker);
     }
 
     default boolean isTileInRackWildcardAt(int i) {

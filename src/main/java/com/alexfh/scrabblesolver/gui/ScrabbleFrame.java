@@ -1,7 +1,7 @@
 package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.ScrabbleGame;
-import com.alexfh.scrabblesolver.gui.action.Action;
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
@@ -18,8 +18,8 @@ public class ScrabbleFrame extends JFrame {
     private static final Dimension screenWidth = Toolkit.getDefaultToolkit().getScreenSize();
     public static final int defaultTileSize = (int) (ScrabbleFrame.screenWidth.getHeight() * .75F / 15);
 
-    private final Stack<Action> undoStack = new Stack<>();
-    private final Stack<Action> redoStack = new Stack<>();
+    private final Stack<RevertableAction> undoStack = new Stack<>();
+    private final Stack<RevertableAction> redoStack = new Stack<>();
     private final ScrabblePanel scrabblePanel;
 
     public ScrabbleFrame(IScrabbleGameState gameState) {
@@ -140,17 +140,17 @@ public class ScrabbleFrame extends JFrame {
         return false;
     }
 
-    public void onAction(Action action) {
-        action.execute();
+    public void onAction(RevertableAction revertableAction) {
+        revertableAction.execute();
         this.redoStack.clear();
-        this.undoStack.push(action);
+        this.undoStack.push(revertableAction);
     }
 
     public void undo() {
         System.out.println("Undoing");
         if (this.undoStack.empty()) return;
 
-        Action toUndo = this.undoStack.pop();
+        RevertableAction toUndo = this.undoStack.pop();
 
         toUndo.undo();
         this.redoStack.push(toUndo);
@@ -160,7 +160,7 @@ public class ScrabbleFrame extends JFrame {
         System.out.println("Redoing");
         if (this.redoStack.empty()) return;
 
-        Action toRedo = this.redoStack.pop();
+        RevertableAction toRedo = this.redoStack.pop();
 
         toRedo.redo();
         this.undoStack.push(toRedo);

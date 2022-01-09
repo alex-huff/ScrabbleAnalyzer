@@ -1,5 +1,6 @@
 package com.alexfh.scrabblesolver.state.impl;
 
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.state.IPlayerTileRack;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
@@ -46,8 +47,8 @@ public class ScrabbleGameStateImpl implements IScrabbleGameState {
     }
 
     @Override
-    public void setTileInRackAt(int i, char c) {
-        this.rack.setTileInRackAt(i, c);
+    public RevertableAction setTileInRackAt(int i, char c) {
+        return this.rack.setTileInRackAt(i, c);
     }
 
     @Override

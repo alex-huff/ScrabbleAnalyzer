@@ -2,7 +2,7 @@ package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.Main;
 import com.alexfh.scrabblesolver.ScrabbleGame;
-import com.alexfh.scrabblesolver.gui.action.Action;
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
@@ -21,7 +21,7 @@ public class ScrabblePanel extends JPanel {
 
     public static final char backspaceChar = '}';
 
-    private final Consumer<Action> onAction;
+    private final Consumer<RevertableAction> onAction;
     private final IScrabbleGameState gameState;
     private final ScrabbleGrid grid;
     private final PlayerTileGrid playerTileGrid;
@@ -33,7 +33,7 @@ public class ScrabblePanel extends JPanel {
     private Future<?> pendingUpdate;
     private final ScrabbleLayout layout;
 
-    public ScrabblePanel(Consumer<Action> onAction, IScrabbleGameState gameState) {
+    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState) {
         this.onAction = onAction;
         this.gameState = gameState;
         this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated);

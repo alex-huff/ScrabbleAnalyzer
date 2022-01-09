@@ -6,10 +6,6 @@ import java.util.ListIterator;
 @SuppressWarnings("ClassCanBeRecord")
 public class CompoundRevertableAction implements RevertableAction {
 
-    public static CompoundRevertableAction compoundActionOf(List<RevertableAction> revertableActions) {
-        return new CompoundRevertableAction(revertableActions);
-    }
-
     public static CompoundRevertableAction compoundActionOf(RevertableAction... revertableActions) {
         return new CompoundRevertableAction(List.of(revertableActions));
     }

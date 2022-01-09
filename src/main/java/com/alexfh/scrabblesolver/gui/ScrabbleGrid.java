@@ -1,7 +1,9 @@
 package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabblesolver.gui.action.RevertableAction;
+import com.alexfh.scrabblesolver.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
@@ -71,18 +73,24 @@ public class ScrabbleGrid extends JPanel {
     }
 
     public RevertableAction clearGrid() {
-        this.clearSelectedMove();
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
                 if (this.board.isEmptyAt(r, c)) continue;
 
-                this.board.removeCharAt(r, c);
-                this.updateAndRepaintTileAt(r, c);
+                final int finalR = r;
+                final int finalC = c;
+
+                actionBuilder.add(
+                    this.board.removeCharAt(finalR, finalC).then(
+                        () -> this.updateAndRepaintTileAt(finalR, finalC)
+                    )
+                );
             }
         }
 
-        return RevertableAction.nullRevertableAction();
+        return actionBuilder.build();
     }
 
     public void showMove(ScrabbleGame.Move move) {
@@ -113,6 +121,7 @@ public class ScrabbleGrid extends JPanel {
     }
 
     public RevertableAction playMove(ScrabbleGame.Move move) {
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
         ScrabbleGame.Offset offset = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
         int startRow = move.row();
         int startCol = move.col();
@@ -120,20 +129,27 @@ public class ScrabbleGrid extends JPanel {
         for (int i = 0; i < move.playedTiles().length; i++) {
             char placedChar = move.playedTiles()[i];
             int spotInWord = move.tileSpotsInWord()[i];
-            int newRow = offset.newRow(startRow, spotInWord);
-            int newCol = offset.newCol(startCol, spotInWord);
+            final int newRow = offset.newRow(startRow, spotInWord);
+            final int newCol = offset.newCol(startCol, spotInWord);
+            RevertableAction placeTileAction;
 
             if (placedChar == IScrabbleGameState.wildCardTile) {
-                this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord));
-                this.board.setWildcardAt(newRow, newCol, true);
+                placeTileAction = CompoundRevertableAction.compoundActionOf(
+                    this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord)),
+                    this.board.setWildcardAt(newRow, newCol, true)
+                );
             } else {
-                this.board.setCharAt(newRow, newCol, placedChar);
+                placeTileAction = this.board.setCharAt(newRow, newCol, placedChar);
             }
 
-            this.updateAndRepaintTileAt(newRow, newCol);
+            actionBuilder.add(
+                placeTileAction.then(
+                    () -> this.updateAndRepaintTileAt(newRow, newCol)
+                )
+            );
         }
 
-        return RevertableAction.nullRevertableAction();
+        return actionBuilder.build();
     }
 
     public void clearSelectedMove() {
@@ -165,57 +181,68 @@ public class ScrabbleGrid extends JPanel {
     }
 
     private void doBackspace(boolean isShiftDown) {
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
+
         if (!this.cursorJustSet) {
             if (isShiftDown) {
                 if (this.wasLastMovementForwardHori) {
-                    this.cursorC--;
+                    actionBuilder.add(this.offsetColCursor(-1));
                 } else {
-                    this.cursorR--;
+                    actionBuilder.add(this.offsetRowCursor(-1));
                 }
             } else {
                 if (this.wasLastMovementForwardVert) {
-                    this.cursorR--;
+                    actionBuilder.add(this.offsetRowCursor(-1));
                 } else {
-                    this.cursorC--;
+                    actionBuilder.add(this.offsetColCursor(-1));
                 }
             }
 
-            this.wasLastMovementForwardVert = false;
-            this.wasLastMovementForwardHori = false;
+            actionBuilder.add(this.setWasLastMovementVert(false));
+            actionBuilder.add(this.setWasLastMovementHori(false));
         } else {
-            this.cursorJustSet = false;
+            actionBuilder.add(this.setJustSet(false));
         }
 
         if (!this.board.isEmptyAt(this.cursorR, this.cursorC)) {
-            this.board.removeCharAt(this.cursorR, this.cursorC);
-            this.updateAndRepaintTileAtCursor();
-            this.onMovesInvalidated.run();
+            actionBuilder.add(
+                this.board.removeCharAt(this.cursorR, this.cursorC).then(
+                    () -> {
+                        this.updateAndRepaintTileAtCursor();
+                        this.onMovesInvalidated.run();
+                    }
+                )
+            );
         }
+
+        this.onAction.accept(actionBuilder.build());
     }
 
     private void placeCharAtCursor(boolean isShiftDown, Character character) {
-        this.cursorJustSet = false;
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
+
+        actionBuilder.add(this.setJustSet(false));
 
         if (isShiftDown) {
             if (this.wasLastMovementForwardHori) {
                 if (this.cursorR == 14) return;
 
-                this.cursorR++;
-                this.cursorC--;
+                actionBuilder.add(this.offsetRowCursor(1));
+                actionBuilder.add(this.offsetColCursor(-1));
             }
 
-            this.wasLastMovementForwardVert = true;
-            this.wasLastMovementForwardHori = false;
+            actionBuilder.add(this.setWasLastMovementVert(true));
+            actionBuilder.add(this.setWasLastMovementHori(false));
         } else {
             if (this.wasLastMovementForwardVert) {
                 if (this.cursorC == 14) return;
 
-                this.cursorR--;
-                this.cursorC++;
+                actionBuilder.add(this.offsetRowCursor(-1));
+                actionBuilder.add(this.offsetColCursor(1));
             }
 
-            this.wasLastMovementForwardHori = true;
-            this.wasLastMovementForwardVert = false;
+            actionBuilder.add(this.setWasLastMovementVert(false));
+            actionBuilder.add(this.setWasLastMovementHori(true));
         }
 
         if (
@@ -225,16 +252,25 @@ public class ScrabbleGrid extends JPanel {
                     (!this.board.isWildcardAt(this.cursorR, this.cursorC))
             )
         ) {
-            this.board.setCharAt(this.cursorR, this.cursorC, character);
-            this.board.setWildcardAt(this.cursorR, this.cursorC, false);
-            this.updateAndRepaintTileAtCursor();
-            this.onMovesInvalidated.run();
+            actionBuilder.add(
+                CompoundRevertableAction.compoundActionOf(
+                    this.board.setCharAt(this.cursorR, this.cursorC, character),
+                    this.board.setWildcardAt(this.cursorR, this.cursorC, false)
+                ).then(
+                    () -> {
+                        this.updateAndRepaintTileAtCursor();
+                        this.onMovesInvalidated.run();
+                    }
+                )
+            );
         }
 
         if (isShiftDown)
-            this.cursorR++;
+            actionBuilder.add(this.offsetRowCursor(1));
         else
-            this.cursorC++;
+            actionBuilder.add(this.offsetColCursor(1));
+
+        this.onAction.accept(actionBuilder.build());
     }
 
     private void onCharPressed(Character character, boolean isShiftDown) {
@@ -249,21 +285,92 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    private void onTileClicked(int r, int c, boolean isLeft) {
+    private void onTileClicked(final int r, final int c, boolean isLeft) {
         if (isLeft) {
-            this.cursorR = r;
-            this.cursorC = c;
-            this.cursorJustSet = true;
-            this.wasLastMovementForwardVert = false;
-            this.wasLastMovementForwardHori = false;
+            this.onAction.accept(
+                CompoundRevertableAction.compoundActionOf(
+                    this.setCursor(r, c),
+                    this.setJustSet(true),
+                    this.setWasLastMovementVert(false),
+                    this.setWasLastMovementHori(false)
+                )
+            );
             this.requestFocusInWindow();
         } else {
             if (!this.board.isEmptyAt(r, c)) {
-                this.board.setWildcardAt(r, c, !this.board.isWildcardAt(r, c));
-                this.updateAndRepaintTileAt(r, c);
-                this.onMovesInvalidated.run();
+                this.onAction.accept(
+                    this.board.setWildcardAt(r, c, !this.board.isWildcardAt(r, c)).then(
+                        () -> {
+                            this.updateAndRepaintTileAt(r, c);
+                            this.onMovesInvalidated.run();
+                        }
+                    )
+                );
             }
         }
+    }
+
+    private RevertableAction setWasLastMovementVert(final boolean lastMovementVert) {
+        final boolean wasLastMovementVert = this.wasLastMovementForwardVert;
+
+        if (wasLastMovementVert == lastMovementVert) return RevertableAction.nullRevertableAction();
+
+        return RevertableAction.of(
+            () -> this.wasLastMovementForwardVert = lastMovementVert,
+            () -> this.wasLastMovementForwardVert = wasLastMovementVert
+        );
+    }
+
+    private RevertableAction setWasLastMovementHori(final boolean lastMovementHori) {
+        final boolean wasLastMovementHori = this.wasLastMovementForwardHori;
+
+        if (wasLastMovementHori == lastMovementHori) return RevertableAction.nullRevertableAction();
+
+        return RevertableAction.of(
+            () -> this.wasLastMovementForwardHori = lastMovementHori,
+            () -> this.wasLastMovementForwardHori = wasLastMovementHori
+        );
+    }
+
+    private RevertableAction setJustSet(final boolean justSet) {
+        final boolean wasJustSet = this.cursorJustSet;
+
+        if (wasJustSet == justSet) return RevertableAction.nullRevertableAction();
+
+        return RevertableAction.of(
+            () -> this.cursorJustSet = justSet,
+            () -> this.cursorJustSet = wasJustSet
+        );
+    }
+
+    private RevertableAction setCursor(final int newRowPos, final int newColPos) {
+        final int oldRowPos = this.cursorR;
+        final int oldColPos = this.cursorC;
+
+        return RevertableAction.of(
+            () -> {
+                this.cursorR = newRowPos;
+                this.cursorC = newColPos;
+            },
+            () -> {
+                this.cursorR = oldRowPos;
+                this.cursorC = oldColPos;
+            }
+        );
+    }
+
+    private RevertableAction offsetRowCursor(final int offset) {
+        return RevertableAction.of(
+            () -> this.cursorR += offset,
+            () -> this.cursorR -= offset
+        );
+    }
+
+    private RevertableAction offsetColCursor(final int offset) {
+        return RevertableAction.of(
+            () -> this.cursorC += offset,
+            () -> this.cursorC -= offset
+        );
     }
 
     private BufferedImage getTileAt(int r, int c) {

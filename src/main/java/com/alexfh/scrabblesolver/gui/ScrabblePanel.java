@@ -66,9 +66,12 @@ public class ScrabblePanel extends JPanel {
 
     private void playMove(ScrabbleGame.Move move) {
         if (this.updateNum == this.lastUpdateReceived) {
-            this.grid.playMove(move);
-            this.playerTileGrid.playMove(move);
-            this.updateMoves();
+            this.onAction.accept(
+                CompoundRevertableAction.compoundActionOf(
+                    this.grid.playMove(move),
+                    this.playerTileGrid.playMove(move)
+                ).then(this::updateMoves)
+            );
         }
     }
 

@@ -30,14 +30,24 @@ public class Main {
         DocumentProvider.INSTANCE.init();
 
         String gameFolder = "src/main/resources/games/game6/";
-        IScrabbleGameState gameState = ScrabbleGameStateImpl.fromFiles(
-            new File(gameFolder + "board.txt"),
-            new File("src/main/resources/multipliers.txt"),
-            new File(gameFolder + "currentletters.txt")
-        );
-//        IScrabbleGameState gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
+//        IScrabbleGameState gameState = ScrabbleGameStateImpl.fromFiles(
+//            new File(gameFolder + "board.txt"),
+//            new File("src/main/resources/multipliers.txt"),
+//            new File(gameFolder + "currentletters.txt")
+//        );
+        IScrabbleGameState gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
 
-        SwingUtilities.invokeLater(() -> new ScrabbleFrame(gameState));
+        SwingUtilities.invokeLater(
+            () -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+                    e.printStackTrace();
+                }
+
+                new ScrabbleFrame(gameState);
+            }
+        );
     }
 
 }

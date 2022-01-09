@@ -87,13 +87,13 @@ public class ScrabbleGameStateImpl implements IScrabbleGameState {
     }
 
     @Override
-    public void setCharAt(int r, int c, char newChar) {
-        this.board.setCharAt(r, c, newChar);
+    public RevertableAction setCharAt(int r, int c, char newChar) {
+        return this.board.setCharAt(r, c, newChar);
     }
 
     @Override
-    public void removeCharAt(int r, int c) {
-        this.board.removeCharAt(r, c);
+    public RevertableAction removeCharAt(int r, int c) {
+        return this.board.removeCharAt(r, c);
     }
 
     @Override
@@ -102,8 +102,8 @@ public class ScrabbleGameStateImpl implements IScrabbleGameState {
     }
 
     @Override
-    public void setWildcardAt(int r, int c, boolean isWild) {
-        this.board.setWildcardAt(r, c, isWild);
+    public RevertableAction setWildcardAt(int r, int c, boolean isWild) {
+        return this.board.setWildcardAt(r, c, isWild);
     }
 
     @Override

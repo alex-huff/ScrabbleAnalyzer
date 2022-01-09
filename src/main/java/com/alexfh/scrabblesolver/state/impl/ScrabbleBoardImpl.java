@@ -1,5 +1,7 @@
 package com.alexfh.scrabblesolver.state.impl;
 
+import com.alexfh.scrabblesolver.gui.action.CompoundRevertableAction;
+import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.state.IScrabbleBoard;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.structure.ImmutablePair;
@@ -211,17 +213,19 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     @Override
-    public void setCharAt(int r, int c, char newChar) {
+    public RevertableAction setCharAt(int r, int c, char newChar) {
         if (newChar == IScrabbleGameState.emptyMarker)
-            this.removeCharAt(r, c);
+            return this.removeCharAt(r, c);
         else
-            this.playedTiles[r][c] = newChar;
+            return RevertableAction.setCharAt(this.playedTiles, r, c, newChar);
     }
 
     @Override
-    public void removeCharAt(int r, int c) {
-        this.playedTiles[r][c] = IScrabbleGameState.emptyMarker;
-        this.wildcardTiles[r][c] = false;
+    public RevertableAction removeCharAt(int r, int c) {
+        return CompoundRevertableAction.compoundActionOf(
+            RevertableAction.setCharAt(this.playedTiles, r, c, IScrabbleGameState.emptyMarker),
+            this.setWildcardAt(r, c, false)
+        );
     }
 
     @Override
@@ -230,8 +234,8 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     }
 
     @Override
-    public void setWildcardAt(int r, int c, boolean isWild) {
-        this.wildcardTiles[r][c] = isWild;
+    public RevertableAction setWildcardAt(int r, int c, boolean isWild) {
+        return RevertableAction.setBooleanAt(this.wildcardTiles, r, c, isWild);
     }
 
     @Override

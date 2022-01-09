@@ -1,7 +1,7 @@
 package com.alexfh.scrabblesolver.state.impl;
 
-import com.alexfh.scrabblesolver.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabblesolver.gui.action.RevertableAction;
+import com.alexfh.scrabblesolver.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabblesolver.state.IPlayerTileRack;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
 import com.alexfh.scrabblesolver.util.ScrabbleUtil;
@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class PlayerTileRackImpl implements IPlayerTileRack {
@@ -72,23 +71,19 @@ public class PlayerTileRackImpl implements IPlayerTileRack {
 
     @Override
     public RevertableAction setTileInRackAt(final int i, final char c) {
-        List<RevertableAction> revertableActions = new LinkedList<>();
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
         final char oldChar = this.placedTiles[i];
 
-        if (!this.isTileInRackEmptyAt(i)) {
-            if (oldChar != c) {
-                revertableActions.add(RevertableAction.removeElementFromListByEquality(this.playerTiles, oldChar));
-            }
-        }
+        if (!this.isTileInRackEmptyAt(i))
+            if (oldChar != c)
+                actionBuilder.add(RevertableAction.removeElementFromListByEquality(this.playerTiles, oldChar));
 
-        if (c != IScrabbleGameState.emptyMarker) {
-            revertableActions.add(RevertableAction.addToList(this.playerTiles, c));
-        }
+        if (c != IScrabbleGameState.emptyMarker)
+            actionBuilder.add(RevertableAction.addToList(this.playerTiles, c));
 
-        this.placedTiles[i] = c; // redo
-        this.placedTiles[i] = oldChar; // undo
+        actionBuilder.add(RevertableAction.setCharAt(this.placedTiles, i, c));
 
-        return CompoundRevertableAction.compoundActionOf(revertableActions);
+        return actionBuilder.build();
     }
 
     @Override

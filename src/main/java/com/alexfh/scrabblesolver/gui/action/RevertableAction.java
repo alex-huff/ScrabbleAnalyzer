@@ -59,6 +59,15 @@ public interface RevertableAction {
         );
     }
 
+    static RevertableAction setCharAt(final char[] chars, final int i, final char toSet) {
+        final char oldChar = chars[i];
+
+        return RevertableAction.of(
+            () -> chars[i] = toSet,
+            () -> chars[i] = oldChar
+        );
+    }
+
     static RevertableAction nullRevertableAction() {
         return RevertableAction.of(() -> {}, () -> {});
     }

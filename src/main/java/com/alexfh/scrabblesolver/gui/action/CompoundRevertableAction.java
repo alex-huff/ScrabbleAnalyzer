@@ -3,6 +3,7 @@ package com.alexfh.scrabblesolver.gui.action;
 import java.util.List;
 import java.util.ListIterator;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class CompoundRevertableAction implements RevertableAction {
 
     public static CompoundRevertableAction compoundActionOf(List<RevertableAction> revertableActions) {

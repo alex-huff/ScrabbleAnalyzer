@@ -141,13 +141,11 @@ public class ScrabbleFrame extends JFrame {
     }
 
     public void onAction(RevertableAction revertableAction) {
-        revertableAction.execute();
         this.redoStack.clear();
         this.undoStack.push(revertableAction);
     }
 
     public void undo() {
-        System.out.println("Undoing");
         if (this.undoStack.empty()) return;
 
         RevertableAction toUndo = this.undoStack.pop();
@@ -157,7 +155,6 @@ public class ScrabbleFrame extends JFrame {
     }
 
     public void redo() {
-        System.out.println("Redoing");
         if (this.redoStack.empty()) return;
 
         RevertableAction toRedo = this.redoStack.pop();

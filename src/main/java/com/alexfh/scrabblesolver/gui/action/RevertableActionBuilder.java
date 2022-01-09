@@ -13,8 +13,8 @@ public class RevertableActionBuilder {
         return this;
     }
 
-    public CompoundRevertableAction build() {
-        return CompoundRevertableAction.compoundActionOf(this.revertableActions);
+    public RevertableAction build() {
+        return new CompoundRevertableAction(this.revertableActions);
     }
 
 }

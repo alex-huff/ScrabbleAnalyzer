@@ -12,8 +12,16 @@ public interface RevertableAction {
         this.execute();
     }
 
+    default RevertableAction init() {
+        this.execute();
+
+        return this;
+    }
+
     default RevertableAction then(final Runnable runAfter) {
-        return RevertableAction.of(
+        runAfter.run();
+
+        return RevertableAction.ofNoInit(
             () -> {
                 RevertableAction.this.execute();
                 runAfter.run();
@@ -25,7 +33,7 @@ public interface RevertableAction {
         );
     }
 
-    static RevertableAction of(final Runnable execute, final Runnable undo) {
+    private static RevertableAction ofNoInit(final Runnable execute, final Runnable undo) {
         return new RevertableAction() {
 
             @Override
@@ -41,14 +49,25 @@ public interface RevertableAction {
         };
     }
 
+    static RevertableAction of(final Runnable execute, final Runnable undo) {
+        return RevertableAction.ofNoInit(execute, undo).init();
+    }
+
     static <T> RevertableAction removeElementFromListByEquality(final List<T> listOfT, final T toRemove) {
         final int index = listOfT.indexOf(toRemove);
 
         if (index < 0) return RevertableAction.nullRevertableAction();
 
+        final boolean atEnd = index == listOfT.size() - 1;
+
         return RevertableAction.of(
             () -> listOfT.remove(index),
-            () -> listOfT.add(index, toRemove)
+            () -> {
+                if (atEnd)
+                    listOfT.add(toRemove);
+                else
+                    listOfT.add(index, toRemove);
+            }
         );
     }
 

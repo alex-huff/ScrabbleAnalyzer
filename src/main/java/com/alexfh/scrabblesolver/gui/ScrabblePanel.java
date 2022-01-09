@@ -2,6 +2,7 @@ package com.alexfh.scrabblesolver.gui;
 
 import com.alexfh.scrabblesolver.Main;
 import com.alexfh.scrabblesolver.ScrabbleGame;
+import com.alexfh.scrabblesolver.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.rule.impl.LetterScoreMapImpl;
@@ -55,9 +56,12 @@ public class ScrabblePanel extends JPanel {
     }
 
     public void clearBoard() {
-        this.grid.clearGrid();
-        this.playerTileGrid.clearPlayerTileGrid();
-        this.updateMoves();
+        this.onAction.accept(
+            CompoundRevertableAction.compoundActionOf(
+                this.grid.clearGrid(),
+                this.playerTileGrid.clearPlayerTileGrid()
+            ).then(this::updateMoves)
+        );
     }
 
     private void playMove(ScrabbleGame.Move move) {

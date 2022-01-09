@@ -70,7 +70,7 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    public void clearGrid() {
+    public RevertableAction clearGrid() {
         this.clearSelectedMove();
 
         for (int r = 0; r < 15; r++) {
@@ -81,6 +81,8 @@ public class ScrabbleGrid extends JPanel {
                 this.updateAndRepaintTileAt(r, c);
             }
         }
+
+        return RevertableAction.nullRevertableAction();
     }
 
     public void showMove(ScrabbleGame.Move move) {
@@ -110,7 +112,7 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    public void playMove(ScrabbleGame.Move move) {
+    public RevertableAction playMove(ScrabbleGame.Move move) {
         ScrabbleGame.Offset offset = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
         int startRow = move.row();
         int startCol = move.col();
@@ -130,6 +132,8 @@ public class ScrabbleGrid extends JPanel {
 
             this.updateAndRepaintTileAt(newRow, newCol);
         }
+
+        return RevertableAction.nullRevertableAction();
     }
 
     public void clearSelectedMove() {

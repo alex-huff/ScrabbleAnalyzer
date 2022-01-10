@@ -104,13 +104,9 @@ public class ScrabbleGrid extends JPanel {
             int spotInWord = this.previewedMove.tileSpotsInWord()[i];
             int newRow = offset.newRow(startRow, spotInWord);
             int newCol = offset.newCol(startCol, spotInWord);
-            char toPlace;
-
-            if (placedChar == IScrabbleGameState.wildCardTile) {
-                toPlace = this.previewedMove.playedWord().charAt(spotInWord);
-            } else {
-                toPlace = Character.toUpperCase(placedChar);
-            }
+            char toPlace = placedChar == IScrabbleGameState.wildCardTile ?
+                this.previewedMove.playedWord().charAt(spotInWord) :
+                Character.toUpperCase(placedChar);
 
             this.playedWordPreviewChars[newRow][newCol] = toPlace;
 
@@ -129,16 +125,12 @@ public class ScrabbleGrid extends JPanel {
             int spotInWord = move.tileSpotsInWord()[i];
             final int newRow = offset.newRow(startRow, spotInWord);
             final int newCol = offset.newCol(startCol, spotInWord);
-            RevertableAction placeTileAction;
-
-            if (placedChar == IScrabbleGameState.wildCardTile) {
-                placeTileAction = CompoundRevertableAction.compoundActionOf(
+            RevertableAction placeTileAction = placedChar == IScrabbleGameState.wildCardTile ?
+                CompoundRevertableAction.compoundActionOf(
                     this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord)),
                     this.board.setWildcardAt(newRow, newCol, true)
-                );
-            } else {
-                placeTileAction = this.board.setCharAt(newRow, newCol, placedChar);
-            }
+                ) :
+                this.board.setCharAt(newRow, newCol, placedChar);
 
             actionBuilder.add(
                 placeTileAction.then(

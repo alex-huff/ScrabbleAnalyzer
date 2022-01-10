@@ -72,8 +72,6 @@ public class PlayerTileGrid extends JPanel {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         for (int i = 0; i < 7; i++) {
-            if (this.tileRack.isTileInRackEmptyAt(i)) continue;
-
             final int finalI = i;
 
             actionBuilder.add(
@@ -126,16 +124,14 @@ public class PlayerTileGrid extends JPanel {
         else
             actionBuilder.add(this.setJustSet(false));
 
-        if (!this.tileRack.isTileInRackEmptyAt(this.cursor))
-            actionBuilder.add(
-                this.tileRack.removeTileInRackAt(this.cursor).then(
-                    () -> {
-                        this.updateAndRepaintTileAtCursor();
-                        this.onMovesInvalidated.run();
-                    }
-                )
-            );
-
+        actionBuilder.add(
+            this.tileRack.removeTileInRackAt(this.cursor).then(
+                () -> {
+                    this.updateAndRepaintTileAtCursor();
+                    this.onMovesInvalidated.run();
+                }
+            )
+        );
         this.onAction.accept(actionBuilder.build());
     }
 
@@ -143,18 +139,14 @@ public class PlayerTileGrid extends JPanel {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         actionBuilder.add(this.setJustSet(false));
-
-        if (this.tileRack.getTileInRackAt(this.cursor) != character) {
-            actionBuilder.add(
-                this.tileRack.setTileInRackAt(this.cursor, character).then(
-                    () -> {
-                        this.updateAndRepaintTileAtCursor();
-                        this.onMovesInvalidated.run();
-                    }
-                )
-            );
-        }
-
+        actionBuilder.add(
+            this.tileRack.setTileInRackAt(this.cursor, character).then(
+                () -> {
+                    this.updateAndRepaintTileAtCursor();
+                    this.onMovesInvalidated.run();
+                }
+            )
+        );
         actionBuilder.add(this.offsetCursor(1));
         this.onAction.accept(actionBuilder.build());
     }

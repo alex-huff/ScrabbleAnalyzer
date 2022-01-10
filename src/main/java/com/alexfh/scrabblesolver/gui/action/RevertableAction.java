@@ -95,6 +95,8 @@ public abstract class RevertableAction {
     public static RevertableAction setCharAt(final char[] chars, final int i, final char toSet) {
         final char oldChar = chars[i];
 
+        if (oldChar == toSet) return RevertableAction.nullRevertableAction;
+
         return RevertableAction.of(
             () -> chars[i] = toSet,
             () -> chars[i] = oldChar
@@ -104,6 +106,8 @@ public abstract class RevertableAction {
     public static RevertableAction setCharAt(final char[][] char2DArray, final int r, final int c, final char toSet) {
         final char oldChar = char2DArray[r][c];
 
+        if (oldChar == toSet) return RevertableAction.nullRevertableAction;
+
         return RevertableAction.of(
             () -> char2DArray[r][c] = toSet,
             () -> char2DArray[r][c] = oldChar
@@ -112,6 +116,8 @@ public abstract class RevertableAction {
 
     public static RevertableAction setBooleanAt(final boolean[][] bool2DArray, final int r, final int c, final boolean toSet) {
         final boolean oldBool = bool2DArray[r][c];
+
+        if (oldBool == toSet) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
             () -> bool2DArray[r][c] = toSet,

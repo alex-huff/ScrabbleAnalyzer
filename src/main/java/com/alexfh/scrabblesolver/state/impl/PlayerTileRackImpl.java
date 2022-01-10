@@ -71,12 +71,14 @@ public class PlayerTileRackImpl implements IPlayerTileRack {
 
     @Override
     public RevertableAction setTileInRackAt(final int i, final char c) {
-        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
         final char oldChar = this.placedTiles[i];
 
+        if (oldChar == c) return RevertableAction.nullRevertableAction;
+
+        RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
+
         if (!this.isTileInRackEmptyAt(i))
-            if (oldChar != c)
-                actionBuilder.add(RevertableAction.removeElementFromListByEquality(this.playerTiles, oldChar));
+            actionBuilder.add(RevertableAction.removeElementFromListByEquality(this.playerTiles, oldChar));
 
         if (c != IScrabbleGameState.emptyMarker)
             actionBuilder.add(RevertableAction.addToList(this.playerTiles, c));

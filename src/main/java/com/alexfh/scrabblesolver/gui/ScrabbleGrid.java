@@ -77,8 +77,6 @@ public class ScrabbleGrid extends JPanel {
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
-                if (this.board.isEmptyAt(r, c)) continue;
-
                 final int finalR = r;
                 final int finalC = c;
 
@@ -204,17 +202,14 @@ public class ScrabbleGrid extends JPanel {
             actionBuilder.add(this.setJustSet(false));
         }
 
-        if (!this.board.isEmptyAt(this.cursorR, this.cursorC)) {
-            actionBuilder.add(
-                this.board.removeCharAt(this.cursorR, this.cursorC).then(
-                    () -> {
-                        this.updateAndRepaintTileAtCursor();
-                        this.onMovesInvalidated.run();
-                    }
-                )
-            );
-        }
-
+        actionBuilder.add(
+            this.board.removeCharAt(this.cursorR, this.cursorC).then(
+                () -> {
+                    this.updateAndRepaintTileAtCursor();
+                    this.onMovesInvalidated.run();
+                }
+            )
+        );
         this.onAction.accept(actionBuilder.build());
     }
 
@@ -245,25 +240,17 @@ public class ScrabbleGrid extends JPanel {
             actionBuilder.add(this.setWasLastMovementHori(true));
         }
 
-        if (
-            !(
-                !this.board.isEmptyAt(this.cursorR, this.cursorC) &&
-                    (this.board.getCharAt(this.cursorR, this.cursorC) == character) &&
-                    (!this.board.isWildcardAt(this.cursorR, this.cursorC))
+        actionBuilder.add(
+            CompoundRevertableAction.compoundActionOf(
+                this.board.setCharAt(this.cursorR, this.cursorC, character),
+                this.board.setWildcardAt(this.cursorR, this.cursorC, false)
+            ).then(
+                () -> {
+                    this.updateAndRepaintTileAtCursor();
+                    this.onMovesInvalidated.run();
+                }
             )
-        ) {
-            actionBuilder.add(
-                CompoundRevertableAction.compoundActionOf(
-                    this.board.setCharAt(this.cursorR, this.cursorC, character),
-                    this.board.setWildcardAt(this.cursorR, this.cursorC, false)
-                ).then(
-                    () -> {
-                        this.updateAndRepaintTileAtCursor();
-                        this.onMovesInvalidated.run();
-                    }
-                )
-            );
-        }
+        );
 
         if (isShiftDown)
             actionBuilder.add(this.offsetRowCursor(1));
@@ -347,6 +334,8 @@ public class ScrabbleGrid extends JPanel {
         final int oldRowPos = this.cursorR;
         final int oldColPos = this.cursorC;
 
+        if (oldRowPos == newRowPos && oldColPos == newColPos) return RevertableAction.nullRevertableAction;
+
         return RevertableAction.of(
             () -> {
                 this.cursorR = newRowPos;
@@ -360,6 +349,8 @@ public class ScrabbleGrid extends JPanel {
     }
 
     private RevertableAction offsetRowCursor(final int offset) {
+        if (offset == 0) return RevertableAction.nullRevertableAction;
+
         return RevertableAction.of(
             () -> this.cursorR += offset,
             () -> this.cursorR -= offset
@@ -367,6 +358,8 @@ public class ScrabbleGrid extends JPanel {
     }
 
     private RevertableAction offsetColCursor(final int offset) {
+        if (offset == 0) return RevertableAction.nullRevertableAction;
+
         return RevertableAction.of(
             () -> this.cursorC += offset,
             () -> this.cursorC -= offset

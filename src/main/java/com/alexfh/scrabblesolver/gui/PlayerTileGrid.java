@@ -24,7 +24,7 @@ public class PlayerTileGrid extends JPanel {
     private final TileLabel[] labels = new TileLabel[7];
     private int tileSize = ScrabbleFrame.defaultTileSize;
     private final Dimension size = new Dimension(this.tileSize * 7, this.tileSize);
-    private final IPlayerTileRack tileRack;
+    private IPlayerTileRack tileRack;
     private final Runnable onMovesInvalidated;
     private int cursor = 0;
     private boolean cursorJustSet = false;
@@ -65,6 +65,14 @@ public class PlayerTileGrid extends JPanel {
             labels[i] = label;
 
             this.add(label);
+        }
+    }
+
+    public void loadNewGame(IPlayerTileRack tileRack) {
+        this.tileRack = tileRack;
+
+        for (int i = 0; i < 7; i++) {
+            this.updateAndRepaintTileAt(i);
         }
     }
 
@@ -171,7 +179,6 @@ public class PlayerTileGrid extends JPanel {
                     this.setJustSet(true)
                 )
             );
-
             this.requestFocusInWindow();
         }
     }

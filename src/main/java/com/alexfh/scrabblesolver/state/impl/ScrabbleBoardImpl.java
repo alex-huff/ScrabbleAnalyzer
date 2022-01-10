@@ -177,14 +177,18 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
     private final int anchorCol;
 
     public ScrabbleBoardImpl(int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles, boolean[][] wildcardTiles) {
+        this(rows, cols, letterMultipliers, wordMultipliers, playedTiles, wildcardTiles, rows / 2, cols / 2);
+    }
+
+    public ScrabbleBoardImpl(int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles, boolean[][] wildcardTiles, int anchorRow, int anchorCol) {
         this.rows = rows;
         this.cols = cols;
         this.letterMultipliers = letterMultipliers;
         this.wordMultipliers = wordMultipliers;
         this.playedTiles = playedTiles;
         this.wildcardTiles = wildcardTiles;
-        this.anchorRow = this.rows / 2;
-        this.anchorCol = this.cols / 2;
+        this.anchorRow = anchorRow;
+        this.anchorCol = anchorCol;
     }
 
     @Override

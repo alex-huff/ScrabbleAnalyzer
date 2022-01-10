@@ -5,12 +5,18 @@ import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 import com.alexfh.scrabblesolver.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabblesolver.gui.tile.TileProvider;
 import com.alexfh.scrabblesolver.state.IScrabbleGameState;
+import com.alexfh.scrabblesolver.state.impl.ScrabbleGameStateImpl;
+import com.alexfh.scrabblesolver.state.impl.stream.SAInputStream;
+import com.alexfh.scrabblesolver.state.impl.stream.SAOutputStream;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Stack;
 
 public class ScrabbleFrame extends JFrame {
@@ -20,9 +26,12 @@ public class ScrabbleFrame extends JFrame {
 
     private final Stack<RevertableAction> undoStack = new Stack<>();
     private final Stack<RevertableAction> redoStack = new Stack<>();
+    private IScrabbleGameState gameState;
     private final ScrabblePanel scrabblePanel;
+    private File saveFile;
 
-    public ScrabbleFrame(IScrabbleGameState gameState) {
+    public ScrabbleFrame() {
+        this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
         BufferedImage iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -65,17 +74,23 @@ public class ScrabbleFrame extends JFrame {
         );
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
+        JMenuItem newFile = new JMenuItem("New File (Ctrl+N)");
+        JMenuItem open = new JMenuItem("Open");
         JMenuItem save = new JMenuItem("Save (Ctrl+S)");
         JMenuItem saveAs = new JMenuItem("Save As (Shift+Ctrl+S)");
         JMenuItem clearBoard = new JMenuItem("Clear Board");
         JMenuItem undo = new JMenuItem("Undo (Ctrl+Z)");
         JMenuItem redo = new JMenuItem("Redo (Ctrl+R)");
 
-        save.addActionListener(e -> System.out.println("Not yet implemented"));
+        newFile.addActionListener(e -> this.newFile());
+        open.addActionListener(e -> this.open());
+        save.addActionListener(e -> this.save());
         saveAs.addActionListener(e -> this.saveAs());
         clearBoard.addActionListener(e -> this.scrabblePanel.clearBoard());
         undo.addActionListener(e -> this.undo());
         redo.addActionListener(e -> this.redo());
+        fileMenu.add(newFile);
+        fileMenu.add(open);
         fileMenu.add(save);
         fileMenu.add(saveAs);
         editMenu.add(clearBoard);
@@ -114,6 +129,16 @@ public class ScrabbleFrame extends JFrame {
                 }
             }
         );
+        inputMap.put(KeyStroke.getKeyStroke("ctrl N"), "newFile");
+        actionMap.put(
+            "newFile",
+            new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ScrabbleFrame.this.newFile();
+                }
+            }
+        );
         inputMap.put(KeyStroke.getKeyStroke("ctrl S"), "save");
         actionMap.put(
             "save",
@@ -136,18 +161,18 @@ public class ScrabbleFrame extends JFrame {
         );
     }
 
-    public boolean isSaved() {
+    private boolean isSaved() {
         return false;
     }
 
-    public void onAction(RevertableAction revertableAction) {
+    private void onAction(RevertableAction revertableAction) {
         if (revertableAction.isNull()) return;
 
         this.redoStack.clear();
         this.undoStack.push(revertableAction);
     }
 
-    public void undo() {
+    private void undo() {
         if (this.undoStack.empty()) return;
 
         RevertableAction toUndo = this.undoStack.pop();
@@ -156,7 +181,7 @@ public class ScrabbleFrame extends JFrame {
         this.redoStack.push(toUndo);
     }
 
-    public void redo() {
+    private void redo() {
         if (this.redoStack.empty()) return;
 
         RevertableAction toRedo = this.redoStack.pop();
@@ -165,25 +190,109 @@ public class ScrabbleFrame extends JFrame {
         this.undoStack.push(toRedo);
     }
 
-    public void save() {
-        System.out.println("Not yet implemented.");
+    private void newFile() {
+        this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
+        this.saveFile = null;
+
+        this.reloadGame();
     }
 
-    public void saveAs() {
+    private void open() {
+        try {
+            this.openChooser();
+        } catch (IOException e) {
+            this.fileOpenErrorDialog();
+        }
+    }
+
+    private void openChooser() throws IOException {
+        JFileChooser fileChooser = new JFileChooser();
+
+        fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
+        fileChooser.setDialogTitle("Select a file to open");
+
+        if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+        this.openFromFile(this.getSelectedFileFromChooser(fileChooser));
+    }
+
+    private void openFromFile(File fileToOpen) throws IOException {
+        this.gameState = this.readFromFile(fileToOpen);
+
+        this.reloadGame();
+    }
+
+    private void reloadGame() {
+        this.undoStack.clear();
+        this.redoStack.clear();
+        System.gc();
+        this.scrabblePanel.loadNewGame(this.gameState);
+    }
+
+    private void save() {
+        if (this.saveFile == null) this.saveAs();
+        else this.tryToSaveToFile(this.saveFile);
+    }
+
+    private void tryToSaveToFile(File file) {
+        try {
+            this.saveToFile(file);
+        } catch (IOException e) {
+            this.fileSaveErrorDialog();
+        }
+    }
+
+    private void fileOpenErrorDialog() {
+        JOptionPane.showMessageDialog(this, "Could not open file");
+    }
+
+    private void fileSaveErrorDialog() {
+        JOptionPane.showMessageDialog(this, "Could not save file");
+    }
+
+    private void saveAs() {
         JFileChooser fileChooser = new JFileChooser();
 
         fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
         fileChooser.setDialogTitle("Select a file to save");
 
-        int selection = fileChooser.showSaveDialog(this);
+        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
-        if (selection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
+        File fileToSave = this.getSelectedFileFromChooser(fileChooser);
 
-            System.out.println(
-                "Save as file: " + (fileChooser.getFileFilter() instanceof ScrabbleAnalyzerFileFilter ? fileToSave.getAbsolutePath() + ScrabbleAnalyzerFileFilter.EXTENSION : fileToSave.getAbsolutePath())
-            );
-        }
+        this.tryToSaveToFile(fileToSave);
+    }
+
+    private File getSelectedFileFromChooser(JFileChooser fileChooser) {
+        File selectedFile = fileChooser.getSelectedFile();
+
+        if (selectedFile.exists() ||
+            !(fileChooser.getFileFilter() instanceof ScrabbleAnalyzerFileFilter)
+        ) return selectedFile;
+
+        return new File(selectedFile.getAbsolutePath() + ScrabbleAnalyzerFileFilter.EXTENSION);
+    }
+
+    private void saveToFile(File file) throws IOException {
+        FileOutputStream fileOut = new FileOutputStream(file);
+        SAOutputStream saOutputStream = new SAOutputStream(fileOut);
+
+        saOutputStream.writeScrabbleGameState(gameState);
+        saOutputStream.close();
+
+        this.saveFile = file;
+    }
+
+    private IScrabbleGameState readFromFile(File file) throws IOException {
+        FileInputStream fileIn = new FileInputStream(file);
+        SAInputStream saInputStream = new SAInputStream(fileIn);
+        IScrabbleGameState readGameState = saInputStream.readGameState();
+
+        saInputStream.close();
+
+        this.saveFile = file;
+
+        return readGameState;
     }
 
 }

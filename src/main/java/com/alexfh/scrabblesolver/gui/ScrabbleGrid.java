@@ -22,7 +22,7 @@ public class ScrabbleGrid extends JPanel {
     private final TileLabel[][] labels = new TileLabel[15][15];
     private int tileSize = ScrabbleFrame.defaultTileSize;
     private final Dimension size = new Dimension(this.tileSize * 15, this.tileSize * 15);
-    private final IScrabbleBoard board;
+    private IScrabbleBoard board;
     private final Runnable onMovesInvalidated;
     private int cursorR = 0;
     private int cursorC = 0;
@@ -72,6 +72,18 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
+    public void loadNewGame(IScrabbleBoard board) {
+        this.board = board;
+
+        this.clearSelectedMove();
+
+        for (int r = 0; r < 15; r++) {
+            for (int c = 0; c < 15; c++) {
+                this.updateAndRepaintTileAt(r, c);
+            }
+        }
+    }
+
     public RevertableAction clearGrid() {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
@@ -107,7 +119,6 @@ public class ScrabbleGrid extends JPanel {
             char toPlace = placedChar == IScrabbleGameState.wildCardTile ?
                 this.previewedMove.playedWord().charAt(spotInWord) :
                 Character.toUpperCase(placedChar);
-
             this.playedWordPreviewChars[newRow][newCol] = toPlace;
 
             this.updateAndRepaintTileAt(newRow, newCol);

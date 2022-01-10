@@ -16,6 +16,7 @@ public class TileLabel extends JLabel {
         this.icon = icon;
         this.onClicked = onClicked;
 
+        this.setFocusable(false);
         this.addMouseListener(
             new MouseAdapter() {
                 @Override

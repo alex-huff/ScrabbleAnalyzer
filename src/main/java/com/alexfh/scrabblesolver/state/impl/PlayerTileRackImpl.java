@@ -34,6 +34,12 @@ public class PlayerTileRackImpl implements IPlayerTileRack {
     private final char[] placedTiles;
     private final List<Character> playerTiles;
 
+    public PlayerTileRackImpl(int rackSize, char[] placedTiles, List<Character> playerTiles) {
+        this.rackSize = rackSize;
+        this.placedTiles = placedTiles;
+        this.playerTiles = playerTiles;
+    }
+
     public PlayerTileRackImpl(char[] placedTiles) {
         this.rackSize = placedTiles.length;
         this.placedTiles = placedTiles;

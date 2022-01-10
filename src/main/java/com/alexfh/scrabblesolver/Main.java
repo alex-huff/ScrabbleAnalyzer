@@ -28,15 +28,6 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         DocumentProvider.INSTANCE.init();
-
-        String gameFolder = "src/main/resources/games/game6/";
-//        IScrabbleGameState gameState = ScrabbleGameStateImpl.fromFiles(
-//            new File(gameFolder + "board.txt"),
-//            new File("src/main/resources/multipliers.txt"),
-//            new File(gameFolder + "currentletters.txt")
-//        );
-        IScrabbleGameState gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
-
         SwingUtilities.invokeLater(
             () -> {
                 try {
@@ -45,7 +36,7 @@ public class Main {
                     e.printStackTrace();
                 }
 
-                new ScrabbleFrame(gameState);
+                new ScrabbleFrame();
             }
         );
     }

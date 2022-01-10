@@ -23,7 +23,7 @@ public class ScrabblePanel extends JPanel {
     public static final char backspaceChar = '}';
 
     private final Consumer<RevertableAction> onAction;
-    private final IScrabbleGameState gameState;
+    private IScrabbleGameState gameState;
     private final ScrabbleGrid grid;
     private final PlayerTileGrid playerTileGrid;
     private final MoveScroller moveScroller;
@@ -52,6 +52,14 @@ public class ScrabblePanel extends JPanel {
         );
         this.setLayout(this.layout);
         this.initializeLayout();
+        this.updateMoves();
+    }
+
+    public void loadNewGame(IScrabbleGameState gameState) {
+        this.gameState = gameState;
+
+        this.grid.loadNewGame(this.gameState);
+        this.playerTileGrid.loadNewGame(this.gameState);
         this.updateMoves();
     }
 

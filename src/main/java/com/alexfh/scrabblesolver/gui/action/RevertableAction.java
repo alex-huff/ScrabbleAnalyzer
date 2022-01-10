@@ -58,16 +58,9 @@ public interface RevertableAction {
 
         if (index < 0) return RevertableAction.nullRevertableAction();
 
-        final boolean atEnd = index == listOfT.size() - 1;
-
         return RevertableAction.of(
             () -> listOfT.remove(index),
-            () -> {
-                if (atEnd)
-                    listOfT.add(toRemove);
-                else
-                    listOfT.add(index, toRemove);
-            }
+            () -> listOfT.add(index, toRemove)
         );
     }
 

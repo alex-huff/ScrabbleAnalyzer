@@ -196,8 +196,8 @@ public class ScrabbleGrid extends JPanel {
                 }
             }
 
-            actionBuilder.add(this.setWasLastMovementVert(false));
-            actionBuilder.add(this.setWasLastMovementHori(false));
+            actionBuilder.add(this.setWasLastMovementForwardVert(false));
+            actionBuilder.add(this.setWasLastMovementForwardHori(false));
         } else {
             actionBuilder.add(this.setJustSet(false));
         }
@@ -226,8 +226,8 @@ public class ScrabbleGrid extends JPanel {
                 actionBuilder.add(this.offsetColCursor(-1));
             }
 
-            actionBuilder.add(this.setWasLastMovementVert(true));
-            actionBuilder.add(this.setWasLastMovementHori(false));
+            actionBuilder.add(this.setWasLastMovementForwardVert(true));
+            actionBuilder.add(this.setWasLastMovementForwardHori(false));
         } else {
             if (this.wasLastMovementForwardVert) {
                 if (this.cursorC == 14) return;
@@ -236,8 +236,8 @@ public class ScrabbleGrid extends JPanel {
                 actionBuilder.add(this.offsetColCursor(1));
             }
 
-            actionBuilder.add(this.setWasLastMovementVert(false));
-            actionBuilder.add(this.setWasLastMovementHori(true));
+            actionBuilder.add(this.setWasLastMovementForwardVert(false));
+            actionBuilder.add(this.setWasLastMovementForwardHori(true));
         }
 
         actionBuilder.add(
@@ -278,8 +278,8 @@ public class ScrabbleGrid extends JPanel {
                 CompoundRevertableAction.compoundActionOf(
                     this.setCursor(r, c),
                     this.setJustSet(true),
-                    this.setWasLastMovementVert(false),
-                    this.setWasLastMovementHori(false)
+                    this.setWasLastMovementForwardVert(false),
+                    this.setWasLastMovementForwardHori(false)
                 )
             );
             this.requestFocusInWindow();
@@ -297,25 +297,25 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    private RevertableAction setWasLastMovementVert(final boolean lastMovementVert) {
-        final boolean wasLastMovementVert = this.wasLastMovementForwardVert;
+    private RevertableAction setWasLastMovementForwardVert(final boolean lastMovementFV) {
+        final boolean wasLastMovementFV = this.wasLastMovementForwardVert;
 
-        if (wasLastMovementVert == lastMovementVert) return RevertableAction.nullRevertableAction;
+        if (wasLastMovementFV == lastMovementFV) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
-            () -> this.wasLastMovementForwardVert = lastMovementVert,
-            () -> this.wasLastMovementForwardVert = wasLastMovementVert
+            () -> this.wasLastMovementForwardVert = lastMovementFV,
+            () -> this.wasLastMovementForwardVert = wasLastMovementFV
         );
     }
 
-    private RevertableAction setWasLastMovementHori(final boolean lastMovementHori) {
-        final boolean wasLastMovementHori = this.wasLastMovementForwardHori;
+    private RevertableAction setWasLastMovementForwardHori(final boolean lastMovementFH) {
+        final boolean wasLastMovementFH = this.wasLastMovementForwardHori;
 
-        if (wasLastMovementHori == lastMovementHori) return RevertableAction.nullRevertableAction;
+        if (wasLastMovementFH == lastMovementFH) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
-            () -> this.wasLastMovementForwardHori = lastMovementHori,
-            () -> this.wasLastMovementForwardHori = wasLastMovementHori
+            () -> this.wasLastMovementForwardHori = lastMovementFH,
+            () -> this.wasLastMovementForwardHori = wasLastMovementFH
         );
     }
 

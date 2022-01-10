@@ -313,7 +313,7 @@ public class ScrabbleGrid extends JPanel {
     private RevertableAction setWasLastMovementVert(final boolean lastMovementVert) {
         final boolean wasLastMovementVert = this.wasLastMovementForwardVert;
 
-        if (wasLastMovementVert == lastMovementVert) return RevertableAction.nullRevertableAction();
+        if (wasLastMovementVert == lastMovementVert) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
             () -> this.wasLastMovementForwardVert = lastMovementVert,
@@ -324,7 +324,7 @@ public class ScrabbleGrid extends JPanel {
     private RevertableAction setWasLastMovementHori(final boolean lastMovementHori) {
         final boolean wasLastMovementHori = this.wasLastMovementForwardHori;
 
-        if (wasLastMovementHori == lastMovementHori) return RevertableAction.nullRevertableAction();
+        if (wasLastMovementHori == lastMovementHori) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
             () -> this.wasLastMovementForwardHori = lastMovementHori,
@@ -335,7 +335,7 @@ public class ScrabbleGrid extends JPanel {
     private RevertableAction setJustSet(final boolean justSet) {
         final boolean wasJustSet = this.cursorJustSet;
 
-        if (wasJustSet == justSet) return RevertableAction.nullRevertableAction();
+        if (wasJustSet == justSet) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
             () -> this.cursorJustSet = justSet,

@@ -187,7 +187,7 @@ public class PlayerTileGrid extends JPanel {
     private RevertableAction setJustSet(final boolean justSet) {
         final boolean wasJustSet = this.cursorJustSet;
 
-        if (wasJustSet == justSet) return RevertableAction.nullRevertableAction();
+        if (wasJustSet == justSet) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
             () -> this.cursorJustSet = justSet,

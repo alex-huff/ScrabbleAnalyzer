@@ -2,12 +2,19 @@ package com.alexfh.scrabblesolver.gui.action;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@SuppressWarnings("ClassCanBeRecord")
-public class CompoundRevertableAction implements RevertableAction {
+public class CompoundRevertableAction extends RevertableAction {
 
-    public static CompoundRevertableAction compoundActionOf(RevertableAction... revertableActions) {
-        return new CompoundRevertableAction(List.of(revertableActions));
+    public static RevertableAction compoundActionOf(RevertableAction... revertableActions) {
+        List<RevertableAction> actions = Stream.of(revertableActions).filter(
+            action -> !action.isNull()
+        ).collect(Collectors.toList());
+
+        return actions.isEmpty() ? RevertableAction.nullRevertableAction : new CompoundRevertableAction(
+            actions
+        );
     }
 
     private final List<RevertableAction> revertableActions;

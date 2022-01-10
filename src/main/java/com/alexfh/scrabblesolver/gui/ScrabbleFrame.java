@@ -141,6 +141,8 @@ public class ScrabbleFrame extends JFrame {
     }
 
     public void onAction(RevertableAction revertableAction) {
+        if (revertableAction.isNull()) return;
+
         this.redoStack.clear();
         this.undoStack.push(revertableAction);
     }

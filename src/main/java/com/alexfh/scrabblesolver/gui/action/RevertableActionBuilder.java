@@ -7,14 +7,16 @@ public class RevertableActionBuilder {
 
     List<RevertableAction> revertableActions = new LinkedList<>();
 
-    public RevertableActionBuilder add(RevertableAction revertableAction) {
-        this.revertableActions.add(revertableAction);
+    public RevertableActionBuilder add(RevertableAction action) {
+        if (!action.isNull()) this.revertableActions.add(action);
 
         return this;
     }
 
     public RevertableAction build() {
-        return new CompoundRevertableAction(this.revertableActions);
+        return this.revertableActions.isEmpty() ?
+            RevertableAction.nullRevertableAction :
+            new CompoundRevertableAction(this.revertableActions);
     }
 
 }

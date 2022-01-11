@@ -29,6 +29,8 @@ public class ScrabbleAnalyzer extends JFrame {
     private final ScrabbleAnalyzerPanel scrabbleAnalyzerPanel;
     private final BufferedImage iconImage;
     private final String title = "ScrabbleAnalyzer";
+    private final JMenuItem undo;
+    private final JMenuItem redo;
     private IScrabbleGameState gameState;
     private IScrabbleGameState lastSaveState;
     private File saveFile;
@@ -73,9 +75,11 @@ public class ScrabbleAnalyzer extends JFrame {
         JMenuItem save = new JMenuItem("Save (Ctrl+S)");
         JMenuItem saveAs = new JMenuItem("Save As (Shift+Ctrl+S)");
         JMenuItem clearBoard = new JMenuItem("Clear Board");
-        JMenuItem undo = new JMenuItem("Undo (Ctrl+Z)");
-        JMenuItem redo = new JMenuItem("Redo (Ctrl+R)");
+        this.undo = new JMenuItem("Undo (Ctrl+Z)");
+        this.redo = new JMenuItem("Redo (Ctrl+R)");
 
+        this.undo.setEnabled(false);
+        this.redo.setEnabled(false);
         newFile.addActionListener(e -> this.newFile());
         open.addActionListener(e -> this.open());
         save.addActionListener(e -> this.save());
@@ -175,28 +179,64 @@ public class ScrabbleAnalyzer extends JFrame {
     private void onAction(RevertableAction revertableAction) {
         if (revertableAction.isNull()) return;
 
-        this.redoStack.clear();
-        this.undoStack.push(revertableAction);
+        this.clearRedo();
+        this.pushOntoUndo(revertableAction);
     }
 
     private void undo() {
-        if (this.undoStack.empty()) return;
+        RevertableAction toUndo;
 
-        RevertableAction toUndo = this.undoStack.pop();
-
-        this.scrabbleAnalyzerPanel.setNotification("Undoing!!!");
+        if ((toUndo = this.popOffUndo()) == null) return;
 
         toUndo.undo();
-        this.redoStack.push(toUndo);
+        this.pushOntoRedo(toUndo);
     }
 
     private void redo() {
-        if (this.redoStack.empty()) return;
+        RevertableAction toRedo;
 
-        RevertableAction toRedo = this.redoStack.pop();
+        if ((toRedo = this.popOffRedo()) == null) return;
 
         toRedo.redo();
-        this.undoStack.push(toRedo);
+        this.pushOntoUndo(toRedo);
+    }
+
+    private void clearRedo() {
+        this.redoStack.clear();
+
+        if (this.redo.isEnabled()) this.redo.setEnabled(false);
+    }
+
+    private RevertableAction popOffUndo() {
+        if (this.undoStack.isEmpty()) return null;
+
+        RevertableAction action = this.undoStack.pop();
+
+        if (this.undoStack.isEmpty() && this.undo.isEnabled()) this.undo.setEnabled(false);
+
+        return action;
+    }
+
+    private RevertableAction popOffRedo() {
+        if (this.redoStack.isEmpty()) return null;
+
+        RevertableAction action = this.redoStack.pop();
+
+        if (this.redoStack.isEmpty() && this.redo.isEnabled()) this.redo.setEnabled(false);
+
+        return action;
+    }
+
+    private void pushOntoUndo(RevertableAction action) {
+        this.undoStack.push(action);
+
+        if (!this.undo.isEnabled()) this.undo.setEnabled(true);
+    }
+
+    private void pushOntoRedo(RevertableAction action) {
+        this.redoStack.push(action);
+
+        if (!this.redo.isEnabled()) this.redo.setEnabled(true);
     }
 
     private void setLastSaveState() {

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MoveScroller extends JScrollPane {
 
-    public static final Font FONT = new Font("Courier New", Font.BOLD, 16);
+    private static final Font FONT = new Font("Courier New", Font.BOLD, 16);
 
     private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;

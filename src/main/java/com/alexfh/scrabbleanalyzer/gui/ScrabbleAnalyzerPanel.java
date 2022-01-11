@@ -27,7 +27,7 @@ public class ScrabbleAnalyzerPanel extends JPanel {
 
         this.setNotification("Welcome");
         this.setLayout(this.layout);
-        this.notificationBar.setFont(MoveScroller.FONT.deriveFont(14F));
+        this.notificationBar.setFont(new Font("Courier New", Font.PLAIN, 14));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;

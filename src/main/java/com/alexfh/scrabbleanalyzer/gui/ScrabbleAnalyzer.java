@@ -29,6 +29,8 @@ public class ScrabbleAnalyzer extends JFrame {
     private final ScrabbleAnalyzerPanel scrabbleAnalyzerPanel;
     private final BufferedImage iconImage;
     private final String title = "ScrabbleAnalyzer";
+    private final String undoPrefix = "Undo (Ctrl+Z)";
+    private final String redoPrefix = "Redo (Ctrl+R)";
     private final JMenuItem undo;
     private final JMenuItem redo;
     private IScrabbleGameState gameState;
@@ -75,8 +77,8 @@ public class ScrabbleAnalyzer extends JFrame {
         JMenuItem save = new JMenuItem("Save (Ctrl+S)");
         JMenuItem saveAs = new JMenuItem("Save As (Shift+Ctrl+S)");
         JMenuItem clearBoard = new JMenuItem("Clear Board");
-        this.undo = new JMenuItem("Undo (Ctrl+Z)");
-        this.redo = new JMenuItem("Redo (Ctrl+R)");
+        this.undo = new JMenuItem(this.undoPrefix);
+        this.redo = new JMenuItem(this.redoPrefix);
 
         this.undo.setEnabled(false);
         this.redo.setEnabled(false);
@@ -176,11 +178,12 @@ public class ScrabbleAnalyzer extends JFrame {
         return this.gameState.isEqualTo(this.lastSaveState);
     }
 
-    private void onAction(RevertableAction revertableAction) {
-        if (revertableAction.isNull()) return;
+    private void onAction(RevertableAction action) {
+        if (action.isNull()) return;
 
+        this.scrabbleAnalyzerPanel.setNotification(action.getDescription());
         this.clearRedo();
-        this.pushOntoUndo(revertableAction);
+        this.pushOntoUndo(action);
     }
 
     private void undo() {
@@ -189,6 +192,7 @@ public class ScrabbleAnalyzer extends JFrame {
         if ((toUndo = this.popOffUndo()) == null) return;
 
         toUndo.undo();
+        this.scrabbleAnalyzerPanel.setNotification("Undid: " + toUndo.getDescription());
         this.pushOntoRedo(toUndo);
     }
 
@@ -198,11 +202,13 @@ public class ScrabbleAnalyzer extends JFrame {
         if ((toRedo = this.popOffRedo()) == null) return;
 
         toRedo.redo();
+        this.scrabbleAnalyzerPanel.setNotification("Redid: " + toRedo.getDescription());
         this.pushOntoUndo(toRedo);
     }
 
     private void clearRedo() {
         this.redoStack.clear();
+        this.redo.setText(this.redoPrefix);
 
         if (this.redo.isEnabled()) this.redo.setEnabled(false);
     }
@@ -212,7 +218,13 @@ public class ScrabbleAnalyzer extends JFrame {
 
         RevertableAction action = this.undoStack.pop();
 
-        if (this.undoStack.isEmpty() && this.undo.isEnabled()) this.undo.setEnabled(false);
+        if (this.undoStack.isEmpty()) {
+            this.undo.setText(this.undoPrefix);
+
+            if (this.undo.isEnabled()) this.undo.setEnabled(false);
+        } else {
+            this.undo.setText(this.undoPrefix + " " + this.undoStack.peek().getDescription());
+        }
 
         return action;
     }
@@ -222,19 +234,27 @@ public class ScrabbleAnalyzer extends JFrame {
 
         RevertableAction action = this.redoStack.pop();
 
-        if (this.redoStack.isEmpty() && this.redo.isEnabled()) this.redo.setEnabled(false);
+        if (this.redoStack.isEmpty()) {
+            this.redo.setText(this.redoPrefix);
+
+            if (this.redo.isEnabled()) this.redo.setEnabled(false);
+        } else {
+            this.redo.setText(this.redoPrefix + " " + this.redoStack.peek().getDescription());
+        }
 
         return action;
     }
 
     private void pushOntoUndo(RevertableAction action) {
         this.undoStack.push(action);
+        this.undo.setText(this.undoPrefix + " " + action.getDescription());
 
         if (!this.undo.isEnabled()) this.undo.setEnabled(true);
     }
 
     private void pushOntoRedo(RevertableAction action) {
         this.redoStack.push(action);
+        this.redo.setText(this.redoPrefix + " " + action.getDescription());
 
         if (!this.redo.isEnabled()) this.redo.setEnabled(true);
     }
@@ -252,6 +272,7 @@ public class ScrabbleAnalyzer extends JFrame {
         this.setSaveFile();
         this.setLastSaveState();
         this.reloadGame();
+        this.scrabbleAnalyzerPanel.setNotification("Created new file");
     }
 
     private void open() {
@@ -263,6 +284,8 @@ public class ScrabbleAnalyzer extends JFrame {
         } catch (IOException e) {
             this.fileOpenErrorDialog();
         }
+
+        this.scrabbleAnalyzerPanel.setNotification("Opened new file: " + this.saveFile.getName());
     }
 
     private void openChooser() throws IOException {
@@ -300,6 +323,8 @@ public class ScrabbleAnalyzer extends JFrame {
         } catch (IOException e) {
             this.fileSaveErrorDialog();
         }
+
+        this.scrabbleAnalyzerPanel.setNotification("Saved to file: " + this.saveFile.getName());
     }
 
     private void fileOpenErrorDialog() {

@@ -142,7 +142,7 @@ public class PlayerTileGrid extends JPanel {
                 }
             )
         );
-        this.onAction.accept(actionBuilder.build());
+        this.onAction.accept(actionBuilder.build().withDescription("Backspace in tile rack"));
     }
 
     private void placeCharAtCursor(Character character) {
@@ -158,7 +158,7 @@ public class PlayerTileGrid extends JPanel {
             )
         );
         actionBuilder.add(this.offsetCursor(1));
-        this.onAction.accept(actionBuilder.build());
+        this.onAction.accept(actionBuilder.build().withDescription("Type character in tile rack"));
     }
 
     private void onCharPressed(Character character) {
@@ -183,7 +183,7 @@ public class PlayerTileGrid extends JPanel {
                 CompoundRevertableAction.compoundActionOf(
                     this.setCursor(i),
                     this.setJustSet(true)
-                )
+                ).withDescription("Set cursor in tile rack at: " + (i + 1))
             );
             this.requestFocusInWindow();
         }

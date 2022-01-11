@@ -219,7 +219,7 @@ public class ScrabbleGrid extends JPanel {
                 }
             )
         );
-        this.onAction.accept(actionBuilder.build());
+        this.onAction.accept(actionBuilder.build().withDescription("Backspace in scrabble board"));
     }
 
     private void placeCharAtCursor(boolean isShiftDown, Character character) {
@@ -262,7 +262,7 @@ public class ScrabbleGrid extends JPanel {
         else
             actionBuilder.add(this.offsetColCursor(1));
 
-        this.onAction.accept(actionBuilder.build());
+        this.onAction.accept(actionBuilder.build().withDescription("Type character on scrabble board"));
     }
 
     private void onCharPressed(Character character, boolean isShiftDown) {
@@ -293,7 +293,7 @@ public class ScrabbleGrid extends JPanel {
                     this.setJustSet(true),
                     this.setWasLastMovementForwardVert(false),
                     this.setWasLastMovementForwardHori(false)
-                )
+                ).withDescription("Set cursor in scrabble board at: " + (r + 1) + " " + (c + 1))
             );
             this.requestFocusInWindow();
         } else {
@@ -304,7 +304,7 @@ public class ScrabbleGrid extends JPanel {
                             this.updateAndRepaintTileAt(r, c);
                             this.onMovesInvalidated.run();
                         }
-                    )
+                    ).withDescription("Toggle tile point value at: " + (r + 1) + " " + (c + 1))
                 );
             }
         }

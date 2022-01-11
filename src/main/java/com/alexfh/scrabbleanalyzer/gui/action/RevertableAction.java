@@ -19,6 +19,8 @@ public abstract class RevertableAction {
 
     };
 
+    private String description = "Untitled action";
+
     public abstract void execute();
 
     public abstract void undo();
@@ -52,6 +54,18 @@ public abstract class RevertableAction {
                 runAfter.run();
             }
         );
+    }
+
+    public RevertableAction withDescription(String description) {
+        if (description == null) return this;
+
+        this.description = description;
+
+        return this;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     private static RevertableAction ofNoInit(final Runnable execute, final Runnable undo) {

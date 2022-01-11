@@ -69,7 +69,9 @@ public class ScrabblePanel extends JPanel {
             CompoundRevertableAction.compoundActionOf(
                 this.grid.clearGrid(),
                 this.playerTileGrid.clearPlayerTileGrid()
-            ).then(this::updateMoves)
+            ).then(this::updateMoves).withDescription(
+                "Clear board"
+            )
         );
     }
 
@@ -79,7 +81,9 @@ public class ScrabblePanel extends JPanel {
                 CompoundRevertableAction.compoundActionOf(
                     this.grid.playMove(move),
                     this.playerTileGrid.playMove(move)
-                ).then(this::updateMoves)
+                ).then(this::updateMoves).withDescription(
+                    "Play move: " + move.playedWord()
+                )
             );
         }
     }

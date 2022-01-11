@@ -165,10 +165,14 @@ public class PlayerTileGrid extends JPanel {
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || this.cursor > 0) {
                 this.doBackspace();
+            } else {
+                Toolkit.getDefaultToolkit().beep();
             }
         } else {
             if (this.cursor < 7) {
                 this.placeCharAtCursor(character);
+            } else {
+                Toolkit.getDefaultToolkit().beep();
             }
         }
     }

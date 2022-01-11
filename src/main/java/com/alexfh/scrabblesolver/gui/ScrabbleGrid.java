@@ -229,8 +229,6 @@ public class ScrabbleGrid extends JPanel {
 
         if (isShiftDown) {
             if (this.wasLastMovementForwardHori) {
-                if (this.cursorR == 14) return;
-
                 actionBuilder.add(this.offsetRowCursor(1));
                 actionBuilder.add(this.offsetColCursor(-1));
             }
@@ -239,8 +237,6 @@ public class ScrabbleGrid extends JPanel {
             actionBuilder.add(this.setWasLastMovementForwardHori(false));
         } else {
             if (this.wasLastMovementForwardVert) {
-                if (this.cursorC == 14) return;
-
                 actionBuilder.add(this.offsetRowCursor(-1));
                 actionBuilder.add(this.offsetColCursor(1));
             }
@@ -273,10 +269,18 @@ public class ScrabbleGrid extends JPanel {
         if (character == ScrabblePanel.backspaceChar) {
             if (this.cursorJustSet || (isShiftDown && this.cursorR > 0) || (!isShiftDown && this.cursorC > 0)) {
                 this.doBackspace(isShiftDown);
+            } else {
+                Toolkit.getDefaultToolkit().beep();
             }
         } else {
-            if ((isShiftDown && this.cursorR < 15) || (!isShiftDown && this.cursorC < 15)) {
+            if (
+                ((isShiftDown && this.cursorR < 15) || (!isShiftDown && this.cursorC < 15)) &&
+                !(isShiftDown && this.wasLastMovementForwardHori && this.cursorR == 14) &&
+                !(!isShiftDown && this.wasLastMovementForwardVert && this.cursorC == 14)
+            ) {
                 this.placeCharAtCursor(isShiftDown, character);
+            } else {
+                Toolkit.getDefaultToolkit().beep();
             }
         }
     }

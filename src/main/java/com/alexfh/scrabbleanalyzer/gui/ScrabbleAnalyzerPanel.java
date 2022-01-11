@@ -47,8 +47,8 @@ public class ScrabbleAnalyzerPanel extends JPanel {
     public void setNotification(String notification) {
         this.notificationBar.setText(
             ZonedDateTime
-                .now( ZoneId.systemDefault() )
-                .format( DateTimeFormatter.ofPattern( "HH:mm:ss" ) ) + " " +
+                .now(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("hh:mm:ss a")) + " | " +
             notification
         );
     }

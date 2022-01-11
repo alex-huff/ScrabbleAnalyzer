@@ -206,6 +206,13 @@ public class ScrabbleAnalyzer extends JFrame {
         this.pushOntoUndo(toRedo);
     }
 
+    private void clearUndo() {
+        this.undoStack.clear();
+        this.undo.setText(this.undoPrefix);
+
+        if (this.undo.isEnabled()) this.undo.setEnabled(false);
+    }
+
     private void clearRedo() {
         this.redoStack.clear();
         this.redo.setText(this.redoPrefix);
@@ -306,8 +313,8 @@ public class ScrabbleAnalyzer extends JFrame {
     }
 
     private void reloadGame() {
-        this.undoStack.clear();
-        this.redoStack.clear();
+        this.clearUndo();
+        this.clearRedo();
         System.gc();
         this.scrabbleAnalyzerPanel.loadNewGame(this.gameState);
     }

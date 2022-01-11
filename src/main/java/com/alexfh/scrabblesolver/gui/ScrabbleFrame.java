@@ -27,12 +27,17 @@ public class ScrabbleFrame extends JFrame {
     private final Stack<RevertableAction> undoStack = new Stack<>();
     private final Stack<RevertableAction> redoStack = new Stack<>();
     private IScrabbleGameState gameState;
+    private IScrabbleGameState lastSaveState;
     private final ScrabblePanel scrabblePanel;
+    private final BufferedImage iconImage;
     private File saveFile;
 
     public ScrabbleFrame() {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
-        BufferedImage iconImage = TileProvider.INSTANCE.getTile(
+
+        this.setLastSaveState();
+
+        this.iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
             false,
@@ -50,16 +55,7 @@ public class ScrabbleFrame extends JFrame {
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    if (ScrabbleFrame.this.isSaved() ||
-                        JOptionPane.showConfirmDialog(
-                            ScrabbleFrame.this,
-                            "Are you sure you want to close without saving?",
-                            "Confirmation",
-                            JOptionPane.OK_CANCEL_OPTION,
-                            JOptionPane.QUESTION_MESSAGE,
-                            new ImageIcon(iconImage)
-                        ) == JOptionPane.YES_OPTION
-                    ) {
+                    if (ScrabbleFrame.this.confirmationIfNotSaved("Are you sure you want to close without saving?")) {
                         ScrabbleGame.threadPool.shutdownNow();
                         System.exit(0);
                     }
@@ -161,8 +157,21 @@ public class ScrabbleFrame extends JFrame {
         );
     }
 
+    private boolean confirmationIfNotSaved(String message) {
+        return
+            this.isSaved() ||
+            JOptionPane.showConfirmDialog(
+                this,
+                message,
+                "Confirmation",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                new ImageIcon(this.iconImage)
+            ) == JOptionPane.YES_OPTION;
+    }
+
     private boolean isSaved() {
-        return false;
+        return this.gameState.isEqualTo(this.lastSaveState);
     }
 
     private void onAction(RevertableAction revertableAction) {
@@ -190,14 +199,25 @@ public class ScrabbleFrame extends JFrame {
         this.undoStack.push(toRedo);
     }
 
+    private void setLastSaveState() {
+        this.lastSaveState = this.gameState.copyScrabbleGame();
+    }
+
     private void newFile() {
+        if (!this.confirmationIfNotSaved("Are you sure you want to create a new file without saving?"))
+            return;
+
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
         this.saveFile = null;
 
+        this.setLastSaveState();
         this.reloadGame();
     }
 
     private void open() {
+        if (!this.confirmationIfNotSaved("Are you sure you want to open a new file without saving?"))
+            return;
+
         try {
             this.openChooser();
         } catch (IOException e) {
@@ -217,8 +237,7 @@ public class ScrabbleFrame extends JFrame {
     }
 
     private void openFromFile(File fileToOpen) throws IOException {
-        this.gameState = this.readFromFile(fileToOpen);
-
+        this.readFromFile(fileToOpen);
         this.reloadGame();
     }
 
@@ -277,22 +296,22 @@ public class ScrabbleFrame extends JFrame {
         FileOutputStream fileOut = new FileOutputStream(file);
         SAOutputStream saOutputStream = new SAOutputStream(fileOut);
 
-        saOutputStream.writeScrabbleGameState(gameState);
+        saOutputStream.writeScrabbleGameState(this.gameState);
         saOutputStream.close();
+        this.setLastSaveState();
 
         this.saveFile = file;
     }
 
-    private IScrabbleGameState readFromFile(File file) throws IOException {
+    private void readFromFile(File file) throws IOException {
         FileInputStream fileIn = new FileInputStream(file);
         SAInputStream saInputStream = new SAInputStream(fileIn);
-        IScrabbleGameState readGameState = saInputStream.readGameState();
+        this.gameState = saInputStream.readGameState();
 
         saInputStream.close();
+        this.setLastSaveState();
 
         this.saveFile = file;
-
-        return readGameState;
     }
 
 }

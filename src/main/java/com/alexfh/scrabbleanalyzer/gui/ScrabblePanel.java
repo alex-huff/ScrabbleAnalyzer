@@ -4,6 +4,7 @@ import com.alexfh.scrabbleanalyzer.Main;
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleLayout;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
 import com.alexfh.scrabbleanalyzer.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;

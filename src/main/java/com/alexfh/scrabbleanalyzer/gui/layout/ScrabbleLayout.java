@@ -1,4 +1,6 @@
-package com.alexfh.scrabbleanalyzer.gui;
+package com.alexfh.scrabbleanalyzer.gui.layout;
+
+import com.alexfh.scrabbleanalyzer.gui.ScrabblePanel;
 
 import java.awt.*;
 

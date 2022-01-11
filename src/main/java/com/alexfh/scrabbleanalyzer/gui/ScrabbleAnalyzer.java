@@ -3,6 +3,7 @@ package com.alexfh.scrabbleanalyzer.gui;
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.file.ScrabbleAnalyzerFileFilter;
+import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleAnalyzerFrameLayout;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 import com.alexfh.scrabbleanalyzer.state.impl.ScrabbleGameStateImpl;
@@ -12,6 +13,7 @@ import com.alexfh.scrabbleanalyzer.state.impl.stream.SAOutputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +32,7 @@ public class ScrabbleAnalyzer extends JFrame {
     private final JLabel notificationBar;
     private final BufferedImage iconImage;
     private final String title = "ScrabbleAnalyzer";
+    private final ScrabbleAnalyzerFrameLayout layoutManager = new ScrabbleAnalyzerFrameLayout(this);
     private IScrabbleGameState gameState;
     private IScrabbleGameState lastSaveState;
     private File saveFile;
@@ -97,9 +100,9 @@ public class ScrabbleAnalyzer extends JFrame {
         editMenu.add(redo);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
-        this.setLayout(new GridBagLayout());
+        this.setLayout(this.layoutManager);
         this.setJMenuBar(menuBar);
-        this.notificationBar.setFont(MoveScroller.FONT);
+        this.notificationBar.setFont(MoveScroller.FONT.deriveFont(14F));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -116,6 +119,24 @@ public class ScrabbleAnalyzer extends JFrame {
         this.add(this.notificationBar, constraints);
         this.pack();
         this.setVisible(true);
+    }
+
+    public void onResize(int width, int height) {
+        GridBagConstraints notificationBarConstraints = this.layoutManager.getConstraints(this.notificationBar);
+        Insets notificationInsets = notificationBarConstraints.insets;
+
+        this.notificationBar.setPreferredSize(
+            new Dimension(
+                width - (notificationInsets.left + notificationInsets.right),
+                this.notificationBar.getMinimumSize().height
+            )
+        );
+        this.scrabblePanel.setPreferredSize(
+            new Dimension(
+                width,
+                height - (this.notificationBar.getMinimumSize().height + notificationInsets.top + notificationInsets.bottom)
+            )
+        );
     }
 
     private void registerKeybindings() {

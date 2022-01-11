@@ -26,12 +26,12 @@ public class ScrabbleAnalyzer extends JFrame {
 
     private final Stack<RevertableAction> undoStack = new Stack<>();
     private final Stack<RevertableAction> redoStack = new Stack<>();
-    private IScrabbleGameState gameState;
-    private IScrabbleGameState lastSaveState;
     private final ScrabblePanel scrabblePanel;
     private final BufferedImage iconImage;
-    private File saveFile;
     private final String title = "ScrabbleAnalyzer";
+    private IScrabbleGameState gameState;
+    private IScrabbleGameState lastSaveState;
+    private File saveFile;
 
     public ScrabbleAnalyzer() {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
@@ -39,6 +39,10 @@ public class ScrabbleAnalyzer extends JFrame {
         this.setSaveFile();
         this.setLastSaveState();
 
+        this.scrabblePanel = new ScrabblePanel(
+            this::onAction,
+            gameState
+        );
         this.iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -65,10 +69,6 @@ public class ScrabbleAnalyzer extends JFrame {
         );
 
         JMenuBar menuBar = new JMenuBar();
-        this.scrabblePanel = new ScrabblePanel(
-            this::onAction,
-            gameState
-        );
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
         JMenuItem newFile = new JMenuItem("New File (Ctrl+N)");
@@ -229,6 +229,7 @@ public class ScrabbleAnalyzer extends JFrame {
     private void openChooser() throws IOException {
         JFileChooser fileChooser = new JFileChooser();
 
+        if (this.saveFile != null) fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
         fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
         fileChooser.setDialogTitle("Select a file to open");
 
@@ -273,6 +274,7 @@ public class ScrabbleAnalyzer extends JFrame {
     private void saveAs() {
         JFileChooser fileChooser = new JFileChooser();
 
+        if (this.saveFile != null) fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
         fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
         fileChooser.setDialogTitle("Select a file to save");
 

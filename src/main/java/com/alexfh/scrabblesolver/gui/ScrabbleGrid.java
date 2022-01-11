@@ -79,9 +79,11 @@ public class ScrabbleGrid extends JPanel {
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
-                this.updateAndRepaintTileAt(r, c);
+                this.updateTileAt(r, c);
             }
         }
+
+        this.repaint();
     }
 
     public RevertableAction clearGrid() {
@@ -94,13 +96,13 @@ public class ScrabbleGrid extends JPanel {
 
                 actionBuilder.add(
                     this.board.removeCharAt(finalR, finalC).then(
-                        () -> this.updateAndRepaintTileAt(finalR, finalC)
+                        () -> this.updateTileAt(finalR, finalC)
                     )
                 );
             }
         }
 
-        return actionBuilder.build();
+        return actionBuilder.build().then(this::repaint);
     }
 
     public void showMove(ScrabbleGame.Move move) {
@@ -177,8 +179,12 @@ public class ScrabbleGrid extends JPanel {
     }
 
     private void updateAndRepaintTileAt(int r, int c) {
-        this.labels[r][c].getIcon().setImage(this.getTileAt(r, c));
+        this.updateTileAt(r, c);
         this.labels[r][c].repaint();
+    }
+
+    private void updateTileAt(int r, int c) {
+        this.labels[r][c].getIcon().setImage(this.getTileAt(r, c));
     }
 
     private void doBackspace(boolean isShiftDown) {

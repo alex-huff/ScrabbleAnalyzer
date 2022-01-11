@@ -72,8 +72,10 @@ public class PlayerTileGrid extends JPanel {
         this.tileRack = tileRack;
 
         for (int i = 0; i < 7; i++) {
-            this.updateAndRepaintTileAt(i);
+            this.updateTileAt(i);
         }
+
+        this.repaint();
     }
 
     public RevertableAction clearPlayerTileGrid() {
@@ -84,12 +86,12 @@ public class PlayerTileGrid extends JPanel {
 
             actionBuilder.add(
                 this.tileRack.removeTileInRackAt(finalI).then(
-                    () -> this.updateAndRepaintTileAt(finalI)
+                    () -> this.updateTileAt(finalI)
                 )
             );
         }
 
-        return actionBuilder.build();
+        return actionBuilder.build().then(this::repaint);
     }
 
     public RevertableAction playMove(ScrabbleGame.Move move) {
@@ -215,8 +217,12 @@ public class PlayerTileGrid extends JPanel {
     }
 
     private void updateAndRepaintTileAt(int i) {
-        this.labels[i].getIcon().setImage(this.getTileAt(i));
+        this.updateTileAt(i);
         this.labels[i].repaint();
+    }
+
+    private void updateTileAt(int i) {
+        this.labels[i].getIcon().setImage(this.getTileAt(i));
     }
 
     private BufferedImage getTileAt(int i) {

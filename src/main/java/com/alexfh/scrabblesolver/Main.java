@@ -1,10 +1,8 @@
 package com.alexfh.scrabblesolver;
 
 import com.alexfh.scrabblesolver.dictionary.WordGraphDictionary;
-import com.alexfh.scrabblesolver.gui.ScrabbleFrame;
+import com.alexfh.scrabblesolver.gui.ScrabbleAnalyzer;
 import com.alexfh.scrabblesolver.gui.tile.DocumentProvider;
-import com.alexfh.scrabblesolver.state.IScrabbleGameState;
-import com.alexfh.scrabblesolver.state.impl.ScrabbleGameStateImpl;
 
 import javax.swing.*;
 import java.io.File;
@@ -36,7 +34,7 @@ public class Main {
                     e.printStackTrace();
                 }
 
-                new ScrabbleFrame();
+                new ScrabbleAnalyzer();
             }
         );
     }

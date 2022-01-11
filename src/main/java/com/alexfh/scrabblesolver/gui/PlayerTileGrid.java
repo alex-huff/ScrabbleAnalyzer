@@ -22,7 +22,7 @@ public class PlayerTileGrid extends JPanel {
 
     private final Consumer<RevertableAction> onAction;
     private final TileLabel[] labels = new TileLabel[7];
-    private int tileSize = ScrabbleFrame.defaultTileSize;
+    private int tileSize = ScrabbleAnalyzer.defaultTileSize;
     private final Dimension size = new Dimension(this.tileSize * 7, this.tileSize);
     private IPlayerTileRack tileRack;
     private final Runnable onMovesInvalidated;

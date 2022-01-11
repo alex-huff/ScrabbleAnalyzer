@@ -28,7 +28,7 @@ public class ScrabblePanel extends JPanel {
     private final PlayerTileGrid playerTileGrid;
     private final MoveScroller moveScroller;
     private boolean isVerticalLayout = false;
-    private int currentTileSize = ScrabbleFrame.defaultTileSize;
+    private int currentTileSize = ScrabbleAnalyzer.defaultTileSize;
     private int updateNum = 0;
     private int lastUpdateReceived = 0;
     private Future<?> pendingUpdate;

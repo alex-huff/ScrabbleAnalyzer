@@ -14,7 +14,7 @@ public class MoveScroller extends JScrollPane {
 
     private static final Font FONT = new Font("Courier New", Font.BOLD, 16);
 
-    private final Dimension size = new Dimension(ScrabbleFrame.defaultTileSize * 8, ScrabbleFrame.defaultTileSize * 14);
+    private final Dimension size = new Dimension(ScrabbleAnalyzer.defaultTileSize * 8, ScrabbleAnalyzer.defaultTileSize * 14);
     private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;

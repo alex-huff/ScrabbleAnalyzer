@@ -19,10 +19,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Stack;
 
-public class ScrabbleFrame extends JFrame {
+public class ScrabbleAnalyzer extends JFrame {
 
     private static final Dimension screenWidth = Toolkit.getDefaultToolkit().getScreenSize();
-    public static final int defaultTileSize = (int) (ScrabbleFrame.screenWidth.getHeight() * .75F / 15);
+    public static final int defaultTileSize = (int) (ScrabbleAnalyzer.screenWidth.getHeight() * .75F / 15);
 
     private final Stack<RevertableAction> undoStack = new Stack<>();
     private final Stack<RevertableAction> redoStack = new Stack<>();
@@ -31,10 +31,12 @@ public class ScrabbleFrame extends JFrame {
     private final ScrabblePanel scrabblePanel;
     private final BufferedImage iconImage;
     private File saveFile;
+    private final String title = "ScrabbleAnalyzer";
 
-    public ScrabbleFrame() {
+    public ScrabbleAnalyzer() {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
 
+        this.setSaveFile();
         this.setLastSaveState();
 
         this.iconImage = TileProvider.INSTANCE.getTile(
@@ -45,7 +47,6 @@ public class ScrabbleFrame extends JFrame {
             50
         );
 
-        this.setTitle("ScrabbleAnalyzer");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setMinimumSize(new Dimension(400, 400));
         this.setIconImage(iconImage);
@@ -55,7 +56,7 @@ public class ScrabbleFrame extends JFrame {
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    if (ScrabbleFrame.this.confirmationIfNotSaved("Are you sure you want to close without saving?")) {
+                    if (ScrabbleAnalyzer.this.confirmationIfNotSaved("Are you sure you want to close without saving?")) {
                         ScrabbleGame.threadPool.shutdownNow();
                         System.exit(0);
                     }
@@ -111,7 +112,7 @@ public class ScrabbleFrame extends JFrame {
             new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ScrabbleFrame.this.undo();
+                    ScrabbleAnalyzer.this.undo();
                 }
             }
         );
@@ -121,7 +122,7 @@ public class ScrabbleFrame extends JFrame {
             new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ScrabbleFrame.this.redo();
+                    ScrabbleAnalyzer.this.redo();
                 }
             }
         );
@@ -131,7 +132,7 @@ public class ScrabbleFrame extends JFrame {
             new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ScrabbleFrame.this.newFile();
+                    ScrabbleAnalyzer.this.newFile();
                 }
             }
         );
@@ -141,7 +142,7 @@ public class ScrabbleFrame extends JFrame {
             new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ScrabbleFrame.this.save();
+                    ScrabbleAnalyzer.this.save();
                 }
             }
         );
@@ -151,7 +152,7 @@ public class ScrabbleFrame extends JFrame {
             new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ScrabbleFrame.this.saveAs();
+                    ScrabbleAnalyzer.this.saveAs();
                 }
             }
         );
@@ -208,8 +209,8 @@ public class ScrabbleFrame extends JFrame {
             return;
 
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
-        this.saveFile = null;
 
+        this.setSaveFile();
         this.setLastSaveState();
         this.reloadGame();
     }
@@ -292,6 +293,18 @@ public class ScrabbleFrame extends JFrame {
         return new File(selectedFile.getAbsolutePath() + ScrabbleAnalyzerFileFilter.EXTENSION);
     }
 
+    private void setSaveFile() {
+        this.saveFile = null;
+
+        this.setTitle(this.title + " [" + "Untitled]");
+    }
+
+    private void setSaveFile(File file) {
+        this.saveFile = file;
+
+        this.setTitle(this.title + " [" + file.getName() + "]");
+    }
+
     private void saveToFile(File file) throws IOException {
         FileOutputStream fileOut = new FileOutputStream(file);
         SAOutputStream saOutputStream = new SAOutputStream(fileOut);
@@ -299,8 +312,7 @@ public class ScrabbleFrame extends JFrame {
         saOutputStream.writeScrabbleGameState(this.gameState);
         saOutputStream.close();
         this.setLastSaveState();
-
-        this.saveFile = file;
+        this.setSaveFile(file);
     }
 
     private void readFromFile(File file) throws IOException {
@@ -310,8 +322,7 @@ public class ScrabbleFrame extends JFrame {
 
         saInputStream.close();
         this.setLastSaveState();
-
-        this.saveFile = file;
+        this.setSaveFile(file);
     }
 
 }

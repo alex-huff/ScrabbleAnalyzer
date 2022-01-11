@@ -20,7 +20,7 @@ public class ScrabbleGrid extends JPanel {
 
     private final Consumer<RevertableAction> onAction;
     private final TileLabel[][] labels = new TileLabel[15][15];
-    private int tileSize = ScrabbleFrame.defaultTileSize;
+    private int tileSize = ScrabbleAnalyzer.defaultTileSize;
     private final Dimension size = new Dimension(this.tileSize * 15, this.tileSize * 15);
     private IScrabbleBoard board;
     private final Runnable onMovesInvalidated;

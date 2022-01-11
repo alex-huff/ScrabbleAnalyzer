@@ -2,6 +2,9 @@ package com.alexfh.scrabblesolver.state;
 
 import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 
+import java.util.function.BiPredicate;
+import java.util.stream.IntStream;
+
 public interface IScrabbleBoard {
 
     int getRows();
@@ -31,5 +34,29 @@ public interface IScrabbleBoard {
     int getAnchorCol();
 
     IScrabbleBoard copyBoard();
+
+    default boolean isEqualTo(IScrabbleBoard otherBoard) {
+        return
+            this.getRows() == otherBoard.getRows() &&
+            this.getCols() == otherBoard.getCols() &&
+            this.trueForAllTiles((r, c) -> this.getLetterMultiplierAt(r, c) == otherBoard.getLetterMultiplierAt(r, c)) &&
+            this.trueForAllTiles((r, c) -> this.getWordMultiplierAt(r, c) == otherBoard.getWordMultiplierAt(r, c)) &&
+            this.trueForAllTiles((r, c) -> this.getCharAt(r, c) == otherBoard.getCharAt(r, c)) &&
+            this.trueForAllTiles((r, c) -> this.isWildcardAt(r, c) == otherBoard.isWildcardAt(r, c)) &&
+            this.getAnchorRow() == otherBoard.getAnchorRow() &&
+            this.getAnchorCol() == otherBoard.getAnchorCol();
+    }
+
+    private boolean trueForAllTiles(BiPredicate<Integer, Integer> tileCondition) {
+        return IntStream.of(
+            this.getRows()
+        ).allMatch(
+            r -> IntStream.of(
+                this.getCols()
+            ).allMatch(
+                c -> tileCondition.test(r, c)
+            )
+        );
+    }
 
 }

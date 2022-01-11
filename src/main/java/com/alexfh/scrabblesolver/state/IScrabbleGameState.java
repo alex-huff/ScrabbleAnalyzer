@@ -10,4 +10,9 @@ public interface IScrabbleGameState extends IScrabbleBoard, IPlayerTileRack {
 
     IScrabbleGameState copyScrabbleGame();
 
+    default boolean isEqualTo(IScrabbleGameState otherGameState) {
+        return this.isEqualTo((IScrabbleBoard) otherGameState) &&
+            this.isEqualTo((IPlayerTileRack) otherGameState);
+    }
+
 }

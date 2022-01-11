@@ -3,6 +3,7 @@ package com.alexfh.scrabblesolver.state;
 import com.alexfh.scrabblesolver.gui.action.RevertableAction;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 public interface IPlayerTileRack {
 
@@ -33,5 +34,16 @@ public interface IPlayerTileRack {
     List<Character> getTilesInRack();
 
     IPlayerTileRack copyRack();
+
+    default boolean isEqualTo(IPlayerTileRack otherRack) {
+        return
+            this.getRackSize() == otherRack.getRackSize() &&
+            IntStream.of(
+                this.getRackSize()
+            ).allMatch(
+                i -> this.getTileInRackAt(i) == otherRack.getTileInRackAt(i)
+            ) &&
+            this.getTilesInRack().equals(otherRack.getTilesInRack());
+    }
 
 }

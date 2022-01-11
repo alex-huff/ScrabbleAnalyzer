@@ -260,7 +260,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
             Arrays.stream(this.letterMultipliers).map(int[]::clone).toArray($ -> this.letterMultipliers.clone()),
             Arrays.stream(this.wordMultipliers).map(int[]::clone).toArray($ -> this.wordMultipliers.clone()),
             Arrays.stream(this.playedTiles).map(char[]::clone).toArray($ -> this.playedTiles.clone()),
-            Arrays.stream(this.wildcardTiles).map(boolean[]::clone).toArray($ -> this.wildcardTiles.clone())
+            Arrays.stream(this.wildcardTiles).map(boolean[]::clone).toArray($ -> this.wildcardTiles.clone()),
+            this.anchorRow,
+            this.anchorCol
         );
     }
 

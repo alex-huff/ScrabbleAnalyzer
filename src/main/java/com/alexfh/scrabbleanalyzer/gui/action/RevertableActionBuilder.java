@@ -1,22 +1,51 @@
 package com.alexfh.scrabbleanalyzer.gui.action;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.stream.Collector;
 
 public class RevertableActionBuilder {
 
-    List<RevertableAction> revertableActions = new LinkedList<>();
+    public Runnable execute;
+    public Runnable undo;
+    private boolean isNull = true;
 
-    public RevertableActionBuilder add(RevertableAction action) {
-        if (!action.isNull()) this.revertableActions.add(action);
+    public void add(final RevertableAction revertableAction) {
+        if (revertableAction.isNull()) return;
+
+        if (this.isNull) this.isNull = false;
+
+        final Runnable oldExecute = this.execute;
+        final Runnable oldUndo = this.undo;
+
+        this.execute = oldExecute == null ? revertableAction::execute : () -> {
+            oldExecute.run();
+            revertableAction.execute();
+        };
+        this.undo = oldUndo == null ? revertableAction::undo : () -> {
+            revertableAction.undo();
+            oldUndo.run();
+        };
+    }
+
+    public RevertableActionBuilder addAll(RevertableActionBuilder revertableActionBuilder) {
+        this.add(revertableActionBuilder.build());
 
         return this;
     }
 
     public RevertableAction build() {
-        return this.revertableActions.isEmpty() ?
+        return this.isNull ?
             RevertableAction.nullRevertableAction :
-            new CompoundRevertableAction(this.revertableActions);
+            RevertableAction.ofNoInit(this.execute, this.undo);
+    }
+
+    public static Collector<RevertableAction, RevertableActionBuilder, RevertableAction> collector() {
+        return Collector.of(
+            RevertableActionBuilder::new,
+            RevertableActionBuilder::add,
+            RevertableActionBuilder::addAll,
+            RevertableActionBuilder::build
+        );
     }
 
 }
+

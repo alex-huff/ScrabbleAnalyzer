@@ -1,91 +1,34 @@
 package com.alexfh.scrabbleanalyzer.gui.action;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-public abstract class RevertableAction {
+public class RevertableAction {
 
-    public static final RevertableAction nullRevertableAction = new RevertableAction() {
-
-        @Override
-        public void execute() { }
-
-        @Override
-        public void undo() { }
+    public static final RevertableAction nullRevertableAction = new RevertableAction(() -> { }, () -> { }) {
 
         @Override
         public boolean isNull() {
             return true;
         }
 
+        @Override
+        public RevertableAction withDescription(String description) {
+            return this;
+        }
+
     };
 
-    private String description = "Untitled action";
-
-    public abstract void execute();
-
-    public abstract void undo();
-
-    public void redo() {
-        this.execute();
+    public static RevertableAction compoundActionOf(RevertableAction... revertableActions) {
+        return Stream.of(revertableActions).collect(RevertableActionBuilder.collector());
     }
 
-    public RevertableAction init() {
-        this.execute();
-
-        return this;
-    }
-
-    public boolean isNull() {
-        return false;
-    }
-
-    public RevertableAction then(final Runnable runAfter) {
-        if (this.isNull()) return this;
-
-        runAfter.run();
-
-        return RevertableAction.ofNoInit(
-            () -> {
-                RevertableAction.this.execute();
-                runAfter.run();
-            },
-            () -> {
-                RevertableAction.this.undo();
-                runAfter.run();
-            }
-        );
-    }
-
-    public RevertableAction withDescription(String description) {
-        if (description == null) return this;
-
-        this.description = description;
-
-        return this;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    private static RevertableAction ofNoInit(final Runnable execute, final Runnable undo) {
-        return new RevertableAction() {
-
-            @Override
-            public void execute() {
-                execute.run();
-            }
-
-            @Override
-            public void undo() {
-                undo.run();
-            }
-
-        };
+    public static RevertableAction ofNoInit(final Runnable execute, final Runnable undo) {
+        return new RevertableAction(execute, undo);
     }
 
     public static RevertableAction of(final Runnable execute, final Runnable undo) {
-        return RevertableAction.ofNoInit(execute, undo).init();
+        return new RevertableAction(execute, undo).init();
     }
 
     public static <T> RevertableAction removeElementFromListByEquality(final List<T> listOfT, final T toRemove) {
@@ -137,6 +80,68 @@ public abstract class RevertableAction {
             () -> bool2DArray[r][c] = toSet,
             () -> bool2DArray[r][c] = oldBool
         );
+    }
+
+    private String description = "Untitled action";
+    private Runnable execute;
+    private Runnable undo;
+
+    private RevertableAction(Runnable execute, Runnable undo) {
+        this.execute = execute;
+        this.undo = undo;
+    }
+
+    public void execute() {
+        this.execute.run();
+    }
+
+    public void undo() {
+        this.undo.run();
+    }
+
+    public void redo() {
+        this.execute();
+    }
+
+    public RevertableAction init() {
+        this.execute();
+
+        return this;
+    }
+
+    public boolean isNull() {
+        return false;
+    }
+
+    public RevertableAction then(final Runnable runAfter) {
+        if (this.isNull()) return this;
+
+        runAfter.run();
+
+        final Runnable oldExecute = this.execute;
+        final Runnable oldUndo = this.undo;
+        this.execute = () -> {
+            oldExecute.run();
+            runAfter.run();
+        };
+        this.undo = () -> {
+            oldUndo.run();
+            runAfter.run();
+        };
+
+        return this;
+    }
+
+    public RevertableAction withDescription(String description) {
+        if (description == null) return this;
+
+        this.description = description;
+
+        return this;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
 }

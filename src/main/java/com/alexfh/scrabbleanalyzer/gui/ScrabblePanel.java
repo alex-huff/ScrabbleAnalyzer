@@ -2,7 +2,6 @@ package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.Main;
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
-import com.alexfh.scrabbleanalyzer.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleLayout;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
@@ -66,7 +65,7 @@ public class ScrabblePanel extends JPanel {
 
     public void clearBoard() {
         this.onAction.accept(
-            CompoundRevertableAction.compoundActionOf(
+            RevertableAction.compoundActionOf(
                 this.grid.clearGrid(),
                 this.playerTileGrid.clearPlayerTileGrid()
             ).then(this::updateMoves).withDescription(
@@ -78,7 +77,7 @@ public class ScrabblePanel extends JPanel {
     private void playMove(ScrabbleGame.Move move) {
         if (this.updateNum == this.lastUpdateReceived) {
             this.onAction.accept(
-                CompoundRevertableAction.compoundActionOf(
+                RevertableAction.compoundActionOf(
                     this.grid.playMove(move),
                     this.playerTileGrid.playMove(move)
                 ).then(this::updateMoves).withDescription(

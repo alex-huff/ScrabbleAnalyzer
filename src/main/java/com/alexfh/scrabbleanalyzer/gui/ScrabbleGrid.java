@@ -1,7 +1,6 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
-import com.alexfh.scrabbleanalyzer.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
@@ -139,7 +138,7 @@ public class ScrabbleGrid extends JPanel {
             final int newRow = offset.newRow(startRow, spotInWord);
             final int newCol = offset.newCol(startCol, spotInWord);
             RevertableAction placeTileAction = placedChar == IScrabbleGameState.wildCardTile ?
-                CompoundRevertableAction.compoundActionOf(
+                RevertableAction.compoundActionOf(
                     this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord)),
                     this.board.setWildcardAt(newRow, newCol, true)
                 ) :
@@ -246,7 +245,7 @@ public class ScrabbleGrid extends JPanel {
         }
 
         actionBuilder.add(
-            CompoundRevertableAction.compoundActionOf(
+            RevertableAction.compoundActionOf(
                 this.board.setCharAt(this.cursorR, this.cursorC, character),
                 this.board.setWildcardAt(this.cursorR, this.cursorC, false)
             ).then(
@@ -288,7 +287,7 @@ public class ScrabbleGrid extends JPanel {
     private void onTileClicked(final int r, final int c, boolean isLeft) {
         if (isLeft) {
             this.onAction.accept(
-                CompoundRevertableAction.compoundActionOf(
+                RevertableAction.compoundActionOf(
                     this.setCursor(r, c),
                     this.setJustSet(true),
                     this.setWasLastMovementForwardVert(false),

@@ -1,7 +1,6 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
-import com.alexfh.scrabbleanalyzer.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
@@ -180,7 +179,7 @@ public class PlayerTileGrid extends JPanel {
     private void onTileClicked(int i, boolean isLeft) {
         if (isLeft) {
             this.onAction.accept(
-                CompoundRevertableAction.compoundActionOf(
+                RevertableAction.compoundActionOf(
                     this.setCursor(i),
                     this.setJustSet(true)
                 ).withDescription("Set cursor in tile rack at: " + (i + 1))

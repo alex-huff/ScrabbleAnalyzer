@@ -1,6 +1,5 @@
 package com.alexfh.scrabbleanalyzer.state.impl;
 
-import com.alexfh.scrabbleanalyzer.gui.action.CompoundRevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleBoard;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
@@ -226,7 +225,7 @@ public class ScrabbleBoardImpl implements IScrabbleBoard {
 
     @Override
     public RevertableAction removeCharAt(int r, int c) {
-        return CompoundRevertableAction.compoundActionOf(
+        return RevertableAction.compoundActionOf(
             RevertableAction.setCharAt(this.playedTiles, r, c, IScrabbleGameState.emptyMarker),
             this.setWildcardAt(r, c, false)
         );

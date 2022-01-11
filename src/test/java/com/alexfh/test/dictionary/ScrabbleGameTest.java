@@ -20,10 +20,10 @@ public class ScrabbleGameTest {
     @Test
     public void testDistributionForAllGames() throws IOException, InterruptedException {
         ILetterScoreMap scoreMap = LetterScoreMapImpl.fromFile(
-            new File("src/main/resources/scoremap.txt")
+            new File("src/test/resources/scoremap.txt")
         );
         WordGraphDictionary dictionary = WordGraphDictionary.fromFile(
-            new File("src/main/resources/nwl20.txt")
+            new File("src/test/resources/nwl20.txt")
         );
         this.testDistribution(
             1,
@@ -58,13 +58,13 @@ public class ScrabbleGameTest {
     }
 
     public void testDistribution(int gameNum, int[] expectedDistribution, WordGraphDictionary dictionary, ILetterScoreMap scoreMap) throws IOException, InterruptedException {
-        String gameFolder = "src/main/resources/games/game" + gameNum + "/";
+        String gameFolder = "src/test/resources/games/game" + gameNum + "/";
         ScrabbleGame scrabbleGame = new ScrabbleGame(
             scoreMap,
             dictionary,
             ScrabbleGameStateImpl.fromFiles(
                 new File(gameFolder + "board.txt"),
-                new File("src/main/resources/multipliers.txt"),
+                new File("src/test/resources/multipliers.txt"),
                 new File(gameFolder + "currentletters.txt")
             )
         );

@@ -2,7 +2,7 @@ package com.alexfh.test.dictionary;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.alexfh.scrabblesolver.ai.PermuteTree;
+import com.alexfh.scrabbleanalyzer.ai.PermuteTree;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

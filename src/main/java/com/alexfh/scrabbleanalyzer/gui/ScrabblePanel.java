@@ -183,33 +183,33 @@ public class ScrabblePanel extends JPanel {
             this.layout.removeLayoutComponent(this.moveScroller);
         }
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridheight = this.isVerticalLayout ? 1 : 2;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridheight = this.isVerticalLayout ? 1 : 2;
 
         if (wasInitialized)
-            this.layout.addLayoutComponent(this.grid, c);
+            this.layout.addLayoutComponent(this.grid, constraints);
         else
-            this.add(this.grid, c);
+            this.add(this.grid, constraints);
 
-        c = new GridBagConstraints();
-        c.gridx = this.isVerticalLayout ? 0 : 1;
-        c.gridy = this.isVerticalLayout ? 1 : 0;
+        constraints = new GridBagConstraints();
+        constraints.gridx = this.isVerticalLayout ? 0 : 1;
+        constraints.gridy = this.isVerticalLayout ? 1 : 0;
 
         if (wasInitialized)
-            this.layout.addLayoutComponent(this.moveScroller, c);
+            this.layout.addLayoutComponent(this.moveScroller, constraints);
         else
-            this.add(this.moveScroller, c);
+            this.add(this.moveScroller, constraints);
 
-        c = new GridBagConstraints();
-        c.gridx = this.isVerticalLayout ? 0 : 1;
-        c.gridy = this.isVerticalLayout ? 2 : 1;
+        constraints = new GridBagConstraints();
+        constraints.gridx = this.isVerticalLayout ? 0 : 1;
+        constraints.gridy = this.isVerticalLayout ? 2 : 1;
 
         if (wasInitialized)
-            this.layout.addLayoutComponent(this.playerTileGrid, c);
+            this.layout.addLayoutComponent(this.playerTileGrid, constraints);
         else
-            this.add(this.playerTileGrid, c);
+            this.add(this.playerTileGrid, constraints);
     }
 
 }

@@ -27,6 +27,7 @@ public class ScrabbleAnalyzer extends JFrame {
     private final Stack<RevertableAction> undoStack = new Stack<>();
     private final Stack<RevertableAction> redoStack = new Stack<>();
     private final ScrabblePanel scrabblePanel;
+    private final JLabel notificationBar;
     private final BufferedImage iconImage;
     private final String title = "ScrabbleAnalyzer";
     private IScrabbleGameState gameState;
@@ -43,6 +44,7 @@ public class ScrabbleAnalyzer extends JFrame {
             this::onAction,
             gameState
         );
+        this.notificationBar = new JLabel("Testing notification bar");
         this.iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -95,8 +97,23 @@ public class ScrabbleAnalyzer extends JFrame {
         editMenu.add(redo);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
+        this.setLayout(new GridBagLayout());
         this.setJMenuBar(menuBar);
-        this.add(this.scrabblePanel);
+        this.notificationBar.setFont(MoveScroller.FONT);
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+
+        this.add(this.scrabblePanel, constraints);
+
+        constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new Insets(4, 4, 4, 4);
+
+        this.add(this.notificationBar, constraints);
         this.pack();
         this.setVisible(true);
     }

@@ -38,7 +38,8 @@ public interface IPlayerTileRack {
     default boolean isEqualTo(IPlayerTileRack otherRack) {
         return
             this.getRackSize() == otherRack.getRackSize() &&
-            IntStream.of(
+            IntStream.range(
+                0,
                 this.getRackSize()
             ).allMatch(
                 i -> this.getTileInRackAt(i) == otherRack.getTileInRackAt(i)

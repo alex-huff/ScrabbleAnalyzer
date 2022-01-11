@@ -48,10 +48,12 @@ public interface IScrabbleBoard {
     }
 
     private boolean trueForAllTiles(BiPredicate<Integer, Integer> tileCondition) {
-        return IntStream.of(
+        return IntStream.range(
+            0,
             this.getRows()
         ).allMatch(
-            r -> IntStream.of(
+            r -> IntStream.range(
+                0,
                 this.getCols()
             ).allMatch(
                 c -> tileCondition.test(r, c)

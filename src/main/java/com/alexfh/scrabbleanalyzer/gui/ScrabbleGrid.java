@@ -21,7 +21,6 @@ public class ScrabbleGrid extends JPanel {
     private final Consumer<RevertableAction> onAction;
     private final TileLabel[][] labels = new TileLabel[15][15];
     private int tileSize = ScrabbleAnalyzer.defaultTileSize;
-    private final Dimension size = new Dimension(this.tileSize * 15, this.tileSize * 15);
     private IScrabbleBoard board;
     private final Runnable onMovesInvalidated;
     private int cursorR = 0;
@@ -37,6 +36,7 @@ public class ScrabbleGrid extends JPanel {
         this.board = board;
         this.onMovesInvalidated = onMovesInvalidated;
 
+        this.setPreferredSize(new Dimension(this.tileSize * 15, this.tileSize * 15));
         this.setLayout(new GridLayout(15, 15));
         this.addKeyListener(
             new KeyAdapter() {
@@ -423,18 +423,13 @@ public class ScrabbleGrid extends JPanel {
     public void newSize(int newTileSize) {
         this.tileSize = newTileSize;
 
-        this.size.setSize(this.tileSize * 15, this.tileSize * 15);
+        this.setPreferredSize(new Dimension(this.tileSize * 15, this.tileSize * 15));
 
         for (int r = 0; r < 15; r++) {
             for (int c = 0; c < 15; c++) {
                 this.labels[r][c].getIcon().setImage(this.getTileAt(r, c));
             }
         }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return this.size;
     }
 
 }

@@ -160,9 +160,15 @@ public class ScrabblePanel extends JPanel {
             }
         }
 
-        this.moveScroller.newSize(
-            this.isVerticalLayout ? width : (width - tileSize * 15),
-            this.isVerticalLayout ? (height - tileSize * 16) : (height - tileSize)
+        this.moveScroller.setPreferredSize(
+            new Dimension(
+                this.isVerticalLayout ?
+                    (width - this.getInsetWidth(this.moveScroller)) :
+                    (width - (tileSize * 15 + this.getInsetWidth(this.moveScroller))),
+                this.isVerticalLayout ?
+                    (height - (tileSize * 16 + this.getInsetHeight(this.moveScroller))) :
+                    (height - (tileSize + this.getInsetHeight(this.moveScroller)))
+            )
         );
 
         if (tileSize != this.currentTileSize) {
@@ -173,6 +179,24 @@ public class ScrabblePanel extends JPanel {
         }
 
         this.currentTileSize = tileSize;
+    }
+
+    private int getInsetWidth(Component component) {
+        Insets componentInsets = this.getInsets(component);
+
+        return componentInsets.left + componentInsets.right;
+    }
+
+    private int getInsetHeight(Component component) {
+        Insets componentInsets = this.getInsets(component);
+
+        return componentInsets.top + componentInsets.bottom;
+    }
+
+    private Insets getInsets(Component component) {
+        GridBagConstraints constraints = this.layout.getConstraints(component);
+
+        return constraints.insets;
     }
 
     private void initializeLayout() {
@@ -188,6 +212,7 @@ public class ScrabblePanel extends JPanel {
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridheight = this.isVerticalLayout ? 1 : 2;
+        // insets not supported by onResize for this component
 
         if (wasInitialized)
             this.layout.addLayoutComponent(this.grid, constraints);
@@ -197,6 +222,7 @@ public class ScrabblePanel extends JPanel {
         constraints = new GridBagConstraints();
         constraints.gridx = this.isVerticalLayout ? 0 : 1;
         constraints.gridy = this.isVerticalLayout ? 1 : 0;
+        constraints.insets = new Insets(4, 4, 4, 4);
 
         if (wasInitialized)
             this.layout.addLayoutComponent(this.moveScroller, constraints);
@@ -206,6 +232,7 @@ public class ScrabblePanel extends JPanel {
         constraints = new GridBagConstraints();
         constraints.gridx = this.isVerticalLayout ? 0 : 1;
         constraints.gridy = this.isVerticalLayout ? 2 : 1;
+        // insets not supported by onResize for this component
 
         if (wasInitialized)
             this.layout.addLayoutComponent(this.playerTileGrid, constraints);

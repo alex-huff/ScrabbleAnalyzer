@@ -14,7 +14,6 @@ public class MoveScroller extends JScrollPane {
 
     public static final Font FONT = new Font("Courier New", Font.BOLD, 16);
 
-    private final Dimension size = new Dimension(ScrabbleAnalyzer.defaultTileSize * 8, ScrabbleAnalyzer.defaultTileSize * 14);
     private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
@@ -26,6 +25,7 @@ public class MoveScroller extends JScrollPane {
         this.onPlayMove = onPlayMove;
         this.table = new JTable(this.getModelFromData(new String[0][0]));
 
+        this.setPreferredSize(new Dimension(ScrabbleAnalyzer.defaultTileSize * 8, ScrabbleAnalyzer.defaultTileSize * 14));
         this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         this.table.setFont(MoveScroller.FONT);
         this.table.getTableHeader().setFont(MoveScroller.FONT);
@@ -98,15 +98,6 @@ public class MoveScroller extends JScrollPane {
                 return false;
             }
         };
-    }
-
-    public void newSize(int width, int height) {
-        this.size.setSize(width, height);
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return this.size;
     }
 
 }

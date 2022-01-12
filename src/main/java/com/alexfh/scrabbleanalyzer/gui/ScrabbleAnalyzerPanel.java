@@ -2,6 +2,7 @@ package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleAnalyzerPanelLayout;
+import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 
 import javax.swing.*;
@@ -17,10 +18,11 @@ public class ScrabbleAnalyzerPanel extends JPanel {
     private final JLabel notificationBar;
     private final ScrabbleAnalyzerPanelLayout layout;
 
-    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction) {
+    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction, TileStyle tileStyle) {
         this.scrabblePanel = new ScrabblePanel(
             onAction,
-            gameState
+            gameState,
+            tileStyle
         );
         this.notificationBar = new JLabel();
         this.layout = new ScrabbleAnalyzerPanelLayout();
@@ -42,6 +44,10 @@ public class ScrabbleAnalyzerPanel extends JPanel {
         constraints.insets = new Insets(4, 4, 4, 4);
 
         this.add(this.notificationBar, constraints);
+    }
+
+    public void repaintGrids() {
+        this.scrabblePanel.repaintGrids();
     }
 
     public void setNotification(String notification) {

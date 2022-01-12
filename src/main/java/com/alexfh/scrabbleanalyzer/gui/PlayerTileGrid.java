@@ -4,6 +4,7 @@ import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
+import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IPlayerTileRack;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 
@@ -24,13 +25,15 @@ public class PlayerTileGrid extends JPanel {
     private int tileSize = ScrabbleAnalyzer.defaultTileSize;
     private IPlayerTileRack tileRack;
     private final Runnable onMovesInvalidated;
+    private final TileStyle tileStyle;
     private int cursor = 0;
     private boolean cursorJustSet = false;
 
-    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated) {
+    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated, TileStyle tileStyle) {
         this.onAction = onAction;
         this.tileRack = tileRack;
         this.onMovesInvalidated = onMovesInvalidated;
+        this.tileStyle = tileStyle;
 
         this.setPreferredSize(new Dimension(this.tileSize * 7, this.tileSize));
         this.setLayout(new GridLayout(1, 7));
@@ -70,6 +73,10 @@ public class PlayerTileGrid extends JPanel {
     public void loadNewGame(IPlayerTileRack tileRack) {
         this.tileRack = tileRack;
 
+        this.repaintGrid();
+    }
+
+    public void repaintGrid() {
         for (int i = 0; i < 7; i++) {
             this.updateTileAt(i);
         }
@@ -233,12 +240,12 @@ public class PlayerTileGrid extends JPanel {
             return TileProvider.INSTANCE.getDefaultBlankTile(this.tileSize);
 
         if (this.tileRack.isTileInRackWildcardAt(i))
-            return TileProvider.INSTANCE.getWildcardTile(true, this.tileSize);
+            return TileProvider.INSTANCE.getWildcardTile(this.tileStyle.getIso(), this.tileSize);
 
         return TileProvider.INSTANCE.getTile(
             this.tileRack.getTileInRackAt(i),
             false,
-            true,
+            this.tileStyle.getIso(),
             false,
             this.tileSize
         );

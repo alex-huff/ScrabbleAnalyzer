@@ -4,6 +4,7 @@ import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
+import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 import com.alexfh.scrabbleanalyzer.state.impl.ScrabbleGameStateImpl;
 import com.alexfh.scrabbleanalyzer.state.impl.stream.SAInputStream;
@@ -36,6 +37,7 @@ public class ScrabbleAnalyzer extends JFrame {
     private IScrabbleGameState gameState;
     private IScrabbleGameState lastSaveState;
     private File saveFile;
+    private final TileStyle tileStyle = new TileStyle(true);
 
     public ScrabbleAnalyzer() {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
@@ -43,7 +45,7 @@ public class ScrabbleAnalyzer extends JFrame {
         this.setSaveFile();
         this.setLastSaveState();
 
-        this.scrabbleAnalyzerPanel = new ScrabbleAnalyzerPanel(this.gameState, this::onAction);
+        this.scrabbleAnalyzerPanel = new ScrabbleAnalyzerPanel(this.gameState, this::onAction, tileStyle);
         this.iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -72,6 +74,7 @@ public class ScrabbleAnalyzer extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
+        JMenu viewMenu = new JMenu("View");
         JMenuItem newFile = new JMenuItem("New File (Ctrl+N)");
         JMenuItem open = new JMenuItem("Open");
         JMenuItem save = new JMenuItem("Save (Ctrl+S)");
@@ -79,7 +82,17 @@ public class ScrabbleAnalyzer extends JFrame {
         JMenuItem clearBoard = new JMenuItem("Clear Board");
         this.undo = new JMenuItem(this.undoPrefix);
         this.redo = new JMenuItem(this.redoPrefix);
+        JMenu tileStyle = new JMenu("Tile Style");
+        JRadioButtonMenuItem iso = new JRadioButtonMenuItem("Isometric");
+        JRadioButtonMenuItem flat = new JRadioButtonMenuItem("Flat");
+        ButtonGroup tileStyleGroup = new ButtonGroup();
 
+        iso.setSelected(this.tileStyle.getIso());
+        flat.setSelected(!this.tileStyle.getIso());
+        tileStyle.add(iso);
+        tileStyleGroup.add(iso);
+        tileStyle.add(flat);
+        tileStyleGroup.add(flat);
         this.undo.setEnabled(false);
         this.redo.setEnabled(false);
         newFile.addActionListener(e -> this.newFile());
@@ -89,6 +102,8 @@ public class ScrabbleAnalyzer extends JFrame {
         clearBoard.addActionListener(e -> this.scrabbleAnalyzerPanel.clearBoard());
         undo.addActionListener(e -> this.undo());
         redo.addActionListener(e -> this.redo());
+        iso.addActionListener(e -> this.setTileStyleAndRepaint(true));
+        flat.addActionListener(e -> this.setTileStyleAndRepaint(false));
         fileMenu.add(newFile);
         fileMenu.add(open);
         fileMenu.add(save);
@@ -96,12 +111,24 @@ public class ScrabbleAnalyzer extends JFrame {
         editMenu.add(clearBoard);
         editMenu.add(undo);
         editMenu.add(redo);
+        viewMenu.add(tileStyle);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
+        menuBar.add(viewMenu);
         this.setJMenuBar(menuBar);
         this.add(this.scrabbleAnalyzerPanel);
         this.pack();
         this.setVisible(true);
+    }
+
+    private void setTileStyleAndRepaint(boolean isIso) {
+        if (this.tileStyle.getIso() == isIso) return;
+
+        TileProvider.INSTANCE.clearCache();
+        this.tileStyle.setIso(isIso);
+        this.scrabbleAnalyzerPanel.setNotification("Tile style changed to " + (isIso ? "isometric" : "flat"));
+        this.scrabbleAnalyzerPanel.repaintGrids();
+        System.gc();
     }
 
     private void registerKeybindings() {

@@ -5,6 +5,7 @@ import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleLayout;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
+import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 import com.alexfh.scrabbleanalyzer.util.ScrabbleUtil;
@@ -34,11 +35,11 @@ public class ScrabblePanel extends JPanel {
     private Future<?> pendingUpdate;
     private final ScrabbleLayout layout;
 
-    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState) {
+    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState, TileStyle tileStyle) {
         this.onAction = onAction;
         this.gameState = gameState;
-        this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated);
-        this.playerTileGrid = new PlayerTileGrid(this.onAction, this.gameState, this::playerTilesInvalidated);
+        this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated, tileStyle);
+        this.playerTileGrid = new PlayerTileGrid(this.onAction, this.gameState, this::playerTilesInvalidated, tileStyle);
         this.moveScroller = new MoveScroller(this::showMove, this::playMove);
         this.layout = new ScrabbleLayout();
 
@@ -61,6 +62,11 @@ public class ScrabblePanel extends JPanel {
         this.grid.loadNewGame(this.gameState);
         this.playerTileGrid.loadNewGame(this.gameState);
         this.updateMoves();
+    }
+
+    public void repaintGrids() {
+        this.grid.repaintGrid();
+        this.playerTileGrid.repaintGrid();
     }
 
     public void clearBoard() {

@@ -431,7 +431,7 @@ public class ScrabbleAnalyzer extends JFrame {
             !(gameState.getRows() == 15 && gameState.getCols() == 15) ||
             !(gameState.getRackSize() == 7)
         ) {
-            throw new ScrabbleAnalyzer.UnsupportedBoardException();
+            throw new UnsupportedBoardException();
         }
 
         this.gameState = gameState;

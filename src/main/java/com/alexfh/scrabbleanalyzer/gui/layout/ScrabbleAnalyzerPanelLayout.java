@@ -12,9 +12,9 @@ public class ScrabbleAnalyzerPanelLayout extends GridBagLayout {
             Dimension dimension = scrabbleAnalyzerPanel.getSize();
 
             scrabbleAnalyzerPanel.onResize((int) dimension.getWidth(), (int) dimension.getHeight());
-
-            super.arrangeGrid(parent);
         }
+
+        super.arrangeGrid(parent);
     }
 
 }

@@ -25,15 +25,13 @@ public class PlayerTileGrid extends JPanel {
     private int tileSize = ScrabbleAnalyzer.defaultTileSize;
     private IPlayerTileRack tileRack;
     private final Runnable onMovesInvalidated;
-    private final TileStyle tileStyle;
     private int cursor = 0;
     private boolean cursorJustSet = false;
 
-    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated, TileStyle tileStyle) {
+    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated) {
         this.onAction = onAction;
         this.tileRack = tileRack;
         this.onMovesInvalidated = onMovesInvalidated;
-        this.tileStyle = tileStyle;
 
         this.setPreferredSize(new Dimension(this.tileSize * 7, this.tileSize));
         this.setLayout(new GridLayout(1, 7));
@@ -240,12 +238,12 @@ public class PlayerTileGrid extends JPanel {
             return TileProvider.INSTANCE.getDefaultBlankTile(this.tileSize);
 
         if (this.tileRack.isTileInRackWildcardAt(i))
-            return TileProvider.INSTANCE.getWildcardTile(this.tileStyle.getIso(), this.tileSize);
+            return TileProvider.INSTANCE.getWildcardTile(TileStyle.INSTANCE.getIso(), this.tileSize);
 
         return TileProvider.INSTANCE.getTile(
             this.tileRack.getTileInRackAt(i),
             false,
-            this.tileStyle.getIso(),
+            TileStyle.INSTANCE.getIso(),
             false,
             this.tileSize
         );

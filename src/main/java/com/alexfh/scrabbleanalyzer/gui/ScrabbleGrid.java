@@ -23,7 +23,6 @@ public class ScrabbleGrid extends JPanel {
     private int tileSize = ScrabbleAnalyzer.defaultTileSize;
     private IScrabbleBoard board;
     private final Runnable onMovesInvalidated;
-    private final TileStyle tileStyle;
     private int cursorR = 0;
     private int cursorC = 0;
     private boolean cursorJustSet = false;
@@ -32,11 +31,10 @@ public class ScrabbleGrid extends JPanel {
     private final char[][] playedWordPreviewChars = ScrabbleBoardImpl.getNewEmptyBoard(15, 15);
     private ScrabbleGame.Move previewedMove;
 
-    public ScrabbleGrid(Consumer<RevertableAction> onAction, IScrabbleBoard board, Runnable onMovesInvalidated, TileStyle tileStyle) {
+    public ScrabbleGrid(Consumer<RevertableAction> onAction, IScrabbleBoard board, Runnable onMovesInvalidated) {
         this.onAction = onAction;
         this.board = board;
         this.onMovesInvalidated = onMovesInvalidated;
-        this.tileStyle = tileStyle;
 
         this.setPreferredSize(new Dimension(this.tileSize * 15, this.tileSize * 15));
         this.setLayout(new GridLayout(15, 15));
@@ -403,7 +401,7 @@ public class ScrabbleGrid extends JPanel {
                 return TileProvider.INSTANCE.getTile(
                     previewCharLower,
                     isWild,
-                    this.tileStyle.getIso(),
+                    TileStyle.INSTANCE.getIso(),
                     true,
                     this.tileSize
                 );
@@ -419,7 +417,7 @@ public class ScrabbleGrid extends JPanel {
         return TileProvider.INSTANCE.getTile(
             this.board.getCharAt(r, c),
             this.board.isWildcardAt(r, c),
-            this.tileStyle.getIso(),
+            TileStyle.INSTANCE.getIso(),
             false,
             this.tileSize
         );

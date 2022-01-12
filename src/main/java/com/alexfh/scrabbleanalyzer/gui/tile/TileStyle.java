@@ -2,9 +2,11 @@ package com.alexfh.scrabbleanalyzer.gui.tile;
 
 public class TileStyle {
 
+    public static final TileStyle INSTANCE = new TileStyle(true);
+
     private boolean isIso;
 
-    public TileStyle(boolean isIso) {
+    private TileStyle(boolean isIso) {
         this.isIso = isIso;
     }
 

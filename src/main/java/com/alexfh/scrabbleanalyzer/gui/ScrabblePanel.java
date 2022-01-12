@@ -35,11 +35,11 @@ public class ScrabblePanel extends JPanel {
     private Future<?> pendingUpdate;
     private final ScrabbleLayout layout;
 
-    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState, TileStyle tileStyle) {
+    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState) {
         this.onAction = onAction;
         this.gameState = gameState;
-        this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated, tileStyle);
-        this.playerTileGrid = new PlayerTileGrid(this.onAction, this.gameState, this::playerTilesInvalidated, tileStyle);
+        this.grid = new ScrabbleGrid(this.onAction, this.gameState, this::boardInvalidated);
+        this.playerTileGrid = new PlayerTileGrid(this.onAction, this.gameState, this::playerTilesInvalidated);
         this.moveScroller = new MoveScroller(this::showMove, this::playMove);
         this.layout = new ScrabbleLayout();
 

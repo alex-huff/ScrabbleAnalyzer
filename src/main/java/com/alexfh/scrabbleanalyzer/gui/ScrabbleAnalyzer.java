@@ -37,7 +37,6 @@ public class ScrabbleAnalyzer extends JFrame {
     private IScrabbleGameState gameState;
     private IScrabbleGameState lastSaveState;
     private File saveFile;
-    private final TileStyle tileStyle = new TileStyle(true);
 
     public ScrabbleAnalyzer() {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
@@ -45,7 +44,7 @@ public class ScrabbleAnalyzer extends JFrame {
         this.setSaveFile();
         this.setLastSaveState();
 
-        this.scrabbleAnalyzerPanel = new ScrabbleAnalyzerPanel(this.gameState, this::onAction, tileStyle);
+        this.scrabbleAnalyzerPanel = new ScrabbleAnalyzerPanel(this.gameState, this::onAction);
         this.iconImage = TileProvider.INSTANCE.getTile(
             'a',
             true,
@@ -87,8 +86,8 @@ public class ScrabbleAnalyzer extends JFrame {
         JRadioButtonMenuItem flat = new JRadioButtonMenuItem("Flat");
         ButtonGroup tileStyleGroup = new ButtonGroup();
 
-        iso.setSelected(this.tileStyle.getIso());
-        flat.setSelected(!this.tileStyle.getIso());
+        iso.setSelected(TileStyle.INSTANCE.getIso());
+        flat.setSelected(!TileStyle.INSTANCE.getIso());
         tileStyle.add(iso);
         tileStyleGroup.add(iso);
         tileStyle.add(flat);
@@ -122,10 +121,10 @@ public class ScrabbleAnalyzer extends JFrame {
     }
 
     private void setTileStyleAndRepaint(boolean isIso) {
-        if (this.tileStyle.getIso() == isIso) return;
+        if (TileStyle.INSTANCE.getIso() == isIso) return;
 
         TileProvider.INSTANCE.clearCache();
-        this.tileStyle.setIso(isIso);
+        TileStyle.INSTANCE.setIso(isIso);
         this.scrabbleAnalyzerPanel.setNotification("Tile style changed to " + (isIso ? "isometric" : "flat"));
         this.scrabbleAnalyzerPanel.repaintGrids();
         System.gc();

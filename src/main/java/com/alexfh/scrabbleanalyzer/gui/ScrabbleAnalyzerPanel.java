@@ -18,11 +18,10 @@ public class ScrabbleAnalyzerPanel extends JPanel {
     private final JLabel notificationBar;
     private final ScrabbleAnalyzerPanelLayout layout;
 
-    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction, TileStyle tileStyle) {
+    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction) {
         this.scrabblePanel = new ScrabblePanel(
             onAction,
-            gameState,
-            tileStyle
+            gameState
         );
         this.notificationBar = new JLabel();
         this.layout = new ScrabbleAnalyzerPanelLayout();

@@ -314,14 +314,16 @@ public class ScrabbleAnalyzer extends JFrame {
 
         try {
             this.openChooser();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             this.fileOpenErrorDialog();
+        } catch (UnsupportedBoardException ignored) {
+            this.fileOpenErrorDialog("Unsupported board");
         }
 
         this.scrabbleAnalyzerPanel.setNotification("Opened new file: " + this.saveFile.getName());
     }
 
-    private void openChooser() throws IOException {
+    private void openChooser() throws IOException, UnsupportedBoardException {
         JFileChooser fileChooser = new JFileChooser();
 
         if (this.saveFile != null) fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
@@ -330,10 +332,10 @@ public class ScrabbleAnalyzer extends JFrame {
 
         if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
-        this.openFromFile(this.getSelectedFileFromChooser(fileChooser));
+        this.loadGameFromFile(this.getSelectedFileFromChooser(fileChooser));
     }
 
-    private void openFromFile(File fileToOpen) throws IOException {
+    private void loadGameFromFile(File fileToOpen) throws IOException, UnsupportedBoardException {
         this.readFromFile(fileToOpen);
         this.reloadGame();
     }
@@ -361,7 +363,13 @@ public class ScrabbleAnalyzer extends JFrame {
     }
 
     private void fileOpenErrorDialog() {
-        JOptionPane.showMessageDialog(this, "Could not open file");
+        this.fileOpenErrorDialog(null);
+    }
+
+    private void fileOpenErrorDialog(String message) {
+        String errorMessage = message == null ? "Could not open file" : "Could not open file: " + message;
+
+        JOptionPane.showMessageDialog(this, errorMessage);
     }
 
     private void fileSaveErrorDialog() {
@@ -414,14 +422,25 @@ public class ScrabbleAnalyzer extends JFrame {
         this.setSaveFile(file);
     }
 
-    private void readFromFile(File file) throws IOException {
+    private void readFromFile(File file) throws IOException, UnsupportedBoardException {
         FileInputStream fileIn = new FileInputStream(file);
         SAInputStream saInputStream = new SAInputStream(fileIn);
-        this.gameState = saInputStream.readGameState();
+        IScrabbleGameState gameState = saInputStream.readGameState();
+
+        if (
+            !(gameState.getRows() == 15 && gameState.getCols() == 15) ||
+            !(gameState.getRackSize() == 7)
+        ) {
+            throw new ScrabbleAnalyzer.UnsupportedBoardException();
+        }
+
+        this.gameState = gameState;
 
         saInputStream.close();
         this.setLastSaveState();
         this.setSaveFile(file);
     }
+
+    private static class UnsupportedBoardException extends Exception { }
 
 }

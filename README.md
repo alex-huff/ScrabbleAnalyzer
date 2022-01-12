@@ -1,2 +1,2 @@
-# ScrabbleSolver
-A Scrabble/Words With Friends best word finder.
+# ScrabbleAnalyzer
+A Scrabble/Words With Friends analyzer.

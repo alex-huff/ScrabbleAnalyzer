@@ -4,7 +4,6 @@ import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
-import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IPlayerTileRack;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 
@@ -238,12 +237,11 @@ public class PlayerTileGrid extends JPanel {
             return TileProvider.INSTANCE.getDefaultBlankTile(this.tileSize);
 
         if (this.tileRack.isTileInRackWildcardAt(i))
-            return TileProvider.INSTANCE.getWildcardTile(TileStyle.INSTANCE.getIso(), this.tileSize);
+            return TileProvider.INSTANCE.getWildcardTile(this.tileSize);
 
         return TileProvider.INSTANCE.getTile(
             this.tileRack.getTileInRackAt(i),
             false,
-            TileStyle.INSTANCE.getIso(),
             false,
             this.tileSize
         );

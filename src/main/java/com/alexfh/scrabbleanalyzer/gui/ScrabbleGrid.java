@@ -4,7 +4,6 @@ import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableActionBuilder;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
-import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleBoard;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 import com.alexfh.scrabbleanalyzer.state.impl.ScrabbleBoardImpl;
@@ -401,7 +400,6 @@ public class ScrabbleGrid extends JPanel {
                 return TileProvider.INSTANCE.getTile(
                     previewCharLower,
                     isWild,
-                    TileStyle.INSTANCE.getIso(),
                     true,
                     this.tileSize
                 );
@@ -417,7 +415,6 @@ public class ScrabbleGrid extends JPanel {
         return TileProvider.INSTANCE.getTile(
             this.board.getCharAt(r, c),
             this.board.isWildcardAt(r, c),
-            TileStyle.INSTANCE.getIso(),
             false,
             this.tileSize
         );

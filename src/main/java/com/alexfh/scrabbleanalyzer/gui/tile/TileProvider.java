@@ -10,8 +10,16 @@ public class TileProvider {
 
     private final Map<Integer, ScrabbleTileCache> tileCacheMap = new HashMap<>();
 
+    public BufferedImage getTile(char letter, boolean isWild, boolean isHighlighted, int tileSize) {
+        return this.getTile(letter, isWild, TileStyle.INSTANCE.getIso(), isHighlighted, tileSize);
+    }
+
     public BufferedImage getTile(char letter, boolean isWild, boolean isIso, boolean isHighlighted, int tileSize) {
         return this.getTileCacheForSize(tileSize).getTile(letter, isWild, isIso, isHighlighted);
+    }
+
+    public BufferedImage getWildcardTile(int tileSize) {
+        return this.getWildcardTile(TileStyle.INSTANCE.getIso(), tileSize);
     }
 
     public BufferedImage getWildcardTile(boolean isIso, int tileSize) {

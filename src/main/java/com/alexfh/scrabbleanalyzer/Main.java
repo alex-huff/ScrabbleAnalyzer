@@ -11,25 +11,12 @@ public class Main {
 
     public static WordGraphDictionary dictionary;
 
-    static {
+    public static void main(String[] args) throws IOException {
         Main.dictionary = WordGraphDictionary.fromInputStream(
             Main.class.getResourceAsStream("/nwl20.txt")
         );
-    }
-
-    public static void main(String[] args) throws IOException {
         DocumentProvider.INSTANCE.init();
-        SwingUtilities.invokeLater(
-            () -> {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
-
-                new ScrabbleAnalyzer();
-            }
-        );
+        SwingUtilities.invokeLater(ScrabbleAnalyzer::new);
     }
 
 }

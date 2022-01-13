@@ -314,13 +314,14 @@ public class ScrabbleAnalyzer extends JFrame {
 
         try {
             this.openChooser();
+
+            if (this.saveFile != null)
+                this.scrabbleAnalyzerPanel.setNotification("Opened new file: " + this.saveFile.getName());
         } catch (IOException ignored) {
             this.fileOpenErrorDialog();
         } catch (UnsupportedBoardException ignored) {
             this.fileOpenErrorDialog("Unsupported board");
         }
-
-        this.scrabbleAnalyzerPanel.setNotification("Opened new file: " + this.saveFile.getName());
     }
 
     private void openChooser() throws IOException, UnsupportedBoardException {
@@ -355,11 +356,12 @@ public class ScrabbleAnalyzer extends JFrame {
     private void tryToSaveToFile(File file) {
         try {
             this.saveToFile(file);
+
+            if (this.saveFile != null)
+                this.scrabbleAnalyzerPanel.setNotification("Saved to file: " + this.saveFile.getName());
         } catch (IOException e) {
             this.fileSaveErrorDialog();
         }
-
-        this.scrabbleAnalyzerPanel.setNotification("Saved to file: " + this.saveFile.getName());
     }
 
     private void fileOpenErrorDialog() {

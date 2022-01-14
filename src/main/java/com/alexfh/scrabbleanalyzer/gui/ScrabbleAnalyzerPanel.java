@@ -1,8 +1,8 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.font.ScrabbleFonts;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleAnalyzerPanelLayout;
-import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 
 import javax.swing.*;
@@ -28,7 +28,7 @@ public class ScrabbleAnalyzerPanel extends JPanel {
 
         this.setNotification("Welcome");
         this.setLayout(this.layout);
-        this.notificationBar.setFont(new Font("Courier New", Font.PLAIN, 14));
+        this.notificationBar.setFont(ScrabbleFonts.courierNewBold.deriveFont(14F));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;

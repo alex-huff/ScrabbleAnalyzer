@@ -1,6 +1,7 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
+import com.alexfh.scrabbleanalyzer.gui.font.ScrabbleFonts;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -12,8 +13,6 @@ import java.util.List;
 
 public class MoveScroller extends JScrollPane {
 
-    private static final Font FONT = new Font("Courier New", Font.BOLD, 16);
-
     private final JTable table;
     private List<ScrabbleGame.Move> currentMoves;
     private final Consumer<ScrabbleGame.Move> onMoveSelected;
@@ -24,11 +23,12 @@ public class MoveScroller extends JScrollPane {
         this.onMoveSelected = onMoveSelected;
         this.onPlayMove = onPlayMove;
         this.table = new JTable(this.getModelFromData(new String[0][0]));
+        Font font = ScrabbleFonts.courierNewBold.deriveFont(16F);
 
         this.setPreferredSize(new Dimension(ScrabbleAnalyzer.defaultTileSize * 8, ScrabbleAnalyzer.defaultTileSize * 14));
         this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        this.table.setFont(MoveScroller.FONT);
-        this.table.getTableHeader().setFont(MoveScroller.FONT);
+        this.table.setFont(font);
+        this.table.getTableHeader().setFont(font);
         this.table.setFillsViewportHeight(true);
         this.table.addKeyListener(
             new KeyAdapter() {

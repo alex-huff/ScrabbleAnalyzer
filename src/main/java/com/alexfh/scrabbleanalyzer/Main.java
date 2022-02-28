@@ -14,6 +14,8 @@ public class Main {
     public static WordGraphDictionary dictionary;
 
     public static void main(String[] args) throws IOException, FontFormatException {
+        System.setProperty("awt.useSystemAAFontSettings","on");
+
         Main.dictionary = WordGraphDictionary.fromInputStream(
             Main.class.getResourceAsStream("/nwl20.txt")
         );

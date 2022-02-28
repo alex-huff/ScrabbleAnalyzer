@@ -3,6 +3,7 @@ package com.alexfh.scrabbleanalyzer.gui;
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
 import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import com.alexfh.scrabbleanalyzer.gui.file.ScrabbleAnalyzerFileFilter;
+import com.alexfh.scrabbleanalyzer.gui.font.ScrabbleFonts;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
@@ -70,6 +71,7 @@ public class ScrabbleAnalyzer extends JFrame {
             }
         );
 
+        Font menuFont = ScrabbleFonts.courierNewBold.deriveFont(15F);
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
@@ -86,6 +88,19 @@ public class ScrabbleAnalyzer extends JFrame {
         JRadioButtonMenuItem flat = new JRadioButtonMenuItem("Flat");
         ButtonGroup tileStyleGroup = new ButtonGroup();
 
+        fileMenu.setFont(menuFont);
+        editMenu.setFont(menuFont);
+        viewMenu.setFont(menuFont);
+        tileStyle.setFont(menuFont);
+        newFile.setFont(menuFont);
+        open.setFont(menuFont);
+        save.setFont(menuFont);
+        saveAs.setFont(menuFont);
+        clearBoard.setFont(menuFont);
+        iso.setFont(menuFont);
+        flat.setFont(menuFont);
+        this.undo.setFont(menuFont);
+        this.redo.setFont(menuFont);
         iso.setSelected(TileStyle.INSTANCE.getIso());
         flat.setSelected(!TileStyle.INSTANCE.getIso());
         tileStyle.add(iso);

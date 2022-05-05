@@ -9,19 +9,24 @@ import org.w3c.dom.Document;
 
 import java.awt.image.BufferedImage;
 
-public class BufferedImageTranscoder extends ImageTranscoder {
+public class BufferedImageTranscoder extends ImageTranscoder
+{
 
     public static final BufferedImageTranscoder INSTANCE = new BufferedImageTranscoder();
 
-    public BufferedImage loadImage(Document svgDocument, float width, float height) {
+    public BufferedImage loadImage(Document svgDocument, float width, float height)
+    {
         this.addTranscodingHint(PNGTranscoder.KEY_WIDTH, width);
         this.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, height);
 
-        try {
+        try
+        {
             TranscoderInput input = new TranscoderInput(svgDocument);
 
             this.transcode(input, null);
-        } catch (TranscoderException e){
+        }
+        catch (TranscoderException e)
+        {
             e.printStackTrace();
             System.exit(-1);
         }
@@ -32,16 +37,19 @@ public class BufferedImageTranscoder extends ImageTranscoder {
     private BufferedImage image;
 
     @Override
-    public BufferedImage createImage(int w, int h) {
+    public BufferedImage createImage(int w, int h)
+    {
         return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
     }
 
     @Override
-    public void writeImage(BufferedImage img, TranscoderOutput output) {
+    public void writeImage(BufferedImage img, TranscoderOutput output)
+    {
         this.image = img;
     }
 
-    public BufferedImage getBufferedImage() {
+    public BufferedImage getBufferedImage()
+    {
         return image;
     }
 

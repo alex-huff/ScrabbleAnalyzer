@@ -12,19 +12,21 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
-public class ScrabbleAnalyzerPanel extends JPanel {
+public class ScrabbleAnalyzerPanel extends JPanel
+{
 
-    private final ScrabblePanel scrabblePanel;
-    private final JLabel notificationBar;
+    private final ScrabblePanel               scrabblePanel;
+    private final JLabel                      notificationBar;
     private final ScrabbleAnalyzerPanelLayout layout;
 
-    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction) {
-        this.scrabblePanel = new ScrabblePanel(
+    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction)
+    {
+        this.scrabblePanel   = new ScrabblePanel(
             onAction,
             gameState
         );
         this.notificationBar = new JLabel();
-        this.layout = new ScrabbleAnalyzerPanelLayout();
+        this.layout          = new ScrabbleAnalyzerPanelLayout();
 
         this.setNotification("Welcome");
         this.setLayout(this.layout);
@@ -36,20 +38,22 @@ public class ScrabbleAnalyzerPanel extends JPanel {
 
         this.add(this.scrabblePanel, constraints);
 
-        constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 1;
+        constraints        = new GridBagConstraints();
+        constraints.gridx  = 0;
+        constraints.gridy  = 1;
         constraints.anchor = GridBagConstraints.WEST;
         constraints.insets = new Insets(4, 4, 4, 4);
 
         this.add(this.notificationBar, constraints);
     }
 
-    public void repaintGrids() {
+    public void repaintGrids()
+    {
         this.scrabblePanel.repaintGrids();
     }
 
-    public void setNotification(String notification) {
+    public void setNotification(String notification)
+    {
         this.notificationBar.setText(
             ZonedDateTime
                 .now(ZoneId.systemDefault())
@@ -58,7 +62,8 @@ public class ScrabbleAnalyzerPanel extends JPanel {
         );
     }
 
-    public void onResize(int width, int height) {
+    public void onResize(int width, int height)
+    {
         this.notificationBar.setPreferredSize(
             new Dimension(
                 width - this.getInsetWidth(this.notificationBar),
@@ -77,29 +82,34 @@ public class ScrabbleAnalyzerPanel extends JPanel {
         );
     }
 
-    private int getInsetWidth(Component component) {
+    private int getInsetWidth(Component component)
+    {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.left + componentInsets.right;
     }
 
-    private int getInsetHeight(Component component) {
+    private int getInsetHeight(Component component)
+    {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.top + componentInsets.bottom;
     }
 
-    private Insets getInsets(Component component) {
+    private Insets getInsets(Component component)
+    {
         GridBagConstraints constraints = this.layout.getConstraints(component);
 
         return constraints.insets;
     }
 
-    public void loadNewGame(IScrabbleGameState gameState) {
+    public void loadNewGame(IScrabbleGameState gameState)
+    {
         this.scrabblePanel.loadNewGame(gameState);
     }
 
-    public void clearBoard() {
+    public void clearBoard()
+    {
         this.scrabblePanel.clearBoard();
     }
 

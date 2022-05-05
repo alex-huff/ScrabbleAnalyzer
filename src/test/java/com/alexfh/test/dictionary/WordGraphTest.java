@@ -9,10 +9,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WordGraphTest {
+public class WordGraphTest
+{
 
     @Test
-    public void testInclusion() {
+    public void testInclusion()
+    {
         WordGraphDictionary dictionary = new WordGraphDictionary();
 
         dictionary.addWord("foo");
@@ -26,15 +28,18 @@ public class WordGraphTest {
     }
 
     @Test
-    public void testPrefix() {
+    public void testPrefix()
+    {
         WordGraphDictionary dictionary = new WordGraphDictionary();
-        List<String> testWords = List.of("prefix", "foo", "bar", "foobar", "a", "dictionary");
+        List<String>        testWords  = List.of("prefix", "foo", "bar", "foobar", "a", "dictionary");
 
         assertFalse(dictionary.hasPrefix("")); // should be false if dictionary is empty
         testWords.forEach(dictionary::addWord);
         testWords.forEach(
-            testWord -> {
-                for (int i = testWord.length(); i > 0; i--) {
+            testWord ->
+            {
+                for (int i = testWord.length(); i > 0; i--)
+                {
                     assertTrue(dictionary.hasPrefix(testWord.substring(0, i)));
                 }
             }
@@ -50,9 +55,10 @@ public class WordGraphTest {
     }
 
     @Test
-    public void nwl20() throws IOException {
+    public void nwl20() throws IOException
+    {
         WordGraphDictionary dictionary = WordGraphDictionary.fromFile(new File("src/test/resources/nwl20.txt"));
-        List<String> words = new ArrayList<>();
+        List<String>        words      = new ArrayList<>();
 
         dictionary.forEach(words::add);
         assertEquals(words.size(), 191852);

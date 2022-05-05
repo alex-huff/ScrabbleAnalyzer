@@ -11,16 +11,19 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PermuteTest {
+public class PermuteTest
+{
 
     @Test
-    public void testPermuteTree() throws InterruptedException {
-        PermuteTree permuteTree = new PermuteTree(new ArrayList<>(List.of('a', 'b', 'c', 'd', 'e', 'f', 'g')));
-        AtomicInteger i = new AtomicInteger(-1); // -1 to ignore 0-perm
-        Set<String> permutations = new TreeSet<>();
+    public void testPermuteTree() throws InterruptedException
+    {
+        PermuteTree   permuteTree  = new PermuteTree(new ArrayList<>(List.of('a', 'b', 'c', 'd', 'e', 'f', 'g')));
+        AtomicInteger i            = new AtomicInteger(-1); // -1 to ignore 0-perm
+        Set<String>   permutations = new TreeSet<>();
 
         permuteTree.forEach(
-            perm -> {
+            perm ->
+            {
                 i.incrementAndGet();
                 assertFalse(permutations.contains(perm));
                 permutations.add(perm);

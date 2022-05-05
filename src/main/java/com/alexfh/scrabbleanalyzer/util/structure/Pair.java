@@ -1,6 +1,7 @@
 package com.alexfh.scrabbleanalyzer.util.structure;
 
-public interface Pair<L, R> {
+public interface Pair<L, R>
+{
 
     L getLeft();
 

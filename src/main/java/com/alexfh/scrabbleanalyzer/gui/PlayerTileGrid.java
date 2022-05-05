@@ -17,27 +17,31 @@ import java.util.function.Consumer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PlayerTileGrid extends JPanel {
+public class PlayerTileGrid extends JPanel
+{
 
     private final Consumer<RevertableAction> onAction;
-    private final TileLabel[] labels = new TileLabel[7];
-    private int tileSize = ScrabbleAnalyzer.defaultTileSize;
-    private IPlayerTileRack tileRack;
-    private final Runnable onMovesInvalidated;
-    private int cursor = 0;
-    private boolean cursorJustSet = false;
+    private final TileLabel[]                labels        = new TileLabel[7];
+    private       int                        tileSize      = ScrabbleAnalyzer.defaultTileSize;
+    private       IPlayerTileRack            tileRack;
+    private final Runnable                   onMovesInvalidated;
+    private       int                        cursor        = 0;
+    private       boolean                    cursorJustSet = false;
 
-    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated) {
-        this.onAction = onAction;
-        this.tileRack = tileRack;
+    public PlayerTileGrid(Consumer<RevertableAction> onAction, IPlayerTileRack tileRack, Runnable onMovesInvalidated)
+    {
+        this.onAction           = onAction;
+        this.tileRack           = tileRack;
         this.onMovesInvalidated = onMovesInvalidated;
 
         this.setPreferredSize(new Dimension(this.tileSize * 7, this.tileSize));
         this.setLayout(new GridLayout(1, 7));
         this.addKeyListener(
-            new KeyAdapter() {
+            new KeyAdapter()
+            {
                 @Override
-                public void keyTyped(KeyEvent e) {
+                public void keyTyped(KeyEvent e)
+                {
                     char c = e.getKeyChar();
 
                     if (Character.isAlphabetic(c))
@@ -47,15 +51,18 @@ public class PlayerTileGrid extends JPanel {
                 }
 
                 @Override
-                public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                public void keyPressed(KeyEvent e)
+                {
+                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
+                    {
                         PlayerTileGrid.this.onCharPressed(ScrabblePanel.backspaceChar);
                     }
                 }
             }
         );
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 7; i++)
+        {
             final int finalI = i;
             TileLabel label = new TileLabel(
                 new ImageIcon(this.getTileAt(i)),
@@ -67,24 +74,29 @@ public class PlayerTileGrid extends JPanel {
         }
     }
 
-    public void loadNewGame(IPlayerTileRack tileRack) {
+    public void loadNewGame(IPlayerTileRack tileRack)
+    {
         this.tileRack = tileRack;
 
         this.repaintGrid();
     }
 
-    public void repaintGrid() {
-        for (int i = 0; i < 7; i++) {
+    public void repaintGrid()
+    {
+        for (int i = 0; i < 7; i++)
+        {
             this.updateTileAt(i);
         }
 
         this.repaint();
     }
 
-    public RevertableAction clearPlayerTileGrid() {
+    public RevertableAction clearPlayerTileGrid()
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 7; i++)
+        {
             final int finalI = i;
 
             actionBuilder.add(
@@ -97,7 +109,8 @@ public class PlayerTileGrid extends JPanel {
         return actionBuilder.build().then(this::repaint);
     }
 
-    public RevertableAction playMove(ScrabbleGame.Move move) {
+    public RevertableAction playMove(ScrabbleGame.Move move)
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
         List<Character> playedTiles = new String(
             move.playedTiles()
@@ -109,12 +122,14 @@ public class PlayerTileGrid extends JPanel {
             )
         );
 
-        for (int i = 0; i < 7 && !playedTiles.isEmpty(); i++) {
+        for (int i = 0; i < 7 && !playedTiles.isEmpty(); i++)
+        {
             if (this.tileRack.isTileInRackEmptyAt(i)) continue;
 
             char c = this.tileRack.getTileInRackAt(i);
 
-            if (playedTiles.contains(c)) {
+            if (playedTiles.contains(c))
+            {
                 final int finalI = i;
 
                 playedTiles.remove((Character) c);
@@ -129,7 +144,8 @@ public class PlayerTileGrid extends JPanel {
         return actionBuilder.build();
     }
 
-    private void doBackspace() {
+    private void doBackspace()
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         if (!this.cursorJustSet)
@@ -139,7 +155,8 @@ public class PlayerTileGrid extends JPanel {
 
         actionBuilder.add(
             this.tileRack.removeTileInRackAt(this.cursor).then(
-                () -> {
+                () ->
+                {
                     this.updateAndRepaintTileAtCursor();
                     this.onMovesInvalidated.run();
                 }
@@ -148,13 +165,15 @@ public class PlayerTileGrid extends JPanel {
         this.onAction.accept(actionBuilder.build().withDescription("Backspace in tile rack"));
     }
 
-    private void placeCharAtCursor(Character character) {
+    private void placeCharAtCursor(Character character)
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         actionBuilder.add(this.setJustSet(false));
         actionBuilder.add(
             this.tileRack.setTileInRackAt(this.cursor, character).then(
-                () -> {
+                () ->
+                {
                     this.updateAndRepaintTileAtCursor();
                     this.onMovesInvalidated.run();
                 }
@@ -164,24 +183,36 @@ public class PlayerTileGrid extends JPanel {
         this.onAction.accept(actionBuilder.build().withDescription("Type character in tile rack"));
     }
 
-    private void onCharPressed(Character character) {
-        if (character == ScrabblePanel.backspaceChar) {
-            if (this.cursorJustSet || this.cursor > 0) {
+    private void onCharPressed(Character character)
+    {
+        if (character == ScrabblePanel.backspaceChar)
+        {
+            if (this.cursorJustSet || this.cursor > 0)
+            {
                 this.doBackspace();
-            } else {
+            }
+            else
+            {
                 Toolkit.getDefaultToolkit().beep();
             }
-        } else {
-            if (this.cursor < 7) {
+        }
+        else
+        {
+            if (this.cursor < 7)
+            {
                 this.placeCharAtCursor(character);
-            } else {
+            }
+            else
+            {
                 Toolkit.getDefaultToolkit().beep();
             }
         }
     }
 
-    private void onTileClicked(int i, boolean isLeft) {
-        if (isLeft) {
+    private void onTileClicked(int i, boolean isLeft)
+    {
+        if (isLeft)
+        {
             this.onAction.accept(
                 RevertableAction.compoundActionOf(
                     this.setCursor(i),
@@ -192,7 +223,8 @@ public class PlayerTileGrid extends JPanel {
         }
     }
 
-    private RevertableAction setJustSet(final boolean justSet) {
+    private RevertableAction setJustSet(final boolean justSet)
+    {
         final boolean wasJustSet = this.cursorJustSet;
 
         if (wasJustSet == justSet) return RevertableAction.nullRevertableAction;
@@ -203,7 +235,8 @@ public class PlayerTileGrid extends JPanel {
         );
     }
 
-    private RevertableAction setCursor(final int newPos) {
+    private RevertableAction setCursor(final int newPos)
+    {
         final int oldPos = this.cursor;
 
         return RevertableAction.of(
@@ -212,27 +245,32 @@ public class PlayerTileGrid extends JPanel {
         );
     }
 
-    private RevertableAction offsetCursor(final int offset) {
+    private RevertableAction offsetCursor(final int offset)
+    {
         return RevertableAction.of(
             () -> this.cursor += offset,
             () -> this.cursor -= offset
         );
     }
 
-    private void updateAndRepaintTileAtCursor() {
+    private void updateAndRepaintTileAtCursor()
+    {
         this.updateAndRepaintTileAt(this.cursor);
     }
 
-    private void updateAndRepaintTileAt(int i) {
+    private void updateAndRepaintTileAt(int i)
+    {
         this.updateTileAt(i);
         this.labels[i].repaint();
     }
 
-    private void updateTileAt(int i) {
+    private void updateTileAt(int i)
+    {
         this.labels[i].getIcon().setImage(this.getTileAt(i));
     }
 
-    private BufferedImage getTileAt(int i) {
+    private BufferedImage getTileAt(int i)
+    {
         if (this.tileRack.isTileInRackEmptyAt(i))
             return TileProvider.INSTANCE.getDefaultBlankTile(this.tileSize);
 
@@ -247,12 +285,14 @@ public class PlayerTileGrid extends JPanel {
         );
     }
 
-    public void newSize(int newTileSize) {
+    public void newSize(int newTileSize)
+    {
         this.tileSize = newTileSize;
 
         this.setPreferredSize(new Dimension(this.tileSize * 7, this.tileSize));
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 7; i++)
+        {
             this.labels[i].getIcon().setImage(this.getTileAt(i));
         }
     }

@@ -13,20 +13,24 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SAInputStream extends DataInputStream {
+public class SAInputStream extends DataInputStream
+{
 
-    public SAInputStream(InputStream inputStream) {
+    public SAInputStream(InputStream inputStream)
+    {
         super(inputStream);
     }
 
-    public IScrabbleGameState readGameState() throws IOException {
+    public IScrabbleGameState readGameState() throws IOException
+    {
         return new ScrabbleGameStateImpl(
             this.readScrabbleBoard(),
             this.readPlayerTileRack()
         );
     }
 
-    private IScrabbleBoard readScrabbleBoard() throws IOException {
+    private IScrabbleBoard readScrabbleBoard() throws IOException
+    {
         int rows = this.readInt();
         int cols = this.readInt();
 
@@ -42,7 +46,8 @@ public class SAInputStream extends DataInputStream {
         );
     }
 
-    private IPlayerTileRack readPlayerTileRack() throws IOException {
+    private IPlayerTileRack readPlayerTileRack() throws IOException
+    {
         int size = this.readInt();
 
         return new PlayerTileRackImpl(
@@ -52,32 +57,39 @@ public class SAInputStream extends DataInputStream {
         );
     }
 
-    private List<Character> readCharacterList() throws IOException {
-        int size = this.readInt();
+    private List<Character> readCharacterList() throws IOException
+    {
+        int             size       = this.readInt();
         List<Character> characters = new ArrayList<>(size);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             characters.add(this.readChar());
         }
 
         return characters;
     }
 
-    private char[] read1DChar(int size) throws IOException {
+    private char[] read1DChar(int size) throws IOException
+    {
         char[] chars = new char[size];
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             chars[i] = this.readChar();
         }
 
         return chars;
     }
 
-    private int[][] read2DInt(int rows, int cols) throws IOException {
+    private int[][] read2DInt(int rows, int cols) throws IOException
+    {
         int[][] ints = new int[rows][cols];
 
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
                 ints[r][c] = this.readInt();
             }
         }
@@ -85,11 +97,14 @@ public class SAInputStream extends DataInputStream {
         return ints;
     }
 
-    private char[][] read2DChar(int rows, int cols) throws IOException {
+    private char[][] read2DChar(int rows, int cols) throws IOException
+    {
         char[][] chars = new char[rows][cols];
 
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
                 chars[r][c] = this.readChar();
             }
         }
@@ -97,11 +112,14 @@ public class SAInputStream extends DataInputStream {
         return chars;
     }
 
-    private boolean[][] read2DBoolean(int rows, int cols) throws IOException {
+    private boolean[][] read2DBoolean(int rows, int cols) throws IOException
+    {
         boolean[][] booleans = new boolean[rows][cols];
 
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
                 booleans[r][c] = this.readBoolean();
             }
         }

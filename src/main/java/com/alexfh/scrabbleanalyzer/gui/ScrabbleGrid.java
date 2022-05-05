@@ -15,32 +15,36 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
-public class ScrabbleGrid extends JPanel {
+public class ScrabbleGrid extends JPanel
+{
 
     private final Consumer<RevertableAction> onAction;
-    private final TileLabel[][] labels = new TileLabel[15][15];
-    private int tileSize = ScrabbleAnalyzer.defaultTileSize;
-    private IScrabbleBoard board;
-    private final Runnable onMovesInvalidated;
-    private int cursorR = 0;
-    private int cursorC = 0;
-    private boolean cursorJustSet = false;
-    private boolean wasLastMovementForwardVert = false;
-    private boolean wasLastMovementForwardHori = false;
-    private final char[][] playedWordPreviewChars = ScrabbleBoardImpl.getNewEmptyBoard(15, 15);
-    private ScrabbleGame.Move previewedMove;
+    private final TileLabel[][]              labels                     = new TileLabel[15][15];
+    private       int                        tileSize                   = ScrabbleAnalyzer.defaultTileSize;
+    private       IScrabbleBoard             board;
+    private final Runnable                   onMovesInvalidated;
+    private       int                        cursorR                    = 0;
+    private       int                        cursorC                    = 0;
+    private       boolean                    cursorJustSet              = false;
+    private       boolean                    wasLastMovementForwardVert = false;
+    private       boolean                    wasLastMovementForwardHori = false;
+    private final char[][]                   playedWordPreviewChars     = ScrabbleBoardImpl.getNewEmptyBoard(15, 15);
+    private       ScrabbleGame.Move          previewedMove;
 
-    public ScrabbleGrid(Consumer<RevertableAction> onAction, IScrabbleBoard board, Runnable onMovesInvalidated) {
-        this.onAction = onAction;
-        this.board = board;
+    public ScrabbleGrid(Consumer<RevertableAction> onAction, IScrabbleBoard board, Runnable onMovesInvalidated)
+    {
+        this.onAction           = onAction;
+        this.board              = board;
         this.onMovesInvalidated = onMovesInvalidated;
 
         this.setPreferredSize(new Dimension(this.tileSize * 15, this.tileSize * 15));
         this.setLayout(new GridLayout(15, 15));
         this.addKeyListener(
-            new KeyAdapter() {
+            new KeyAdapter()
+            {
                 @Override
-                public void keyTyped(KeyEvent e) {
+                public void keyTyped(KeyEvent e)
+                {
                     char c = e.getKeyChar();
 
                     if (Character.isAlphabetic(c))
@@ -48,16 +52,20 @@ public class ScrabbleGrid extends JPanel {
                 }
 
                 @Override
-                public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                public void keyPressed(KeyEvent e)
+                {
+                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
+                    {
                         ScrabbleGrid.this.onCharPressed(ScrabblePanel.backspaceChar, e.isShiftDown());
                     }
                 }
             }
         );
 
-        for (int r = 0; r < 15; r++) {
-            for (int c = 0; c < 15; c++) {
+        for (int r = 0; r < 15; r++)
+        {
+            for (int c = 0; c < 15; c++)
+            {
                 final int finalR = r;
                 final int finalC = c;
                 TileLabel label = new TileLabel(
@@ -71,16 +79,20 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    public void loadNewGame(IScrabbleBoard board) {
+    public void loadNewGame(IScrabbleBoard board)
+    {
         this.board = board;
 
         this.clearSelectedMove();
         this.repaintGrid();
     }
 
-    public void repaintGrid() {
-        for (int r = 0; r < 15; r++) {
-            for (int c = 0; c < 15; c++) {
+    public void repaintGrid()
+    {
+        for (int r = 0; r < 15; r++)
+        {
+            for (int c = 0; c < 15; c++)
+            {
                 this.updateTileAt(r, c);
             }
         }
@@ -88,11 +100,14 @@ public class ScrabbleGrid extends JPanel {
         this.repaint();
     }
 
-    public RevertableAction clearGrid() {
+    public RevertableAction clearGrid()
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
-        for (int r = 0; r < 15; r++) {
-            for (int c = 0; c < 15; c++) {
+        for (int r = 0; r < 15; r++)
+        {
+            for (int c = 0; c < 15; c++)
+            {
                 final int finalR = r;
                 final int finalC = c;
 
@@ -107,45 +122,51 @@ public class ScrabbleGrid extends JPanel {
         return actionBuilder.build().then(this::repaint);
     }
 
-    public void showMove(ScrabbleGame.Move move) {
+    public void showMove(ScrabbleGame.Move move)
+    {
         this.clearSelectedMove();
 
         this.previewedMove = move;
-        ScrabbleGame.Offset offset = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
-        int startRow = this.previewedMove.row();
-        int startCol = this.previewedMove.col();
+        ScrabbleGame.Offset offset   = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset
+                                                                       : ScrabbleGame.horiOffset;
+        int                 startRow = this.previewedMove.row();
+        int                 startCol = this.previewedMove.col();
 
-        for (int i = 0; i < this.previewedMove.playedTiles().length; i++) {
+        for (int i = 0; i < this.previewedMove.playedTiles().length; i++)
+        {
             char placedChar = this.previewedMove.playedTiles()[i];
-            int spotInWord = this.previewedMove.tileSpotsInWord()[i];
-            int newRow = offset.newRow(startRow, spotInWord);
-            int newCol = offset.newCol(startCol, spotInWord);
+            int  spotInWord = this.previewedMove.tileSpotsInWord()[i];
+            int  newRow     = offset.newRow(startRow, spotInWord);
+            int  newCol     = offset.newCol(startCol, spotInWord);
             char toPlace = placedChar == IScrabbleGameState.wildCardTile ?
-                this.previewedMove.playedWord().charAt(spotInWord) :
-                Character.toUpperCase(placedChar);
+                           this.previewedMove.playedWord().charAt(spotInWord) :
+                           Character.toUpperCase(placedChar);
             this.playedWordPreviewChars[newRow][newCol] = toPlace;
 
             this.updateAndRepaintTileAt(newRow, newCol);
         }
     }
 
-    public RevertableAction playMove(ScrabbleGame.Move move) {
+    public RevertableAction playMove(ScrabbleGame.Move move)
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
-        ScrabbleGame.Offset offset = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
-        int startRow = move.row();
-        int startCol = move.col();
+        ScrabbleGame.Offset     offset        = move.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+        int                     startRow      = move.row();
+        int                     startCol      = move.col();
 
-        for (int i = 0; i < move.playedTiles().length; i++) {
-            char placedChar = move.playedTiles()[i];
-            int spotInWord = move.tileSpotsInWord()[i];
-            final int newRow = offset.newRow(startRow, spotInWord);
-            final int newCol = offset.newCol(startCol, spotInWord);
+        for (int i = 0; i < move.playedTiles().length; i++)
+        {
+            char      placedChar = move.playedTiles()[i];
+            int       spotInWord = move.tileSpotsInWord()[i];
+            final int newRow     = offset.newRow(startRow, spotInWord);
+            final int newCol     = offset.newCol(startCol, spotInWord);
             RevertableAction placeTileAction = placedChar == IScrabbleGameState.wildCardTile ?
-                RevertableAction.compoundActionOf(
-                    this.board.setCharAt(newRow, newCol, move.playedWord().charAt(spotInWord)),
-                    this.board.setWildcardAt(newRow, newCol, true)
-                ) :
-                this.board.setCharAt(newRow, newCol, placedChar);
+                                               RevertableAction.compoundActionOf(
+                                                   this.board.setCharAt(
+                                                       newRow, newCol, move.playedWord().charAt(spotInWord)),
+                                                   this.board.setWildcardAt(newRow, newCol, true)
+                                               ) :
+                                               this.board.setCharAt(newRow, newCol, placedChar);
 
             actionBuilder.add(
                 placeTileAction.then(
@@ -157,17 +178,20 @@ public class ScrabbleGrid extends JPanel {
         return actionBuilder.build();
     }
 
-    public void clearSelectedMove() {
+    public void clearSelectedMove()
+    {
         if (this.previewedMove == null) return;
 
-        ScrabbleGame.Offset offset = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
-        int startRow = this.previewedMove.row();
-        int startCol = this.previewedMove.col();
+        ScrabbleGame.Offset offset   = this.previewedMove.isVertical() ? ScrabbleGame.vertOffset
+                                                                       : ScrabbleGame.horiOffset;
+        int                 startRow = this.previewedMove.row();
+        int                 startCol = this.previewedMove.col();
 
-        for (int i = 0; i < this.previewedMove.playedTiles().length; i++) {
+        for (int i = 0; i < this.previewedMove.playedTiles().length; i++)
+        {
             int spotInWord = this.previewedMove.tileSpotsInWord()[i];
-            int newRow = offset.newRow(startRow, spotInWord);
-            int newCol = offset.newCol(startCol, spotInWord);
+            int newRow     = offset.newRow(startRow, spotInWord);
+            int newCol     = offset.newCol(startCol, spotInWord);
             this.playedWordPreviewChars[newRow][newCol] = IScrabbleGameState.emptyMarker;
 
             this.updateAndRepaintTileAt(newRow, newCol);
@@ -176,46 +200,63 @@ public class ScrabbleGrid extends JPanel {
         this.previewedMove = null;
     }
 
-    private void updateAndRepaintTileAtCursor() {
+    private void updateAndRepaintTileAtCursor()
+    {
         this.updateAndRepaintTileAt(this.cursorR, this.cursorC);
     }
 
-    private void updateAndRepaintTileAt(int r, int c) {
+    private void updateAndRepaintTileAt(int r, int c)
+    {
         this.updateTileAt(r, c);
         this.labels[r][c].repaint();
     }
 
-    private void updateTileAt(int r, int c) {
+    private void updateTileAt(int r, int c)
+    {
         this.labels[r][c].getIcon().setImage(this.getTileAt(r, c));
     }
 
-    private void doBackspace(boolean isShiftDown) {
+    private void doBackspace(boolean isShiftDown)
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
-        if (!this.cursorJustSet) {
-            if (isShiftDown) {
-                if (this.wasLastMovementForwardHori) {
+        if (!this.cursorJustSet)
+        {
+            if (isShiftDown)
+            {
+                if (this.wasLastMovementForwardHori)
+                {
                     actionBuilder.add(this.offsetColCursor(-1));
-                } else {
+                }
+                else
+                {
                     actionBuilder.add(this.offsetRowCursor(-1));
                 }
-            } else {
-                if (this.wasLastMovementForwardVert) {
+            }
+            else
+            {
+                if (this.wasLastMovementForwardVert)
+                {
                     actionBuilder.add(this.offsetRowCursor(-1));
-                } else {
+                }
+                else
+                {
                     actionBuilder.add(this.offsetColCursor(-1));
                 }
             }
 
             actionBuilder.add(this.setWasLastMovementForwardVert(false));
             actionBuilder.add(this.setWasLastMovementForwardHori(false));
-        } else {
+        }
+        else
+        {
             actionBuilder.add(this.setJustSet(false));
         }
 
         actionBuilder.add(
             this.board.removeCharAt(this.cursorR, this.cursorC).then(
-                () -> {
+                () ->
+                {
                     this.updateAndRepaintTileAtCursor();
                     this.onMovesInvalidated.run();
                 }
@@ -224,21 +265,27 @@ public class ScrabbleGrid extends JPanel {
         this.onAction.accept(actionBuilder.build().withDescription("Backspace in scrabble board"));
     }
 
-    private void placeCharAtCursor(boolean isShiftDown, Character character) {
+    private void placeCharAtCursor(boolean isShiftDown, Character character)
+    {
         RevertableActionBuilder actionBuilder = new RevertableActionBuilder();
 
         actionBuilder.add(this.setJustSet(false));
 
-        if (isShiftDown) {
-            if (this.wasLastMovementForwardHori) {
+        if (isShiftDown)
+        {
+            if (this.wasLastMovementForwardHori)
+            {
                 actionBuilder.add(this.offsetRowCursor(1));
                 actionBuilder.add(this.offsetColCursor(-1));
             }
 
             actionBuilder.add(this.setWasLastMovementForwardVert(true));
             actionBuilder.add(this.setWasLastMovementForwardHori(false));
-        } else {
-            if (this.wasLastMovementForwardVert) {
+        }
+        else
+        {
+            if (this.wasLastMovementForwardVert)
+            {
                 actionBuilder.add(this.offsetRowCursor(-1));
                 actionBuilder.add(this.offsetColCursor(1));
             }
@@ -252,7 +299,8 @@ public class ScrabbleGrid extends JPanel {
                 this.board.setCharAt(this.cursorR, this.cursorC, character),
                 this.board.setWildcardAt(this.cursorR, this.cursorC, false)
             ).then(
-                () -> {
+                () ->
+                {
                     this.updateAndRepaintTileAtCursor();
                     this.onMovesInvalidated.run();
                 }
@@ -267,28 +315,40 @@ public class ScrabbleGrid extends JPanel {
         this.onAction.accept(actionBuilder.build().withDescription("Type character on scrabble board"));
     }
 
-    private void onCharPressed(Character character, boolean isShiftDown) {
-        if (character == ScrabblePanel.backspaceChar) {
-            if (this.cursorJustSet || (isShiftDown && this.cursorR > 0) || (!isShiftDown && this.cursorC > 0)) {
+    private void onCharPressed(Character character, boolean isShiftDown)
+    {
+        if (character == ScrabblePanel.backspaceChar)
+        {
+            if (this.cursorJustSet || (isShiftDown && this.cursorR > 0) || (!isShiftDown && this.cursorC > 0))
+            {
                 this.doBackspace(isShiftDown);
-            } else {
+            }
+            else
+            {
                 Toolkit.getDefaultToolkit().beep();
             }
-        } else {
+        }
+        else
+        {
             if (
                 ((isShiftDown && this.cursorR < 15) || (!isShiftDown && this.cursorC < 15)) &&
                 !(isShiftDown && this.wasLastMovementForwardHori && this.cursorR == 14) &&
                 !(!isShiftDown && this.wasLastMovementForwardVert && this.cursorC == 14)
-            ) {
+            )
+            {
                 this.placeCharAtCursor(isShiftDown, character);
-            } else {
+            }
+            else
+            {
                 Toolkit.getDefaultToolkit().beep();
             }
         }
     }
 
-    private void onTileClicked(final int r, final int c, boolean isLeft) {
-        if (isLeft) {
+    private void onTileClicked(final int r, final int c, boolean isLeft)
+    {
+        if (isLeft)
+        {
             this.onAction.accept(
                 RevertableAction.compoundActionOf(
                     this.setCursor(r, c),
@@ -298,11 +358,15 @@ public class ScrabbleGrid extends JPanel {
                 ).withDescription("Set cursor in scrabble board at: " + (r + 1) + " " + (c + 1))
             );
             this.requestFocusInWindow();
-        } else {
-            if (!this.board.isEmptyAt(r, c)) {
+        }
+        else
+        {
+            if (!this.board.isEmptyAt(r, c))
+            {
                 this.onAction.accept(
                     this.board.setWildcardAt(r, c, !this.board.isWildcardAt(r, c)).then(
-                        () -> {
+                        () ->
+                        {
                             this.updateAndRepaintTileAt(r, c);
                             this.onMovesInvalidated.run();
                         }
@@ -312,7 +376,8 @@ public class ScrabbleGrid extends JPanel {
         }
     }
 
-    private RevertableAction setWasLastMovementForwardVert(final boolean lastMovementFV) {
+    private RevertableAction setWasLastMovementForwardVert(final boolean lastMovementFV)
+    {
         final boolean wasLastMovementFV = this.wasLastMovementForwardVert;
 
         if (wasLastMovementFV == lastMovementFV) return RevertableAction.nullRevertableAction;
@@ -323,7 +388,8 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    private RevertableAction setWasLastMovementForwardHori(final boolean lastMovementFH) {
+    private RevertableAction setWasLastMovementForwardHori(final boolean lastMovementFH)
+    {
         final boolean wasLastMovementFH = this.wasLastMovementForwardHori;
 
         if (wasLastMovementFH == lastMovementFH) return RevertableAction.nullRevertableAction;
@@ -334,7 +400,8 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    private RevertableAction setJustSet(final boolean justSet) {
+    private RevertableAction setJustSet(final boolean justSet)
+    {
         final boolean wasJustSet = this.cursorJustSet;
 
         if (wasJustSet == justSet) return RevertableAction.nullRevertableAction;
@@ -345,25 +412,29 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    private RevertableAction setCursor(final int newRowPos, final int newColPos) {
+    private RevertableAction setCursor(final int newRowPos, final int newColPos)
+    {
         final int oldRowPos = this.cursorR;
         final int oldColPos = this.cursorC;
 
         if (oldRowPos == newRowPos && oldColPos == newColPos) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
-            () -> {
+            () ->
+            {
                 this.cursorR = newRowPos;
                 this.cursorC = newColPos;
             },
-            () -> {
+            () ->
+            {
                 this.cursorR = oldRowPos;
                 this.cursorC = oldColPos;
             }
         );
     }
 
-    private RevertableAction offsetRowCursor(final int offset) {
+    private RevertableAction offsetRowCursor(final int offset)
+    {
         if (offset == 0) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
@@ -372,7 +443,8 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    private RevertableAction offsetColCursor(final int offset) {
+    private RevertableAction offsetColCursor(final int offset)
+    {
         if (offset == 0) return RevertableAction.nullRevertableAction;
 
         return RevertableAction.of(
@@ -381,20 +453,26 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    private BufferedImage getTileAt(int r, int c) {
-        if (this.board.isEmptyAt(r, c)) {
+    private BufferedImage getTileAt(int r, int c)
+    {
+        if (this.board.isEmptyAt(r, c))
+        {
             char previewChar = this.playedWordPreviewChars[r][c];
 
-            if (previewChar != IScrabbleGameState.emptyMarker) {
-                char previewCharLower;
+            if (previewChar != IScrabbleGameState.emptyMarker)
+            {
+                char    previewCharLower;
                 boolean isWild;
 
-                if (Character.isUpperCase(previewChar)) {
+                if (Character.isUpperCase(previewChar))
+                {
                     previewCharLower = Character.toLowerCase(previewChar);
-                    isWild = false;
-                } else {
+                    isWild           = false;
+                }
+                else
+                {
                     previewCharLower = previewChar;
-                    isWild = true;
+                    isWild           = true;
                 }
 
                 return TileProvider.INSTANCE.getTile(
@@ -420,13 +498,16 @@ public class ScrabbleGrid extends JPanel {
         );
     }
 
-    public void newSize(int newTileSize) {
+    public void newSize(int newTileSize)
+    {
         this.tileSize = newTileSize;
 
         this.setPreferredSize(new Dimension(this.tileSize * 15, this.tileSize * 15));
 
-        for (int r = 0; r < 15; r++) {
-            for (int c = 0; c < 15; c++) {
+        for (int r = 0; r < 15; r++)
+        {
+            for (int c = 0; c < 15; c++)
+            {
                 this.labels[r][c].getIcon().setImage(this.getTileAt(r, c));
             }
         }

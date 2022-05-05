@@ -5,7 +5,8 @@ import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
 import java.util.function.BiPredicate;
 import java.util.stream.IntStream;
 
-public interface IScrabbleBoard {
+public interface IScrabbleBoard
+{
 
     int getRows();
 
@@ -25,7 +26,8 @@ public interface IScrabbleBoard {
 
     RevertableAction setWildcardAt(int r, int c, boolean isWild);
 
-    default boolean isEmptyAt(int r, int c) {
+    default boolean isEmptyAt(int r, int c)
+    {
         return this.getCharAt(r, c) == IScrabbleGameState.emptyMarker;
     }
 
@@ -35,11 +37,13 @@ public interface IScrabbleBoard {
 
     IScrabbleBoard copyBoard();
 
-    default boolean isEqualTo(IScrabbleBoard otherBoard) {
+    default boolean isEqualTo(IScrabbleBoard otherBoard)
+    {
         return
             this.getRows() == otherBoard.getRows() &&
             this.getCols() == otherBoard.getCols() &&
-            this.trueForAllTiles((r, c) -> this.getLetterMultiplierAt(r, c) == otherBoard.getLetterMultiplierAt(r, c)) &&
+            this.trueForAllTiles(
+                (r, c) -> this.getLetterMultiplierAt(r, c) == otherBoard.getLetterMultiplierAt(r, c)) &&
             this.trueForAllTiles((r, c) -> this.getWordMultiplierAt(r, c) == otherBoard.getWordMultiplierAt(r, c)) &&
             this.trueForAllTiles((r, c) -> this.getCharAt(r, c) == otherBoard.getCharAt(r, c)) &&
             this.trueForAllTiles((r, c) -> this.isWildcardAt(r, c) == otherBoard.isWildcardAt(r, c)) &&
@@ -47,7 +51,8 @@ public interface IScrabbleBoard {
             this.getAnchorCol() == otherBoard.getAnchorCol();
     }
 
-    private boolean trueForAllTiles(BiPredicate<Integer, Integer> tileCondition) {
+    private boolean trueForAllTiles(BiPredicate<Integer, Integer> tileCondition)
+    {
         return IntStream.range(
             0,
             this.getRows()

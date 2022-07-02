@@ -2,10 +2,9 @@ package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.Main;
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
-import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.action.RevertibleAction;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleLayout;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
-import com.alexfh.scrabbleanalyzer.gui.tile.TileStyle;
 import com.alexfh.scrabbleanalyzer.rule.impl.LetterScoreMapImpl;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
 import com.alexfh.scrabbleanalyzer.util.ScrabbleUtil;
@@ -15,16 +14,17 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
-import java.util.concurrent.Future;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-public class ScrabblePanel extends JPanel
+public
+class ScrabblePanel extends JPanel
 {
 
     public static final char backspaceChar = '}';
 
-    private final Consumer<RevertableAction> onAction;
+    private final Consumer<RevertibleAction> onAction;
     private       IScrabbleGameState         gameState;
     private final ScrabbleGrid               grid;
     private final PlayerTileGrid             playerTileGrid;
@@ -36,7 +36,8 @@ public class ScrabblePanel extends JPanel
     private       Future<?>                  pendingUpdate;
     private final ScrabbleLayout             layout;
 
-    public ScrabblePanel(Consumer<RevertableAction> onAction, IScrabbleGameState gameState)
+    public
+    ScrabblePanel(Consumer<RevertibleAction> onAction, IScrabbleGameState gameState)
     {
         this.onAction       = onAction;
         this.gameState      = gameState;
@@ -45,22 +46,25 @@ public class ScrabblePanel extends JPanel
         this.moveScroller   = new MoveScroller(this::showMove, this::playMove);
         this.layout         = new ScrabbleLayout();
 
-        this.addMouseListener(
-            new MouseAdapter()
+        this.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public
+            void mousePressed(MouseEvent e)
             {
-                @Override
-                public void mousePressed(MouseEvent e)
+                if (e.getButton() == MouseEvent.BUTTON1)
                 {
-                    if (e.getButton() == MouseEvent.BUTTON1) ScrabblePanel.this.requestFocusInWindow();
+                    ScrabblePanel.this.requestFocusInWindow();
                 }
             }
-        );
+        });
         this.setLayout(this.layout);
         this.initializeLayout();
         this.updateMoves();
     }
 
-    public void loadNewGame(IScrabbleGameState gameState)
+    public
+    void loadNewGame(IScrabbleGameState gameState)
     {
         this.gameState = gameState;
 
@@ -69,109 +73,108 @@ public class ScrabblePanel extends JPanel
         this.updateMoves();
     }
 
-    public void repaintGrids()
+    public
+    void repaintGrids()
     {
         this.grid.repaintGrid();
         this.playerTileGrid.repaintGrid();
     }
 
-    public void clearBoard()
+    public
+    void clearBoard()
     {
         this.onAction.accept(
-            RevertableAction.compoundActionOf(
-                this.grid.clearGrid(),
-                this.playerTileGrid.clearPlayerTileGrid()
-            ).then(this::updateMoves).withDescription(
-                "Clear board"
-            )
-        );
+            RevertibleAction.compoundActionOf(this.grid.clearGrid(), this.playerTileGrid.clearPlayerTileGrid())
+                .then(this::updateMoves).withDescription("Clear board"));
     }
 
-    private void playMove(ScrabbleGame.Move move)
+    private
+    void playMove(ScrabbleGame.Move move)
     {
         if (this.updateNum == this.lastUpdateReceived)
         {
             this.onAction.accept(
-                RevertableAction.compoundActionOf(
-                    this.grid.playMove(move),
-                    this.playerTileGrid.playMove(move)
-                ).then(this::updateMoves).withDescription(
-                    "Play move: " + move.playedWord()
-                )
-            );
+                RevertibleAction.compoundActionOf(this.grid.playMove(move), this.playerTileGrid.playMove(move))
+                    .then(this::updateMoves).withDescription("Play move: " + move.playedWord()));
         }
     }
 
-    private void showMove(ScrabbleGame.Move move)
+    private
+    void showMove(ScrabbleGame.Move move)
     {
-        if (this.updateNum == this.lastUpdateReceived) this.grid.showMove(move);
+        if (this.updateNum == this.lastUpdateReceived)
+        {
+            this.grid.showMove(move);
+        }
     }
 
-    private void boardInvalidated()
+    private
+    void boardInvalidated()
     {
         this.updateMoves();
     }
 
-    private void playerTilesInvalidated()
+    private
+    void playerTilesInvalidated()
     {
         this.updateMoves();
     }
 
-    private void updateMoves()
+    private
+    void updateMoves()
     {
         this.grid.clearSelectedMove();
 
-        if (this.pendingUpdate != null) this.pendingUpdate.cancel(true);
+        if (this.pendingUpdate != null)
+        {
+            this.pendingUpdate.cancel(true);
+        }
 
         this.updateNum++;
         final IScrabbleGameState gameStateCopy = this.gameState.copyScrabbleGame();
         final int                updateNumCopy = this.updateNum;
-        this.pendingUpdate = ScrabbleGame.threadPool.submit(
-            () ->
+        this.pendingUpdate = ScrabbleGame.threadPool.submit(() ->
+        {
+            try
             {
-                try
-                {
-                    this.getMoves(gameStateCopy, updateNumCopy);
-                }
-                catch (InterruptedException ignored)
-                {
-                }
+                this.getMoves(gameStateCopy, updateNumCopy);
             }
-        );
+            catch (InterruptedException ignored)
+            {
+            }
+        });
     }
 
-    private void getMoves(IScrabbleGameState gameStateCopy, int updateNumCopy) throws InterruptedException
+    private
+    void getMoves(IScrabbleGameState gameStateCopy, int updateNumCopy) throws InterruptedException
     {
-        ScrabbleGame game = new ScrabbleGame(
-            LetterScoreMapImpl.defaultScoreMap,
-            Main.dictionary,
-            gameStateCopy
-        );
+        ScrabbleGame game = new ScrabbleGame(LetterScoreMapImpl.defaultScoreMap, Main.dictionary, gameStateCopy);
         List<ScrabbleGame.Move> moves = game.findMoves();
 
         Collections.sort(moves);
         ScrabbleUtil.checkInterrupted();
-        SwingUtilities.invokeLater(
-            () ->
+        SwingUtilities.invokeLater(() ->
+        {
+            if (this.lastUpdateReceived > updateNumCopy)
             {
-                if (this.lastUpdateReceived > updateNumCopy) return;
-
-                this.lastUpdateReceived = updateNumCopy;
-
-                this.moveScroller.createListForMoves(moves);
+                return;
             }
-        );
+
+            this.lastUpdateReceived = updateNumCopy;
+
+            this.moveScroller.createListForMoves(moves);
+        });
     }
 
-    public void onResize(int width, int height)
+    public
+    void onResize(int width, int height)
     {
         float aspectRatio     = width * 1.0F / height;
         int   tileSize;
         float layoutThreshold = 23 / 19F; // exact aspect ratio where vert/hori layouts equal in tile size
 
         if ((!this.isVerticalLayout && aspectRatio < layoutThreshold) ||
-            (this.isVerticalLayout && aspectRatio > layoutThreshold)
-        )
+            (this.isVerticalLayout && aspectRatio > layoutThreshold))
         {
             this.isVerticalLayout = !this.isVerticalLayout;
             this.initializeLayout();
@@ -200,16 +203,11 @@ public class ScrabblePanel extends JPanel
             }
         }
 
-        this.moveScroller.setPreferredSize(
-            new Dimension(
-                this.isVerticalLayout ?
-                (width - this.getInsetWidth(this.moveScroller)) :
-                (width - (tileSize * 15 + this.getInsetWidth(this.moveScroller))),
-                this.isVerticalLayout ?
-                (height - (tileSize * 16 + this.getInsetHeight(this.moveScroller))) :
-                (height - (tileSize + this.getInsetHeight(this.moveScroller)))
-            )
-        );
+        this.moveScroller.setPreferredSize(new Dimension(
+            this.isVerticalLayout ? (width - this.getInsetWidth(this.moveScroller))
+                                  : (width - (tileSize * 15 + this.getInsetWidth(this.moveScroller))),
+            this.isVerticalLayout ? (height - (tileSize * 16 + this.getInsetHeight(this.moveScroller)))
+                                  : (height - (tileSize + this.getInsetHeight(this.moveScroller)))));
 
         if (tileSize != this.currentTileSize)
         {
@@ -222,28 +220,32 @@ public class ScrabblePanel extends JPanel
         this.currentTileSize = tileSize;
     }
 
-    private int getInsetWidth(Component component)
+    private
+    int getInsetWidth(Component component)
     {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.left + componentInsets.right;
     }
 
-    private int getInsetHeight(Component component)
+    private
+    int getInsetHeight(Component component)
     {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.top + componentInsets.bottom;
     }
 
-    private Insets getInsets(Component component)
+    private
+    Insets getInsets(Component component)
     {
         GridBagConstraints constraints = this.layout.getConstraints(component);
 
         return constraints.insets;
     }
 
-    private void initializeLayout()
+    private
+    void initializeLayout()
     {
         boolean wasInitialized = this.getComponents().length > 0;
 
@@ -261,9 +263,13 @@ public class ScrabblePanel extends JPanel
         // insets not supported by onResize for this component
 
         if (wasInitialized)
+        {
             this.layout.addLayoutComponent(this.grid, constraints);
+        }
         else
+        {
             this.add(this.grid, constraints);
+        }
 
         constraints        = new GridBagConstraints();
         constraints.gridx  = this.isVerticalLayout ? 0 : 1;
@@ -271,9 +277,13 @@ public class ScrabblePanel extends JPanel
         constraints.insets = new Insets(4, 4, 4, 4);
 
         if (wasInitialized)
+        {
             this.layout.addLayoutComponent(this.moveScroller, constraints);
+        }
         else
+        {
             this.add(this.moveScroller, constraints);
+        }
 
         constraints       = new GridBagConstraints();
         constraints.gridx = this.isVerticalLayout ? 0 : 1;
@@ -281,9 +291,13 @@ public class ScrabblePanel extends JPanel
         // insets not supported by onResize for this component
 
         if (wasInitialized)
+        {
             this.layout.addLayoutComponent(this.playerTileGrid, constraints);
+        }
         else
+        {
             this.add(this.playerTileGrid, constraints);
+        }
     }
 
 }

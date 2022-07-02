@@ -8,10 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WordGraphDictionary
+public
+class WordGraphDictionary
 {
 
-    public static WordGraphDictionary fromInputStream(InputStream inputStream)
+    public static
+    WordGraphDictionary fromInputStream(InputStream inputStream)
     {
         WordGraphDictionary dictionary = new WordGraphDictionary();
 
@@ -27,7 +29,8 @@ public class WordGraphDictionary
         return dictionary;
     }
 
-    public static WordGraphDictionary fromFile(File dictionaryFile) throws IOException
+    public static
+    WordGraphDictionary fromFile(File dictionaryFile) throws IOException
     {
         WordGraphDictionary dictionary = new WordGraphDictionary();
 
@@ -43,15 +46,19 @@ public class WordGraphDictionary
         return dictionary;
     }
 
-    private static void populateDictionaryFromReader(WordGraphDictionary dictionary, BufferedReader reader)
-        throws IOException
+    private static
+    void populateDictionaryFromReader(WordGraphDictionary dictionary, BufferedReader reader) throws IOException
     {
         String line;
 
-        while ((line = reader.readLine()) != null) dictionary.addWord(line.toLowerCase());
+        while ((line = reader.readLine()) != null)
+        {
+            dictionary.addWord(line.toLowerCase());
+        }
     }
 
-    public static class WGNode
+    public static
+    class WGNode
     {
 
         private final WGNode[]        nodes = new WGNode[26];
@@ -60,12 +67,14 @@ public class WordGraphDictionary
         private final List<Character> paths;
         private final String          word;
 
-        public WGNode(WGNode parent, String word)
+        public
+        WGNode(WGNode parent, String word)
         {
             this(false, parent, word);
         }
 
-        public WGNode(boolean wordHere, WGNode parent, String word)
+        public
+        WGNode(boolean wordHere, WGNode parent, String word)
         {
             this.wordHere = wordHere;
             this.parent   = parent;
@@ -73,22 +82,26 @@ public class WordGraphDictionary
             this.word     = word;
         }
 
-        public String getWord()
+        public
+        String getWord()
         {
             return this.word;
         }
 
-        public boolean isWordHere()
+        public
+        boolean isWordHere()
         {
             return this.wordHere;
         }
 
-        public List<Character> getPaths()
+        public
+        List<Character> getPaths()
         {
             return this.paths;
         }
 
-        private void removePath(char c)
+        private
+        void removePath(char c)
         {
             int    i    = ScrabbleUtil.charToInt(c);
             WGNode path = this.nodes[i];
@@ -101,12 +114,14 @@ public class WordGraphDictionary
             }
         }
 
-        public WGNode getPath(char c)
+        public
+        WGNode getPath(char c)
         {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        private WGNode getOrCreatePath(char c)
+        private
+        WGNode getOrCreatePath(char c)
         {
             int    i       = ScrabbleUtil.charToInt(c);
             WGNode current = this.nodes[i];
@@ -125,14 +140,19 @@ public class WordGraphDictionary
 
     private WGNode root = null;
 
-    public WGNode getRoot()
+    public
+    WGNode getRoot()
     {
         return this.root;
     }
 
-    private WGNode followPath(String path)
+    private
+    WGNode followPath(String path)
     {
-        if (this.root == null) return null;
+        if (this.root == null)
+        {
+            return null;
+        }
 
         WGNode current = this.root;
 
@@ -140,13 +160,17 @@ public class WordGraphDictionary
         {
             current = current.getPath(path.charAt(i));
 
-            if (current == null) return null;
+            if (current == null)
+            {
+                return null;
+            }
         }
 
         return current;
     }
 
-    private WGNode getOrCreateRoot()
+    private
+    WGNode getOrCreateRoot()
     {
         if (this.root == null)
         {
@@ -156,19 +180,22 @@ public class WordGraphDictionary
         return this.root;
     }
 
-    public boolean hasWord(String word)
+    public
+    boolean hasWord(String word)
     {
         WGNode path = this.followPath(word);
 
         return path != null && path.wordHere;
     }
 
-    public boolean hasPrefix(String prefix)
+    public
+    boolean hasPrefix(String prefix)
     {
         return this.followPath(prefix) != null;
     }
 
-    public void addWord(String word)
+    public
+    void addWord(String word)
     {
         WGNode current = this.getOrCreateRoot();
 
@@ -180,11 +207,15 @@ public class WordGraphDictionary
         current.wordHere = true;
     }
 
-    public void removeWord(String word)
+    public
+    void removeWord(String word)
     {
         WGNode path = this.followPath(word);
 
-        if (path == null || !path.wordHere) return;
+        if (path == null || !path.wordHere)
+        {
+            return;
+        }
 
         path.wordHere = false;
 
@@ -204,19 +235,30 @@ public class WordGraphDictionary
             path = parent;
         }
 
-        if (path.paths.size() == 0 && !path.wordHere) this.root = null;
+        if (path.paths.size() == 0 && !path.wordHere)
+        {
+            this.root = null;
+        }
     }
 
-    public void forEach(Consumer<String> consumer)
+    public
+    void forEach(Consumer<String> consumer)
     {
-        if (this.root == null) return;
+        if (this.root == null)
+        {
+            return;
+        }
 
         this.forEach(this.root, consumer);
     }
 
-    private void forEach(WGNode node, Consumer<String> consumer)
+    private
+    void forEach(WGNode node, Consumer<String> consumer)
     {
-        if (node.wordHere) consumer.accept(node.word);
+        if (node.wordHere)
+        {
+            consumer.accept(node.word);
+        }
 
         for (char c : node.paths)
         {

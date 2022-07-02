@@ -6,33 +6,39 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class PermuteTree
+public
+class PermuteTree
 {
 
-    public static class PTNode
+    public static
+    class PTNode
     {
 
         private final PTNode[]        nodes = new PTNode[27];
         private final List<Character> paths;
         private final String          permutation;
 
-        public PTNode(String permutation)
+        public
+        PTNode(String permutation)
         {
             this.paths       = new LinkedList<>();
             this.permutation = permutation;
         }
 
-        public List<Character> getPaths()
+        public
+        List<Character> getPaths()
         {
             return this.paths;
         }
 
-        public PTNode getPath(char c)
+        public
+        PTNode getPath(char c)
         {
             return this.nodes[ScrabbleUtil.charToInt(c)];
         }
 
-        private void createPathIfNull(char c)
+        private
+        void createPathIfNull(char c)
         {
             int    i       = ScrabbleUtil.charToInt(c);
             PTNode current = this.nodes[i];
@@ -46,7 +52,8 @@ public class PermuteTree
 
         }
 
-        private PTNode createPath(char c)
+        private
+        PTNode createPath(char c)
         {
             int i = ScrabbleUtil.charToInt(c);
             this.nodes[i] = new PTNode(this.permutation.concat(String.valueOf(c)));
@@ -60,19 +67,25 @@ public class PermuteTree
 
     private final PTNode root = new PTNode("");
 
-    public PermuteTree(List<Character> toPermute) throws InterruptedException
+    public
+    PermuteTree(List<Character> toPermute) throws InterruptedException
     {
-        if (toPermute.size() == 0) return;
+        if (toPermute.size() == 0)
+        {
+            return;
+        }
 
         this.forAllPerm(this.root, toPermute, 0);
     }
 
-    public PTNode getRoot()
+    public
+    PTNode getRoot()
     {
         return this.root;
     }
 
-    private void forAllPerm(PTNode permuteNode, List<Character> toPermute, int i) throws InterruptedException
+    private
+    void forAllPerm(PTNode permuteNode, List<Character> toPermute, int i) throws InterruptedException
     {
         ScrabbleUtil.checkInterrupted();
 
@@ -84,20 +97,23 @@ public class PermuteTree
         }
 
         if (permuteNode.getPath(toPermute.get(i)) == null)
-            forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
+        {
+            this.forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
+        }
 
         for (int w = i + 1; w < toPermute.size(); w++)
         {
             if (toPermute.get(i) != toPermute.get(w) && permuteNode.getPath(toPermute.get(w)) == null)
             {
-                swap(toPermute, i, w);
-                forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
-                swap(toPermute, w, i);
+                this.swap(toPermute, i, w);
+                this.forAllPerm(permuteNode.createPath(toPermute.get(i)), toPermute, i + 1);
+                this.swap(toPermute, w, i);
             }
         }
     }
 
-    private void swap(List<Character> toSwap, int from, int to)
+    private
+    void swap(List<Character> toSwap, int from, int to)
     {
         char temp = toSwap.get(to);
 
@@ -105,12 +121,14 @@ public class PermuteTree
         toSwap.set(from, temp);
     }
 
-    public void forEach(Consumer<String> consumer)
+    public
+    void forEach(Consumer<String> consumer)
     {
         this.forEach(this.root, consumer);
     }
 
-    private void forEach(PTNode node, Consumer<String> consumer)
+    private
+    void forEach(PTNode node, Consumer<String> consumer)
     {
         consumer.accept(node.permutation);
 

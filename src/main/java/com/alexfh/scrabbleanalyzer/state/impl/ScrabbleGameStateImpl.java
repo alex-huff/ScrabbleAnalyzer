@@ -1,6 +1,6 @@
 package com.alexfh.scrabbleanalyzer.state.impl;
 
-import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.action.RevertibleAction;
 import com.alexfh.scrabbleanalyzer.state.IPlayerTileRack;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleBoard;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
@@ -10,141 +10,162 @@ import java.io.IOException;
 import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class ScrabbleGameStateImpl implements IScrabbleGameState
+public
+class ScrabbleGameStateImpl implements IScrabbleGameState
 {
 
-    public static IScrabbleGameState defaultBlankScrabbleGameState()
+    public static
+    IScrabbleGameState defaultBlankScrabbleGameState()
     {
         return new ScrabbleGameStateImpl(ScrabbleBoardImpl.defaultBlankBoard(), PlayerTileRackImpl.defaultBlankRack());
     }
 
-    public static IScrabbleGameState fromFiles(File gameFile, File multipliersFile, File rackFile) throws IOException
+    public static
+    IScrabbleGameState fromFiles(File gameFile, File multipliersFile, File rackFile) throws IOException
     {
-        return new ScrabbleGameStateImpl(
-            ScrabbleBoardImpl.fromFiles(gameFile, multipliersFile),
-            PlayerTileRackImpl.fromFile(rackFile)
-        );
+        return new ScrabbleGameStateImpl(ScrabbleBoardImpl.fromFiles(gameFile, multipliersFile),
+            PlayerTileRackImpl.fromFile(rackFile));
     }
 
     private final IScrabbleBoard  board;
     private final IPlayerTileRack rack;
 
-    public ScrabbleGameStateImpl(IScrabbleBoard board, IPlayerTileRack rack)
+    public
+    ScrabbleGameStateImpl(IScrabbleBoard board, IPlayerTileRack rack)
     {
         this.board = board;
         this.rack  = rack;
     }
 
     @Override
-    public int getRackSize()
+    public
+    int getRackSize()
     {
         return this.rack.getRackSize();
     }
 
     @Override
-    public int getNumTilesInRack()
+    public
+    int getNumTilesInRack()
     {
         return this.rack.getNumTilesInRack();
     }
 
     @Override
-    public char getTileInRackAt(int i)
+    public
+    char getTileInRackAt(int i)
     {
         return this.rack.getTileInRackAt(i);
     }
 
     @Override
-    public RevertableAction setTileInRackAt(int i, char c)
+    public
+    RevertibleAction setTileInRackAt(int i, char c)
     {
         return this.rack.setTileInRackAt(i, c);
     }
 
     @Override
-    public List<Character> getTilesInRack()
+    public
+    List<Character> getTilesInRack()
     {
         return this.rack.getTilesInRack();
     }
 
     @Override
-    public IPlayerTileRack copyRack()
+    public
+    IPlayerTileRack copyRack()
     {
         return this.rack.copyRack();
     }
 
     @Override
-    public int getRows()
+    public
+    int getRows()
     {
         return this.board.getRows();
     }
 
     @Override
-    public int getCols()
+    public
+    int getCols()
     {
         return this.board.getCols();
     }
 
     @Override
-    public int getLetterMultiplierAt(int r, int c)
+    public
+    int getLetterMultiplierAt(int r, int c)
     {
         return this.board.getLetterMultiplierAt(r, c);
     }
 
     @Override
-    public int getWordMultiplierAt(int r, int c)
+    public
+    int getWordMultiplierAt(int r, int c)
     {
         return this.board.getWordMultiplierAt(r, c);
     }
 
     @Override
-    public char getCharAt(int r, int c)
+    public
+    char getCharAt(int r, int c)
     {
         return this.board.getCharAt(r, c);
     }
 
     @Override
-    public RevertableAction setCharAt(int r, int c, char newChar)
+    public
+    RevertibleAction setCharAt(int r, int c, char newChar)
     {
         return this.board.setCharAt(r, c, newChar);
     }
 
     @Override
-    public RevertableAction removeCharAt(int r, int c)
+    public
+    RevertibleAction removeCharAt(int r, int c)
     {
         return this.board.removeCharAt(r, c);
     }
 
     @Override
-    public boolean isWildcardAt(int r, int c)
+    public
+    boolean isWildcardAt(int r, int c)
     {
         return this.board.isWildcardAt(r, c);
     }
 
     @Override
-    public RevertableAction setWildcardAt(int r, int c, boolean isWild)
+    public
+    RevertibleAction setWildcardAt(int r, int c, boolean isWild)
     {
         return this.board.setWildcardAt(r, c, isWild);
     }
 
     @Override
-    public int getAnchorRow()
+    public
+    int getAnchorRow()
     {
         return this.board.getAnchorRow();
     }
 
     @Override
-    public int getAnchorCol()
+    public
+    int getAnchorCol()
     {
         return this.board.getAnchorCol();
     }
 
     @Override
-    public IScrabbleBoard copyBoard()
+    public
+    IScrabbleBoard copyBoard()
     {
         return this.board.copyBoard();
     }
 
     @Override
-    public IScrabbleGameState copyScrabbleGame()
+    public
+    IScrabbleGameState copyScrabbleGame()
     {
         return new ScrabbleGameStateImpl(this.copyBoard(), this.copyRack());
     }

@@ -1,6 +1,6 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
-import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.action.RevertibleAction;
 import com.alexfh.scrabbleanalyzer.gui.font.ScrabbleFonts;
 import com.alexfh.scrabbleanalyzer.gui.layout.ScrabbleAnalyzerPanelLayout;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
@@ -12,19 +12,18 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
-public class ScrabbleAnalyzerPanel extends JPanel
+public
+class ScrabbleAnalyzerPanel extends JPanel
 {
 
     private final ScrabblePanel               scrabblePanel;
     private final JLabel                      notificationBar;
     private final ScrabbleAnalyzerPanelLayout layout;
 
-    public ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertableAction> onAction)
+    public
+    ScrabbleAnalyzerPanel(IScrabbleGameState gameState, Consumer<RevertibleAction> onAction)
     {
-        this.scrabblePanel   = new ScrabblePanel(
-            onAction,
-            gameState
-        );
+        this.scrabblePanel   = new ScrabblePanel(onAction, gameState);
         this.notificationBar = new JLabel();
         this.layout          = new ScrabbleAnalyzerPanelLayout();
 
@@ -47,68 +46,65 @@ public class ScrabbleAnalyzerPanel extends JPanel
         this.add(this.notificationBar, constraints);
     }
 
-    public void repaintGrids()
+    public
+    void repaintGrids()
     {
         this.scrabblePanel.repaintGrids();
     }
 
-    public void setNotification(String notification)
+    public
+    void setNotification(String notification)
     {
         this.notificationBar.setText(
-            ZonedDateTime
-                .now(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("hh:mm:ss a")) + " | " +
-            notification
-        );
+            ZonedDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("hh:mm:ss a")) + " | " +
+            notification);
     }
 
-    public void onResize(int width, int height)
+    public
+    void onResize(int width, int height)
     {
-        this.notificationBar.setPreferredSize(
-            new Dimension(
-                width - this.getInsetWidth(this.notificationBar),
-                this.notificationBar.getMinimumSize().height
-            )
-        );
-        this.scrabblePanel.setPreferredSize(
-            new Dimension(
-                width - this.getInsetWidth(this.scrabblePanel),
-                height - (
-                    this.notificationBar.getMinimumSize().height +
-                    this.getInsetHeight(this.notificationBar) +
-                    this.getInsetHeight(this.scrabblePanel)
-                )
-            )
-        );
+        this.notificationBar.setPreferredSize(new Dimension(width - this.getInsetWidth(this.notificationBar),
+            this.notificationBar.getMinimumSize().height));
+        this.scrabblePanel.setPreferredSize(new Dimension(width - this.getInsetWidth(this.scrabblePanel), height -
+                                                                                                          (this.notificationBar.getMinimumSize().height +
+                                                                                                           this.getInsetHeight(
+                                                                                                               this.notificationBar) +
+                                                                                                           this.getInsetHeight(
+                                                                                                               this.scrabblePanel))));
     }
 
-    private int getInsetWidth(Component component)
+    private
+    int getInsetWidth(Component component)
     {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.left + componentInsets.right;
     }
 
-    private int getInsetHeight(Component component)
+    private
+    int getInsetHeight(Component component)
     {
         Insets componentInsets = this.getInsets(component);
 
         return componentInsets.top + componentInsets.bottom;
     }
 
-    private Insets getInsets(Component component)
+    private
+    Insets getInsets(Component component)
     {
         GridBagConstraints constraints = this.layout.getConstraints(component);
 
         return constraints.insets;
     }
 
-    public void loadNewGame(IScrabbleGameState gameState)
+    public
+    void loadNewGame(IScrabbleGameState gameState)
     {
         this.scrabblePanel.loadNewGame(gameState);
     }
 
-    public void clearBoard()
+    public
+    void clearBoard()
     {
         this.scrabblePanel.clearBoard();
     }

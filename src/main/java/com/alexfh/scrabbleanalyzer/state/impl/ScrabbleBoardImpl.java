@@ -1,56 +1,56 @@
 package com.alexfh.scrabbleanalyzer.state.impl;
 
-import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.action.RevertibleAction;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleBoard;
 import com.alexfh.scrabbleanalyzer.state.IScrabbleGameState;
+import com.alexfh.scrabbleanalyzer.util.ScrabbleUtil;
 import com.alexfh.scrabbleanalyzer.util.structure.ImmutablePair;
 import com.alexfh.scrabbleanalyzer.util.structure.Pair;
-import com.alexfh.scrabbleanalyzer.util.ScrabbleUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ScrabbleBoardImpl implements IScrabbleBoard
+public
+class ScrabbleBoardImpl implements IScrabbleBoard
 {
 
     private static final int[][] defaultLetterMultipliers = new int[][]{
-        new int[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1},
-        new int[]{1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1},
-        new int[]{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1},
-        new int[]{1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1},
-        new int[]{3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3},
-        new int[]{1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1},
-        new int[]{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1},
-        new int[]{1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1},
-        new int[]{1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1},
-        };
+        new int[]{ 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1 },
+        new int[]{ 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1 },
+        new int[]{ 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[]{ 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1 },
+        new int[]{ 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3 },
+        new int[]{ 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1 },
+        new int[]{ 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[]{ 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1 },
+        new int[]{ 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1 }, };
 
     private static final int[][] defaultWordMultipliers = new int[][]{
-        new int[]{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3},
-        new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1},
-        new int[]{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1},
-        };
+        new int[]{ 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 3, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3 },
+        new int[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1 },
+        new int[]{ 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1 }, };
 
-    public static char[][] getNewEmptyBoard(int row, int col)
+    public static
+    char[][] getNewEmptyBoard(int row, int col)
     {
         char[][] emptyBoard = new char[row][col];
 
@@ -65,19 +65,15 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
         return emptyBoard;
     }
 
-    public static IScrabbleBoard defaultBlankBoard()
+    public static
+    IScrabbleBoard defaultBlankBoard()
     {
-        return new ScrabbleBoardImpl(
-            15,
-            15,
-            ScrabbleBoardImpl.defaultLetterMultipliers,
-            ScrabbleBoardImpl.defaultWordMultipliers,
-            ScrabbleBoardImpl.getNewEmptyBoard(15, 15),
-            new boolean[15][15]
-        );
+        return new ScrabbleBoardImpl(15, 15, ScrabbleBoardImpl.defaultLetterMultipliers,
+            ScrabbleBoardImpl.defaultWordMultipliers, ScrabbleBoardImpl.getNewEmptyBoard(15, 15), new boolean[15][15]);
     }
 
-    public static ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException
+    public static
+    ScrabbleBoardImpl fromFiles(File gameFile, File multipliersFile) throws IOException
     {
         Pair<char[][], boolean[][]> gameData          = ScrabbleBoardImpl.readGameFile(gameFile);
         Pair<int[][], int[][]>      multipliersData   = ScrabbleBoardImpl.readMultipliersFile(multipliersFile);
@@ -90,16 +86,23 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
         int                         multiplierRows    = letterMultipliers.length;
         int                         multiplierCols    = letterMultipliers[0].length;
 
-        if (gameRows != multiplierRows) throw new IllegalStateException(
-            "Game board rows are not equal to multiplier rows: " + gameRows + "!=" + multiplierRows);
-        if (gameCols != multiplierCols) throw new IllegalStateException(
-            "Game board columns are not equal to multiplier columns: " + gameCols + "!=" + multiplierCols);
+        if (gameRows != multiplierRows)
+        {
+            throw new IllegalStateException(
+                "Game board rows are not equal to multiplier rows: " + gameRows + "!=" + multiplierRows);
+        }
+        if (gameCols != multiplierCols)
+        {
+            throw new IllegalStateException(
+                "Game board columns are not equal to multiplier columns: " + gameCols + "!=" + multiplierCols);
+        }
 
-        return new ScrabbleBoardImpl(
-            gameRows, gameCols, letterMultipliers, wordMultipliers, playedTiles, wildcardTiles);
+        return new ScrabbleBoardImpl(gameRows, gameCols, letterMultipliers, wordMultipliers, playedTiles,
+            wildcardTiles);
     }
 
-    private static Pair<int[][], int[][]> readMultipliersFile(File multipliersFile) throws IOException
+    private static
+    Pair<int[][], int[][]> readMultipliersFile(File multipliersFile) throws IOException
     {
         char[][] boardText;
 
@@ -149,7 +152,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
                 else
                 {
                     if (b != IScrabbleGameState.emptyMarker)
+                    {
                         throw new IllegalStateException("Invalid character in multipliers board");
+                    }
 
                     letterMultipliers[r][c] = 1;
                     wordMultipliers[r][c]   = 1;
@@ -160,7 +165,8 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
         return new ImmutablePair<>(letterMultipliers, wordMultipliers);
     }
 
-    private static Pair<char[][], boolean[][]> readGameFile(File gameFile) throws IOException
+    private static
+    Pair<char[][], boolean[][]> readGameFile(File gameFile) throws IOException
     {
         char[][] boardText;
 
@@ -187,7 +193,9 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
                 boolean isUpper = Character.isUpperCase(b);
 
                 if (!isAlpha && b != IScrabbleGameState.emptyMarker)
+                {
                     throw new IllegalStateException("Invalid character: '" + b + "' in game board");
+                }
 
                 playedTiles[r][c]   = isAlpha ? (isUpper ? Character.toLowerCase(b) : b)
                                               : IScrabbleGameState.emptyMarker;
@@ -207,18 +215,16 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
     private final int         anchorRow;
     private final int         anchorCol;
 
-    public ScrabbleBoardImpl(
-        int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles,
-        boolean[][] wildcardTiles
-    )
+    public
+    ScrabbleBoardImpl(int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles,
+                      boolean[][] wildcardTiles)
     {
         this(rows, cols, letterMultipliers, wordMultipliers, playedTiles, wildcardTiles, rows / 2, cols / 2);
     }
 
-    public ScrabbleBoardImpl(
-        int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles,
-        boolean[][] wildcardTiles, int anchorRow, int anchorCol
-    )
+    public
+    ScrabbleBoardImpl(int rows, int cols, int[][] letterMultipliers, int[][] wordMultipliers, char[][] playedTiles,
+                      boolean[][] wildcardTiles, int anchorRow, int anchorCol)
     {
         this.rows              = rows;
         this.cols              = cols;
@@ -231,90 +237,101 @@ public class ScrabbleBoardImpl implements IScrabbleBoard
     }
 
     @Override
-    public int getRows()
+    public
+    int getRows()
     {
         return this.rows;
     }
 
     @Override
-    public int getCols()
+    public
+    int getCols()
     {
         return this.cols;
     }
 
     @Override
-    public int getLetterMultiplierAt(int r, int c)
+    public
+    int getLetterMultiplierAt(int r, int c)
     {
         return this.letterMultipliers[r][c];
     }
 
     @Override
-    public int getWordMultiplierAt(int r, int c)
+    public
+    int getWordMultiplierAt(int r, int c)
     {
         return this.wordMultipliers[r][c];
     }
 
     @Override
-    public char getCharAt(int r, int c)
+    public
+    char getCharAt(int r, int c)
     {
         return this.playedTiles[r][c];
     }
 
     @Override
-    public RevertableAction setCharAt(int r, int c, char newChar)
+    public
+    RevertibleAction setCharAt(int r, int c, char newChar)
     {
         if (newChar == IScrabbleGameState.emptyMarker)
+        {
             return this.removeCharAt(r, c);
+        }
         else
-            return RevertableAction.setCharAt(this.playedTiles, r, c, newChar);
+        {
+            return RevertibleAction.setCharAt(this.playedTiles, r, c, newChar);
+        }
     }
 
     @Override
-    public RevertableAction removeCharAt(int r, int c)
+    public
+    RevertibleAction removeCharAt(int r, int c)
     {
-        return RevertableAction.compoundActionOf(
-            RevertableAction.setCharAt(this.playedTiles, r, c, IScrabbleGameState.emptyMarker),
-            this.setWildcardAt(r, c, false)
-        );
+        return RevertibleAction.compoundActionOf(
+            RevertibleAction.setCharAt(this.playedTiles, r, c, IScrabbleGameState.emptyMarker),
+            this.setWildcardAt(r, c, false));
     }
 
     @Override
-    public boolean isWildcardAt(int r, int c)
+    public
+    boolean isWildcardAt(int r, int c)
     {
         return this.wildcardTiles[r][c];
     }
 
     @Override
-    public RevertableAction setWildcardAt(int r, int c, boolean isWild)
+    public
+    RevertibleAction setWildcardAt(int r, int c, boolean isWild)
     {
-        return RevertableAction.setBooleanAt(this.wildcardTiles, r, c, isWild);
+        return RevertibleAction.setBooleanAt(this.wildcardTiles, r, c, isWild);
     }
 
     @Override
-    public int getAnchorRow()
+    public
+    int getAnchorRow()
     {
         return this.anchorRow;
     }
 
     @Override
-    public int getAnchorCol()
+    public
+    int getAnchorCol()
     {
         return this.anchorCol;
     }
 
     @Override
-    public IScrabbleBoard copyBoard()
+    public
+    IScrabbleBoard copyBoard()
     {
-        return new ScrabbleBoardImpl(
-            this.rows,
-            this.cols,
+        return new ScrabbleBoardImpl(this.rows, this.cols,
             Arrays.stream(this.letterMultipliers).map(int[]::clone).toArray($ -> this.letterMultipliers.clone()),
             Arrays.stream(this.wordMultipliers).map(int[]::clone).toArray($ -> this.wordMultipliers.clone()),
             Arrays.stream(this.playedTiles).map(char[]::clone).toArray($ -> this.playedTiles.clone()),
             Arrays.stream(this.wildcardTiles).map(boolean[]::clone).toArray($ -> this.wildcardTiles.clone()),
-            this.anchorRow,
-            this.anchorCol
-        );
+            this.anchorRow, this.anchorCol);
     }
 
 }

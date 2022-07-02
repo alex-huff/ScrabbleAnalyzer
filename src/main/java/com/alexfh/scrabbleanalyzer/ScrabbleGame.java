@@ -10,7 +10,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ScrabbleGame
+public
+class ScrabbleGame
 {
 
     public static final  ExecutorService threadPool           = Executors.newCachedThreadPool();
@@ -25,47 +26,44 @@ public class ScrabbleGame
         Arrays.fill(ScrabbleGame.allValid, true);
     }
 
-    public static record Offset(int moveRowBy, int moveColBy)
+    public static
+    record Offset(int moveRowBy, int moveColBy)
     {
 
-        public int newRow(int row, int offset)
+        public
+        int newRow(int row, int offset)
         {
             return row + this.moveRowBy * offset;
         }
 
-        public int newCol(int col, int offset)
+        public
+        int newCol(int col, int offset)
         {
             return col + this.moveColBy * offset;
         }
 
     }
 
-    public record Move(
-        String playedWord, char[] playedTiles, int[] tileSpotsInWord, boolean isVertical, int row, int col, int score
-    ) implements Comparable<Move>
+    public
+    record Move(String playedWord, char[] playedTiles, int[] tileSpotsInWord, boolean isVertical, int row, int col,
+                int score) implements Comparable<Move>
     {
 
-        private static final Comparator<Move> moveComparator = Comparator.comparingInt(
-            Move::score
-        ).reversed().thenComparingInt(
-            move -> move.playedTiles.length
-        ).thenComparing(
-            Move::playedWord
-        ).thenComparingInt(
-            Move::row
-        ).thenComparingInt(
-            Move::col
-        );
+        private static final Comparator<Move> moveComparator = Comparator.comparingInt(Move::score).reversed()
+            .thenComparingInt(move -> move.playedTiles.length).thenComparing(Move::playedWord)
+            .thenComparingInt(Move::row).thenComparingInt(Move::col);
 
         @Override
-        public int compareTo(Move o)
+        public
+        int compareTo(Move o)
         {
             return moveComparator.compare(this, o);
         }
 
     }
 
-    private class WordStart
+    private
+    class WordStart
     {
 
         private final int         row;
@@ -84,10 +82,9 @@ public class ScrabbleGame
         private final int[][]     cumulativeScoringData;
         private final Offset      offset;
 
-        private WordStart(
-            int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord,
-            int[] posInEffectiveWordMap, int[] effectiveWordSizeMap
-        )
+        private
+        WordStart(int row, int col, boolean isVertical, int minTilesPlaced, int maxTilesPlaced, char[] effectiveWord,
+                  int[] posInEffectiveWordMap, int[] effectiveWordSizeMap)
         {
             this.row                        = row;
             this.col                        = col;
@@ -119,9 +116,13 @@ public class ScrabbleGame
         }
 
         // lazily cache scoring data for words based on number of tiles
-        private int[] getScoreDataForTile(int tile)
+        private
+        int[] getScoreDataForTile(int tile)
         {
-            if (this.cumulativeScoringData[tile] != null) return this.cumulativeScoringData[tile];
+            if (this.cumulativeScoringData[tile] != null)
+            {
+                return this.cumulativeScoringData[tile];
+            }
 
             int   spotInWord       = this.posInEffectiveWordMap[tile];
             int   newRow           = offset.newRow(this.row, spotInWord);
@@ -149,7 +150,10 @@ public class ScrabbleGame
                 current[3] = last[3] + suffixScore;
                 current[4] = last[4] * wordMultiplier;
 
-                if (tile + 1 == ScrabbleGame.this.gameState.getRackSize()) current[2] += 35;
+                if (tile + 1 == ScrabbleGame.this.gameState.getRackSize())
+                {
+                    current[2] += 35;
+                }
             }
 
             this.cumulativeScoringData[tile] = current;
@@ -157,7 +161,8 @@ public class ScrabbleGame
             return this.cumulativeScoringData[tile];
         }
 
-        private int getScore()
+        private
+        int getScore()
         {
             int[] cumulativeData     = this.getScoreDataForTile(this.numPlacedTiles - 1);
             int   playScore          = cumulativeData[2];
@@ -166,14 +171,14 @@ public class ScrabbleGame
 
             for (int i = 0; i < this.numPlacedTiles; i++)
             {
-                char  placedTile         = this.currentlyPlacedTiles[i];
+                char placedTile = this.currentlyPlacedTiles[i];
                 int[] tileScoringData
-                                         = this.cumulativeScoringData[i]; // won't be null because this.getScoreDataForTile(this.numPlacedTiles - 1); will recursively initialize all the way to 0
-                int   letterMultiplier   = tileScoringData[0];
-                int   perpWordMultiplier = tileScoringData[1];
-                int   letterScore        = (placedTile == IScrabbleGameState.wildCardTile) ? 0 : letterMultiplier *
-                                                                                                 ScrabbleGame.this.letterScoreMap.getScore(
-                                                                                                     placedTile);
+                    = this.cumulativeScoringData[i]; // won't be null because this.getScoreDataForTile(this.numPlacedTiles - 1); will recursively initialize all the way to 0
+                int letterMultiplier   = tileScoringData[0];
+                int perpWordMultiplier = tileScoringData[1];
+                int letterScore = (placedTile == IScrabbleGameState.wildCardTile) ? 0 : letterMultiplier *
+                                                                                        ScrabbleGame.this.letterScoreMap.getScore(
+                                                                                            placedTile);
                 playScore += letterScore * perpWordMultiplier;
                 mainWordScore += letterScore;
             }
@@ -183,29 +188,34 @@ public class ScrabbleGame
             return playScore;
         }
 
-        private boolean cantPlace(char tile)
+        private
+        boolean cantPlace(char tile)
         {
             return !this.validPerpTilesForPlacement[this.numPlacedTiles][ScrabbleUtil.charToInt(tile)];
         }
 
-        private void placeTile(char tile)
+        private
+        void placeTile(char tile)
         {
             this.placeTileAs(tile, tile);
         }
 
-        private void placeWildcardTileAs(char as)
+        private
+        void placeWildcardTileAs(char as)
         {
             this.placeTileAs(IScrabbleGameState.wildCardTile, as);
         }
 
-        private void placeTileAs(char tile, char as)
+        private
+        void placeTileAs(char tile, char as)
         {
             this.currentlyPlacedTiles[this.numPlacedTiles]                      = tile;
             this.effectiveWord[this.posInEffectiveWordMap[this.numPlacedTiles]] = as;
             this.numPlacedTiles++;
         }
 
-        private void removeTile()
+        private
+        void removeTile()
         {
             this.numPlacedTiles--;
         }
@@ -259,16 +269,20 @@ public class ScrabbleGame
     private final boolean[][]     canPlaceVert;
     private final boolean[][]     canPlaceHori;
     private final int[][][]       scoreDataVert;
-        // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
+    // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
     private final int[][][]       scoreDataHori;
-        // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
+    // letterMultiplier, wordMultiplier, prefixPlacedTileScores, suffixPlacedTileScores | null for invalid
     private final int[][]         perpScoreDataVert; // -1 for invalid
     private final int[][]         perpScoreDataHori; // -1 for invalid
     private       boolean         initialized = false;
 
-    public ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleGameState gameState)
+    public
+    ScrabbleGame(ILetterScoreMap letterScoreMap, WordGraphDictionary dictionary, IScrabbleGameState gameState)
     {
-        if (dictionary.getRoot() == null) throw new IllegalStateException("Empty dictionary");
+        if (dictionary.getRoot() == null)
+        {
+            throw new IllegalStateException("Empty dictionary");
+        }
 
         this.letterScoreMap         = letterScoreMap;
         this.dictionary             = dictionary;
@@ -284,22 +298,27 @@ public class ScrabbleGame
         this.perpScoreDataHori      = new int[this.gameState.getRows()][this.gameState.getCols()];
     }
 
-    private void initialize() throws InterruptedException
+    private
+    void initialize() throws InterruptedException
     {
         this.permuteTree = ScrabbleUtil.timeRetrievalInterruptable(
             () -> new PermuteTree(this.gameState.getTilesInRack()), "generatePermuteTree");
 
-        ScrabbleUtil.timeItInterruptable(
-            this::initializeValidPerpendicularPlacementsAndScoringData, "initializeValidPerpendicularPlacements");
+        ScrabbleUtil.timeItInterruptable(this::initializeValidPerpendicularPlacementsAndScoringData,
+            "initializeValidPerpendicularPlacements");
 
-        this.validWordStarts = ScrabbleUtil.timeRetrievalInterruptable(
-            this::findValidWordStarts, "findValidPlacements");
+        this.validWordStarts = ScrabbleUtil.timeRetrievalInterruptable(this::findValidWordStarts,
+            "findValidPlacements");
         this.initialized     = true;
     }
 
-    public List<Move> findMoves() throws InterruptedException
+    public
+    List<Move> findMoves() throws InterruptedException
     {
-        if (!this.initialized) this.initialize();
+        if (!this.initialized)
+        {
+            this.initialize();
+        }
 
         List<Move> moves = new ArrayList<>();
 
@@ -312,7 +331,8 @@ public class ScrabbleGame
         return moves;
     }
 
-    private void addAllMovesFromWordStart(WordStart wordStart, List<Move> moves)
+    private
+    void addAllMovesFromWordStart(WordStart wordStart, List<Move> moves)
     {
         WordGraphDictionary.WGNode startPath = this.initializePath(wordStart);
 
@@ -326,9 +346,9 @@ public class ScrabbleGame
         this.permuteOnWordStart(wordStart, this.permuteTree.getRoot(), startPath, moves);
     }
 
-    private void permuteOnWordStart(
-        WordStart wordStart, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path, List<Move> moves
-    )
+    private
+    void permuteOnWordStart(WordStart wordStart, PermuteTree.PTNode perm, WordGraphDictionary.WGNode path,
+                            List<Move> moves)
     {
         if (wordStart.numPlacedTiles >= wordStart.minTilesPlaced && path.isWordHere())
         {
@@ -337,20 +357,14 @@ public class ScrabbleGame
 
             System.arraycopy(wordStart.currentlyPlacedTiles, 0, playedTilesCopy, 0, playedTilesCopy.length);
             System.arraycopy(wordStart.posInEffectiveWordMap, 0, tileSpotsInWord, 0, tileSpotsInWord.length);
-            moves.add(
-                new Move(
-                    path.getWord(),
-                    playedTilesCopy,
-                    tileSpotsInWord,
-                    wordStart.isVertical,
-                    wordStart.row,
-                    wordStart.col,
-                    wordStart.getScore()
-                )
-            );
+            moves.add(new Move(path.getWord(), playedTilesCopy, tileSpotsInWord, wordStart.isVertical, wordStart.row,
+                wordStart.col, wordStart.getScore()));
         }
 
-        if (wordStart.numPlacedTiles == wordStart.maxTilesPlaced) return;
+        if (wordStart.numPlacedTiles == wordStart.maxTilesPlaced)
+        {
+            return;
+        }
 
         WordGraphDictionary.WGNode newPath;
 
@@ -361,7 +375,9 @@ public class ScrabbleGame
                 for (char as : IScrabbleGameState.alphaChars)
                 {
                     if (wordStart.cantPlace(as) || (newPath = this.followPathToNextBlank(wordStart, path, as)) == null)
+                    {
                         continue;
+                    }
 
                     wordStart.placeWildcardTileAs(as);
                     this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);
@@ -371,7 +387,9 @@ public class ScrabbleGame
             else
             {
                 if (wordStart.cantPlace(c) || (newPath = this.followPathToNextBlank(wordStart, path, c)) == null)
+                {
                     continue;
+                }
 
                 wordStart.placeTile(c);
                 this.permuteOnWordStart(wordStart, perm.getPath(c), newPath, moves);
@@ -380,7 +398,8 @@ public class ScrabbleGame
         }
     }
 
-    private WordGraphDictionary.WGNode initializePath(WordStart wordStart)
+    private
+    WordGraphDictionary.WGNode initializePath(WordStart wordStart)
     {
         int                        start   = 0;
         int                        finish  = wordStart.posInEffectiveWordMap[0];
@@ -391,7 +410,10 @@ public class ScrabbleGame
         {
             newPath = newPath.getPath(wordStart.effectiveWord[current]);
 
-            if (newPath == null) break;
+            if (newPath == null)
+            {
+                break;
+            }
 
             current++;
         }
@@ -399,22 +421,28 @@ public class ScrabbleGame
         return newPath;
     }
 
-    private WordGraphDictionary.WGNode followPathToNextBlank(
-        WordStart wordStart, WordGraphDictionary.WGNode currentPath, char toPlace
-    )
+    private
+    WordGraphDictionary.WGNode followPathToNextBlank(WordStart wordStart, WordGraphDictionary.WGNode currentPath,
+                                                     char toPlace)
     {
         int                        start   = wordStart.posInEffectiveWordMap[wordStart.numPlacedTiles];
         int                        finish  = wordStart.effectiveWordSizeMap[wordStart.numPlacedTiles];
         int                        current = start + 1;
         WordGraphDictionary.WGNode newPath = currentPath.getPath(toPlace);
 
-        if (newPath == null) return null;
+        if (newPath == null)
+        {
+            return null;
+        }
 
         while (current < finish)
         {
             newPath = newPath.getPath(wordStart.effectiveWord[current]);
 
-            if (newPath == null) break;
+            if (newPath == null)
+            {
+                break;
+            }
 
             current++;
         }
@@ -422,7 +450,8 @@ public class ScrabbleGame
         return newPath;
     }
 
-    private boolean[] getPossiblePlacements()
+    private
+    boolean[] getPossiblePlacements()
     {
         boolean[] placements = new boolean[IScrabbleGameState.alphaChars.length];
 
@@ -439,7 +468,8 @@ public class ScrabbleGame
         return placements;
     }
 
-    private List<WordStart> findValidWordStarts() throws InterruptedException
+    private
+    List<WordStart> findValidWordStarts() throws InterruptedException
     {
         List<WordStart> wordStarts = new LinkedList<>();
 
@@ -456,14 +486,18 @@ public class ScrabbleGame
         return wordStarts;
     }
 
-    private void addWordStartIfValid(int row, int col, boolean isVertical, List<WordStart> wordStarts)
+    private
+    void addWordStartIfValid(int row, int col, boolean isVertical, List<WordStart> wordStarts)
     {
-        int     wordStart   = isVertical ? row : col;
-        Offset  offset      = isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
+        int    wordStart = isVertical ? row : col;
+        Offset offset    = isVertical ? ScrabbleGame.vertOffset : ScrabbleGame.horiOffset;
         boolean beforeEmpty = wordStart == 0 ||
                               this.gameState.isEmptyAt(offset.newRow(row, -1), offset.newCol(col, -1));
 
-        if (!beforeEmpty) return; // letter before this position
+        if (!beforeEmpty)
+        {
+            return; // letter before this position
+        }
 
         int         wordStartPerp    = isVertical ? col : row;
         Offset      offsetPerp       = isVertical ? ScrabbleGame.horiOffset : ScrabbleGame.vertOffset;
@@ -484,7 +518,10 @@ public class ScrabbleGame
 
             if (isBlank)
             {
-                if (blanks == this.gameState.getNumTilesInRack() || !canPlaceSource[newRow][newCol]) break;
+                if (blanks == this.gameState.getNumTilesInRack() || !canPlaceSource[newRow][newCol])
+                {
+                    break;
+                }
 
                 blanks++;
             }
@@ -492,15 +529,12 @@ public class ScrabbleGame
             if (!hasAnchor)
             {
                 boolean onBeforeSide = wordStartPerp > 0 && !this.gameState.isEmptyAt(offsetPerp.newRow(newRow, -1),
-                                                                                      offsetPerp.newCol(newCol, -1)
-                );
-                boolean onAfterSide  = wordStartPerp < lineBoundPerp - 1 &&
-                                       !this.gameState.isEmptyAt(offsetPerp.newRow(newRow, 1),
-                                                                 offsetPerp.newCol(newCol, 1)
-                                       );
-                boolean onAnchor     = newRow == this.gameState.getAnchorRow() &&
-                                       newCol == this.gameState.getAnchorCol();
-                boolean anchorable   = !isBlank || onBeforeSide || onAfterSide || onAnchor;
+                    offsetPerp.newCol(newCol, -1));
+                boolean onAfterSide = wordStartPerp < lineBoundPerp - 1 &&
+                                      !this.gameState.isEmptyAt(offsetPerp.newRow(newRow, 1),
+                                          offsetPerp.newCol(newCol, 1));
+                boolean onAnchor = newRow == this.gameState.getAnchorRow() && newCol == this.gameState.getAnchorCol();
+                boolean anchorable = !isBlank || onBeforeSide || onAfterSide || onAnchor;
 
                 if (anchorable)
                 {
@@ -510,7 +544,10 @@ public class ScrabbleGame
             }
         }
 
-        if (!hasAnchor || blanks == 0) return;
+        if (!hasAnchor || blanks == 0)
+        {
+            return;
+        }
 
         int    maxWordLength         = w;
         char[] effectiveWord         = new char[maxWordLength];
@@ -536,21 +573,12 @@ public class ScrabbleGame
 
         effectiveWordSizeMap[effectiveWordSizeMap.length - 1] = maxWordLength;
 
-        wordStarts.add(
-            new WordStart(
-                row,
-                col,
-                isVertical,
-                Math.max(1, blanksTillAnchor),
-                blanks,
-                effectiveWord,
-                posInEffectiveWordMap,
-                effectiveWordSizeMap
-            )
-        );
+        wordStarts.add(new WordStart(row, col, isVertical, Math.max(1, blanksTillAnchor), blanks, effectiveWord,
+            posInEffectiveWordMap, effectiveWordSizeMap));
     }
 
-    private void initializeValidPerpendicularPlacementsAndScoringData() throws InterruptedException
+    private
+    void initializeValidPerpendicularPlacementsAndScoringData() throws InterruptedException
     {
         for (int row = 0; row < this.gameState.getRows(); row++)
         {
@@ -574,7 +602,8 @@ public class ScrabbleGame
         }
     }
 
-    private void initializeValidPerpendicularPlacementAndScoringDataAt(int row, int col, boolean isVertical)
+    private
+    void initializeValidPerpendicularPlacementAndScoringDataAt(int row, int col, boolean isVertical)
     {
         boolean[][][] perpSource          = isVertical ? this.perpVert : this.perpHori;
         int[][]       perpScoreDataSource = isVertical ? this.perpScoreDataVert : this.perpScoreDataHori;
@@ -583,18 +612,15 @@ public class ScrabbleGame
         int           wordStartPerp       = isVertical ? col : row;
         int           lineBoundPerp       = isVertical ? this.gameState.getCols() : this.gameState.getRows();
         Offset        offsetPerp          = isVertical ? ScrabbleGame.horiOffset : ScrabbleGame.vertOffset;
-        boolean       beforeEmpty         = wordStartPerp == 0 || this.gameState.isEmptyAt(offsetPerp.newRow(row, -1),
-                                                                                           offsetPerp.newCol(col, -1)
-        );
-        boolean       afterEmpty          = wordStartPerp == lineBoundPerp - 1 ||
-                                            this.gameState.isEmptyAt(offsetPerp.newRow(row, 1),
-                                                                     offsetPerp.newCol(col, 1)
-                                            );
-        int           before              = wordStartPerp, after = wordStartPerp;
-        int           i                   = 0;
-        int           score               = 0;
-        int           prefixScore         = 0;
-        int           suffixScore         = 0;
+        boolean beforeEmpty = wordStartPerp == 0 ||
+                              this.gameState.isEmptyAt(offsetPerp.newRow(row, -1), offsetPerp.newCol(col, -1));
+        boolean afterEmpty = wordStartPerp == lineBoundPerp - 1 ||
+                             this.gameState.isEmptyAt(offsetPerp.newRow(row, 1), offsetPerp.newCol(col, 1));
+        int before      = wordStartPerp, after = wordStartPerp;
+        int i           = 0;
+        int score       = 0;
+        int prefixScore = 0;
+        int suffixScore = 0;
 
         while (after + 1 < lineBoundPerp &&
                !this.gameState.isEmptyAt(offsetPerp.newRow(row, i + 1), offsetPerp.newCol(col, i + 1)))
@@ -635,10 +661,9 @@ public class ScrabbleGame
             canPlaceSource[row][col]      = true;
             perpSource[row][col]          = ScrabbleGame.allValid;
             perpScoreDataSource[row][col] = ScrabbleGame.invalidPerpWordScore;
-            scoreDataSource[row][col]     = new int[]{
-                this.gameState.getLetterMultiplierAt(row, col), this.gameState.getWordMultiplierAt(row, col),
-                prefixScore, suffixScore
-            };
+            scoreDataSource[row][col]     = new int[]{ this.gameState.getLetterMultiplierAt(row, col),
+                                                       this.gameState.getWordMultiplierAt(row, col), prefixScore,
+                                                       suffixScore };
 
             return;
         }
@@ -651,7 +676,10 @@ public class ScrabbleGame
             currentPath = currentPath.getPath(
                 this.gameState.getCharAt(offsetPerp.newRow(row, i), offsetPerp.newCol(col, i)));
 
-            if (currentPath == null) break;
+            if (currentPath == null)
+            {
+                break;
+            }
 
             current++;
             i++;
@@ -665,7 +693,10 @@ public class ScrabbleGame
 
             for (Character c : currentPath.getPaths())
             {
-                if (!this.possibleCharPlacements[ScrabbleUtil.charToInt(c)]) continue;
+                if (!this.possibleCharPlacements[ScrabbleUtil.charToInt(c)])
+                {
+                    continue;
+                }
 
                 WordGraphDictionary.WGNode afterPath = currentPath.getPath(c);
                 current = wordStartPerp + 1;
@@ -676,7 +707,10 @@ public class ScrabbleGame
                     afterPath = afterPath.getPath(
                         this.gameState.getCharAt(offsetPerp.newRow(row, i), offsetPerp.newCol(col, i)));
 
-                    if (afterPath == null) break;
+                    if (afterPath == null)
+                    {
+                        break;
+                    }
 
                     current++;
                     i++;
@@ -708,10 +742,8 @@ public class ScrabbleGame
             perpScoreDataSource[row][col] = ScrabbleGame.invalidPerpWordScore;
         }
 
-        scoreDataSource[row][col] = new int[]{
-            this.gameState.getLetterMultiplierAt(row, col), this.gameState.getWordMultiplierAt(row, col), prefixScore,
-            suffixScore
-        };
+        scoreDataSource[row][col] = new int[]{ this.gameState.getLetterMultiplierAt(row, col),
+                                               this.gameState.getWordMultiplierAt(row, col), prefixScore, suffixScore };
     }
 
 }

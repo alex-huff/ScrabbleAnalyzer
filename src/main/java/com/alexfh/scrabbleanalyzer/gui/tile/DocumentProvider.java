@@ -6,9 +6,13 @@ import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.w3c.dom.Document;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
-public class DocumentProvider
+public
+class DocumentProvider
 {
 
     public static        DocumentProvider INSTANCE       = new DocumentProvider();
@@ -22,7 +26,8 @@ public class DocumentProvider
     private final Document[][]          blankTileDocuments = new Document[2][2];
     private       Document              defaultBlankDocument;
 
-    public void init() throws IOException
+    public
+    void init() throws IOException
     {
         this.initTileDocuments();
         this.initWildcardDocuments();
@@ -30,7 +35,8 @@ public class DocumentProvider
         this.initDefaultBlankDocument();
     }
 
-    private void initTileDocuments() throws IOException
+    private
+    void initTileDocuments() throws IOException
     {
         for (int c = 0; c < IScrabbleGameState.alphaChars.length; c++)
         {
@@ -61,7 +67,8 @@ public class DocumentProvider
         }
     }
 
-    private void initWildcardDocuments() throws IOException
+    private
+    void initWildcardDocuments() throws IOException
     {
         this.wildcardDocuments[0] = this.getDocumentFromInputStream(
             this.getClass().getResourceAsStream(DocumentProvider.documentFolder + "flatwild.svg"));
@@ -69,7 +76,8 @@ public class DocumentProvider
             this.getClass().getResourceAsStream(DocumentProvider.documentFolder + "isowild.svg"));
     }
 
-    private void initBlankTileDocuments() throws IOException
+    private
+    void initBlankTileDocuments() throws IOException
     {
         this.blankTileDocuments[0][0] = this.getDocumentFromInputStream(
             this.getClass().getResourceAsStream(DocumentProvider.documentFolder + "blankdl.svg"));
@@ -81,13 +89,15 @@ public class DocumentProvider
             this.getClass().getResourceAsStream(DocumentProvider.documentFolder + "blanktw.svg"));
     }
 
-    private void initDefaultBlankDocument() throws IOException
+    private
+    void initDefaultBlankDocument() throws IOException
     {
         this.defaultBlankDocument = this.getDocumentFromInputStream(
             this.getClass().getResourceAsStream(DocumentProvider.documentFolder + "blank.svg"));
     }
 
-    private Document getDocumentFromInputStream(InputStream inputStream) throws IOException
+    private
+    Document getDocumentFromInputStream(InputStream inputStream) throws IOException
     {
         Reader   reader   = new InputStreamReader(inputStream);
         Document document = this.documentFactory.createDocument(null, reader);
@@ -97,19 +107,25 @@ public class DocumentProvider
         return document;
     }
 
-    public Document getTileDocument(char letter, boolean isWild, boolean isIso, boolean isHighlighted)
+    public
+    Document getTileDocument(char letter, boolean isWild, boolean isIso, boolean isHighlighted)
     {
         return this.tileDocuments[ScrabbleUtil.charToInt(letter)][isWild ? 1 : 0][isIso ? 1 : 0][isHighlighted ? 1 : 0];
     }
 
-    public Document getWildcardDocument(boolean isIso)
+    public
+    Document getWildcardDocument(boolean isIso)
     {
         return this.wildcardDocuments[isIso ? 1 : 0];
     }
 
-    public Document getBlankTileDocument(int letterMultiplier, int wordMultiplier)
+    public
+    Document getBlankTileDocument(int letterMultiplier, int wordMultiplier)
     {
-        if (letterMultiplier == 1 && wordMultiplier == 1) return this.getDefaultBlankDocument();
+        if (letterMultiplier == 1 && wordMultiplier == 1)
+        {
+            return this.getDefaultBlankDocument();
+        }
 
         if (letterMultiplier > 1 && letterMultiplier < 4)
         {
@@ -125,7 +141,8 @@ public class DocumentProvider
         }
     }
 
-    public Document getDefaultBlankDocument()
+    public
+    Document getDefaultBlankDocument()
     {
         return this.defaultBlankDocument;
     }

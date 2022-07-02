@@ -6,7 +6,8 @@ import com.alexfh.scrabbleanalyzer.util.ScrabbleUtil;
 
 import java.awt.image.BufferedImage;
 
-public class ScrabbleTileCache
+public
+class ScrabbleTileCache
 {
 
     private final int                   tileSize;
@@ -15,12 +16,14 @@ public class ScrabbleTileCache
     private final BufferedImage[][]     blankTileCache = new BufferedImage[2][2];
     private       BufferedImage         defaultBlankTile;
 
-    public ScrabbleTileCache(int tileSize)
+    public
+    ScrabbleTileCache(int tileSize)
     {
         this.tileSize = tileSize;
     }
 
-    public BufferedImage getTile(char letter, boolean isWild, boolean isIso, boolean isHighlighted)
+    public
+    BufferedImage getTile(char letter, boolean isWild, boolean isIso, boolean isHighlighted)
     {
         int           letterIndex      = ScrabbleUtil.charToInt(letter);
         int           wildIndex        = isWild ? 1 : 0;
@@ -31,22 +34,16 @@ public class ScrabbleTileCache
         if (tile == null)
         {
             tile                                                                 = BufferedImageTranscoder.INSTANCE.loadImage(
-                DocumentProvider.INSTANCE.getTileDocument(
-                    letter,
-                    isWild,
-                    isIso,
-                    isHighlighted
-                ),
-                this.tileSize,
-                this.tileSize
-            );
+                DocumentProvider.INSTANCE.getTileDocument(letter, isWild, isIso, isHighlighted), this.tileSize,
+                this.tileSize);
             this.letterCache[letterIndex][wildIndex][isoIndex][highlightedIndex] = tile;
         }
 
         return tile;
     }
 
-    public BufferedImage getWildcardTile(boolean isIso)
+    public
+    BufferedImage getWildcardTile(boolean isIso)
     {
         int           index = isIso ? 1 : 0;
         BufferedImage tile  = this.wildcardCache[index];
@@ -54,19 +51,20 @@ public class ScrabbleTileCache
         if (tile == null)
         {
             tile                      = BufferedImageTranscoder.INSTANCE.loadImage(
-                DocumentProvider.INSTANCE.getWildcardDocument(isIso),
-                this.tileSize,
-                this.tileSize
-            );
+                DocumentProvider.INSTANCE.getWildcardDocument(isIso), this.tileSize, this.tileSize);
             this.wildcardCache[index] = tile;
         }
 
         return tile;
     }
 
-    public BufferedImage getBlankTile(int letterMultiplier, int wordMultiplier)
+    public
+    BufferedImage getBlankTile(int letterMultiplier, int wordMultiplier)
     {
-        if (letterMultiplier == 1 && wordMultiplier == 1) return this.getDefaultBlankTile();
+        if (letterMultiplier == 1 && wordMultiplier == 1)
+        {
+            return this.getDefaultBlankTile();
+        }
 
         if (letterMultiplier > 1 && letterMultiplier < 4)
         {
@@ -75,10 +73,8 @@ public class ScrabbleTileCache
             if (tile == null)
             {
                 tile                                         = BufferedImageTranscoder.INSTANCE.loadImage(
-                    DocumentProvider.INSTANCE.getBlankTileDocument(letterMultiplier, wordMultiplier),
-                    this.tileSize,
-                    this.tileSize
-                );
+                    DocumentProvider.INSTANCE.getBlankTileDocument(letterMultiplier, wordMultiplier), this.tileSize,
+                    this.tileSize);
                 this.blankTileCache[0][letterMultiplier - 2] = tile;
             }
 
@@ -91,10 +87,8 @@ public class ScrabbleTileCache
             if (tile == null)
             {
                 tile                                       = BufferedImageTranscoder.INSTANCE.loadImage(
-                    DocumentProvider.INSTANCE.getBlankTileDocument(letterMultiplier, wordMultiplier),
-                    this.tileSize,
-                    this.tileSize
-                );
+                    DocumentProvider.INSTANCE.getBlankTileDocument(letterMultiplier, wordMultiplier), this.tileSize,
+                    this.tileSize);
                 this.blankTileCache[1][wordMultiplier - 2] = tile;
             }
 
@@ -106,17 +100,15 @@ public class ScrabbleTileCache
         }
     }
 
-    public BufferedImage getDefaultBlankTile()
+    public
+    BufferedImage getDefaultBlankTile()
     {
         BufferedImage tile = this.defaultBlankTile;
 
         if (tile == null)
         {
             tile                  = BufferedImageTranscoder.INSTANCE.loadImage(
-                DocumentProvider.INSTANCE.getDefaultBlankDocument(),
-                this.tileSize,
-                this.tileSize
-            );
+                DocumentProvider.INSTANCE.getDefaultBlankDocument(), this.tileSize, this.tileSize);
             this.defaultBlankTile = tile;
         }
 

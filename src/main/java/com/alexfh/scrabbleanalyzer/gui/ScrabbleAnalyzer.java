@@ -1,7 +1,7 @@
 package com.alexfh.scrabbleanalyzer.gui;
 
 import com.alexfh.scrabbleanalyzer.ScrabbleGame;
-import com.alexfh.scrabbleanalyzer.gui.action.RevertableAction;
+import com.alexfh.scrabbleanalyzer.gui.action.RevertibleAction;
 import com.alexfh.scrabbleanalyzer.gui.file.ScrabbleAnalyzerFileFilter;
 import com.alexfh.scrabbleanalyzer.gui.font.ScrabbleFonts;
 import com.alexfh.scrabbleanalyzer.gui.tile.TileProvider;
@@ -13,7 +13,9 @@ import com.alexfh.scrabbleanalyzer.state.impl.stream.SAOutputStream;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,14 +23,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Stack;
 
-public class ScrabbleAnalyzer extends JFrame
+public
+class ScrabbleAnalyzer extends JFrame
 {
 
     private static final Dimension screenWidth     = Toolkit.getDefaultToolkit().getScreenSize();
     public static final  int       defaultTileSize = (int) (ScrabbleAnalyzer.screenWidth.getHeight() * .75F / 15);
 
-    private final Stack<RevertableAction> undoStack  = new Stack<>();
-    private final Stack<RevertableAction> redoStack  = new Stack<>();
+    private final Stack<RevertibleAction> undoStack = new Stack<>();
+    private final Stack<RevertibleAction> redoStack = new Stack<>();
     private final ScrabbleAnalyzerPanel   scrabbleAnalyzerPanel;
     private final BufferedImage           iconImage;
     private final String                  title      = "ScrabbleAnalyzer";
@@ -40,7 +43,8 @@ public class ScrabbleAnalyzer extends JFrame
     private       IScrabbleGameState      lastSaveState;
     private       File                    saveFile;
 
-    public ScrabbleAnalyzer()
+    public
+    ScrabbleAnalyzer()
     {
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
 
@@ -48,33 +52,26 @@ public class ScrabbleAnalyzer extends JFrame
         this.setLastSaveState();
 
         this.scrabbleAnalyzerPanel = new ScrabbleAnalyzerPanel(this.gameState, this::onAction);
-        this.iconImage             = TileProvider.INSTANCE.getTile(
-            'a',
-            true,
-            false,
-            false,
-            50
-        );
+        this.iconImage             = TileProvider.INSTANCE.getTile('a', true, false, false, 50);
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setMinimumSize(new Dimension(450, 450));
         this.setIconImage(iconImage);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.registerKeybindings();
-        this.addWindowListener(
-            new WindowAdapter()
+        this.addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public
+            void windowClosing(WindowEvent e)
             {
-                @Override
-                public void windowClosing(WindowEvent e)
+                if (ScrabbleAnalyzer.this.confirmationIfNotSaved("Are you sure you want to close without saving?"))
                 {
-                    if (ScrabbleAnalyzer.this.confirmationIfNotSaved("Are you sure you want to close without saving?"))
-                    {
-                        ScrabbleGame.threadPool.shutdownNow();
-                        System.exit(0);
-                    }
+                    ScrabbleGame.threadPool.shutdownNow();
+                    System.exit(0);
                 }
             }
-        );
+        });
 
         Font      menuFont   = ScrabbleFonts.courierNewBold.deriveFont(15F);
         JMenuBar  menuBar    = new JMenuBar();
@@ -140,9 +137,13 @@ public class ScrabbleAnalyzer extends JFrame
         this.setVisible(true);
     }
 
-    private void setTileStyleAndRepaint(boolean isIso)
+    private
+    void setTileStyleAndRepaint(boolean isIso)
     {
-        if (TileStyle.INSTANCE.getIso() == isIso) return;
+        if (TileStyle.INSTANCE.getIso() == isIso)
+        {
+            return;
+        }
 
         TileProvider.INSTANCE.clearCache();
         TileStyle.INSTANCE.setIso(isIso);
@@ -151,151 +152,164 @@ public class ScrabbleAnalyzer extends JFrame
         System.gc();
     }
 
-    private void registerKeybindings()
+    private
+    void registerKeybindings()
     {
         JPanel    contentPane = ((JPanel) this.getContentPane());
         InputMap  inputMap    = contentPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap   = contentPane.getActionMap();
 
         inputMap.put(KeyStroke.getKeyStroke("ctrl Z"), "undo");
-        actionMap.put(
-            "undo",
-            new AbstractAction()
+        actionMap.put("undo", new AbstractAction()
+        {
+            @Override
+            public
+            void actionPerformed(ActionEvent e)
             {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    ScrabbleAnalyzer.this.undo();
-                }
+                ScrabbleAnalyzer.this.undo();
             }
-        );
+        });
         inputMap.put(KeyStroke.getKeyStroke("ctrl R"), "redo");
-        actionMap.put(
-            "redo",
-            new AbstractAction()
+        actionMap.put("redo", new AbstractAction()
+        {
+            @Override
+            public
+            void actionPerformed(ActionEvent e)
             {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    ScrabbleAnalyzer.this.redo();
-                }
+                ScrabbleAnalyzer.this.redo();
             }
-        );
+        });
         inputMap.put(KeyStroke.getKeyStroke("ctrl N"), "newFile");
-        actionMap.put(
-            "newFile",
-            new AbstractAction()
+        actionMap.put("newFile", new AbstractAction()
+        {
+            @Override
+            public
+            void actionPerformed(ActionEvent e)
             {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    ScrabbleAnalyzer.this.newFile();
-                }
+                ScrabbleAnalyzer.this.newFile();
             }
-        );
+        });
         inputMap.put(KeyStroke.getKeyStroke("ctrl S"), "save");
-        actionMap.put(
-            "save",
-            new AbstractAction()
+        actionMap.put("save", new AbstractAction()
+        {
+            @Override
+            public
+            void actionPerformed(ActionEvent e)
             {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    ScrabbleAnalyzer.this.save();
-                }
+                ScrabbleAnalyzer.this.save();
             }
-        );
+        });
         inputMap.put(KeyStroke.getKeyStroke("shift ctrl S"), "saveAs");
-        actionMap.put(
-            "saveAs",
-            new AbstractAction()
+        actionMap.put("saveAs", new AbstractAction()
+        {
+            @Override
+            public
+            void actionPerformed(ActionEvent e)
             {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    ScrabbleAnalyzer.this.saveAs();
-                }
+                ScrabbleAnalyzer.this.saveAs();
             }
-        );
+        });
     }
 
-    private boolean confirmationIfNotSaved(String message)
+    private
+    boolean confirmationIfNotSaved(String message)
     {
-        return
-            this.isSaved() ||
-            JOptionPane.showConfirmDialog(
-                this,
-                message,
-                "Confirmation",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                new ImageIcon(this.iconImage)
-            ) == JOptionPane.YES_OPTION;
+        return this.isSaved() ||
+               JOptionPane.showConfirmDialog(this, message, "Confirmation", JOptionPane.OK_CANCEL_OPTION,
+                   JOptionPane.QUESTION_MESSAGE, new ImageIcon(this.iconImage)) == JOptionPane.YES_OPTION;
     }
 
-    private boolean isSaved()
+    private
+    boolean isSaved()
     {
         return this.gameState.isEqualTo(this.lastSaveState);
     }
 
-    private void onAction(RevertableAction action)
+    private
+    void onAction(RevertibleAction action)
     {
-        if (action.isNull()) return;
+        if (action.isNull())
+        {
+            return;
+        }
 
         this.scrabbleAnalyzerPanel.setNotification(action.getDescription());
         this.clearRedo();
         this.pushOntoUndo(action);
     }
 
-    private void undo()
+    private
+    void undo()
     {
-        RevertableAction toUndo;
+        RevertibleAction toUndo;
 
-        if ((toUndo = this.popOffUndo()) == null) return;
+        if ((toUndo = this.popOffUndo()) == null)
+        {
+            return;
+        }
 
         toUndo.undo();
         this.scrabbleAnalyzerPanel.setNotification("Undid: " + toUndo.getDescription());
         this.pushOntoRedo(toUndo);
     }
 
-    private void redo()
+    private
+    void redo()
     {
-        RevertableAction toRedo;
+        RevertibleAction toRedo;
 
-        if ((toRedo = this.popOffRedo()) == null) return;
+        if ((toRedo = this.popOffRedo()) == null)
+        {
+            return;
+        }
 
         toRedo.redo();
         this.scrabbleAnalyzerPanel.setNotification("Redid: " + toRedo.getDescription());
         this.pushOntoUndo(toRedo);
     }
 
-    private void clearUndo()
+    private
+    void clearUndo()
     {
         this.undoStack.clear();
         this.undo.setText(this.undoPrefix);
 
-        if (this.undo.isEnabled()) this.undo.setEnabled(false);
+        if (this.undo.isEnabled())
+        {
+            this.undo.setEnabled(false);
+        }
     }
 
-    private void clearRedo()
+    private
+    void clearRedo()
     {
         this.redoStack.clear();
         this.redo.setText(this.redoPrefix);
 
-        if (this.redo.isEnabled()) this.redo.setEnabled(false);
+        if (this.redo.isEnabled())
+        {
+            this.redo.setEnabled(false);
+        }
     }
 
-    private RevertableAction popOffUndo()
+    private
+    RevertibleAction popOffUndo()
     {
-        if (this.undoStack.isEmpty()) return null;
+        if (this.undoStack.isEmpty())
+        {
+            return null;
+        }
 
-        RevertableAction action = this.undoStack.pop();
+        RevertibleAction action = this.undoStack.pop();
 
         if (this.undoStack.isEmpty())
         {
             this.undo.setText(this.undoPrefix);
 
-            if (this.undo.isEnabled()) this.undo.setEnabled(false);
+            if (this.undo.isEnabled())
+            {
+                this.undo.setEnabled(false);
+            }
         }
         else
         {
@@ -305,17 +319,24 @@ public class ScrabbleAnalyzer extends JFrame
         return action;
     }
 
-    private RevertableAction popOffRedo()
+    private
+    RevertibleAction popOffRedo()
     {
-        if (this.redoStack.isEmpty()) return null;
+        if (this.redoStack.isEmpty())
+        {
+            return null;
+        }
 
-        RevertableAction action = this.redoStack.pop();
+        RevertibleAction action = this.redoStack.pop();
 
         if (this.redoStack.isEmpty())
         {
             this.redo.setText(this.redoPrefix);
 
-            if (this.redo.isEnabled()) this.redo.setEnabled(false);
+            if (this.redo.isEnabled())
+            {
+                this.redo.setEnabled(false);
+            }
         }
         else
         {
@@ -325,31 +346,43 @@ public class ScrabbleAnalyzer extends JFrame
         return action;
     }
 
-    private void pushOntoUndo(RevertableAction action)
+    private
+    void pushOntoUndo(RevertibleAction action)
     {
         this.undoStack.push(action);
         this.undo.setText(this.undoPrefix + " " + action.getDescription());
 
-        if (!this.undo.isEnabled()) this.undo.setEnabled(true);
+        if (!this.undo.isEnabled())
+        {
+            this.undo.setEnabled(true);
+        }
     }
 
-    private void pushOntoRedo(RevertableAction action)
+    private
+    void pushOntoRedo(RevertibleAction action)
     {
         this.redoStack.push(action);
         this.redo.setText(this.redoPrefix + " " + action.getDescription());
 
-        if (!this.redo.isEnabled()) this.redo.setEnabled(true);
+        if (!this.redo.isEnabled())
+        {
+            this.redo.setEnabled(true);
+        }
     }
 
-    private void setLastSaveState()
+    private
+    void setLastSaveState()
     {
         this.lastSaveState = this.gameState.copyScrabbleGame();
     }
 
-    private void newFile()
+    private
+    void newFile()
     {
         if (!this.confirmationIfNotSaved("Are you sure you want to create a new file without saving?"))
+        {
             return;
+        }
 
         this.gameState = ScrabbleGameStateImpl.defaultBlankScrabbleGameState();
 
@@ -359,17 +392,22 @@ public class ScrabbleAnalyzer extends JFrame
         this.scrabbleAnalyzerPanel.setNotification("Created new file");
     }
 
-    private void open()
+    private
+    void open()
     {
         if (!this.confirmationIfNotSaved("Are you sure you want to open a new file without saving?"))
+        {
             return;
+        }
 
         try
         {
             this.openChooser();
 
             if (this.saveFile != null)
+            {
                 this.scrabbleAnalyzerPanel.setNotification("Opened new file: " + this.saveFile.getName());
+            }
         }
         catch (IOException ignored)
         {
@@ -381,26 +419,35 @@ public class ScrabbleAnalyzer extends JFrame
         }
     }
 
-    private void openChooser() throws IOException, UnsupportedBoardException
+    private
+    void openChooser() throws IOException, UnsupportedBoardException
     {
         JFileChooser fileChooser = new JFileChooser();
 
-        if (this.saveFile != null) fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
+        if (this.saveFile != null)
+        {
+            fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
+        }
         fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
         fileChooser.setDialogTitle("Select a file to open");
 
-        if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+        {
+            return;
+        }
 
         this.loadGameFromFile(this.getSelectedFileFromChooser(fileChooser));
     }
 
-    private void loadGameFromFile(File fileToOpen) throws IOException, UnsupportedBoardException
+    private
+    void loadGameFromFile(File fileToOpen) throws IOException, UnsupportedBoardException
     {
         this.readFromFile(fileToOpen);
         this.reloadGame();
     }
 
-    private void reloadGame()
+    private
+    void reloadGame()
     {
         this.clearUndo();
         this.clearRedo();
@@ -408,20 +455,30 @@ public class ScrabbleAnalyzer extends JFrame
         this.scrabbleAnalyzerPanel.loadNewGame(this.gameState);
     }
 
-    private void save()
+    private
+    void save()
     {
-        if (this.saveFile == null) this.saveAs();
-        else this.tryToSaveToFile(this.saveFile);
+        if (this.saveFile == null)
+        {
+            this.saveAs();
+        }
+        else
+        {
+            this.tryToSaveToFile(this.saveFile);
+        }
     }
 
-    private void tryToSaveToFile(File file)
+    private
+    void tryToSaveToFile(File file)
     {
         try
         {
             this.saveToFile(file);
 
             if (this.saveFile != null)
+            {
                 this.scrabbleAnalyzerPanel.setNotification("Saved to file: " + this.saveFile.getName());
+            }
         }
         catch (IOException e)
         {
@@ -429,64 +486,79 @@ public class ScrabbleAnalyzer extends JFrame
         }
     }
 
-    private void fileOpenErrorDialog()
+    private
+    void fileOpenErrorDialog()
     {
         this.fileOpenErrorDialog(null);
     }
 
-    private void fileOpenErrorDialog(String message)
+    private
+    void fileOpenErrorDialog(String message)
     {
         String errorMessage = message == null ? "Could not open file" : "Could not open file: " + message;
 
         JOptionPane.showMessageDialog(this, errorMessage);
     }
 
-    private void fileSaveErrorDialog()
+    private
+    void fileSaveErrorDialog()
     {
         JOptionPane.showMessageDialog(this, "Could not save file");
     }
 
-    private void saveAs()
+    private
+    void saveAs()
     {
         JFileChooser fileChooser = new JFileChooser();
 
-        if (this.saveFile != null) fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
+        if (this.saveFile != null)
+        {
+            fileChooser.setCurrentDirectory(this.saveFile.getParentFile());
+        }
         fileChooser.setFileFilter(ScrabbleAnalyzerFileFilter.INSTANCE);
         fileChooser.setDialogTitle("Select a file to save");
 
-        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION)
+        {
+            return;
+        }
 
         File fileToSave = this.getSelectedFileFromChooser(fileChooser);
 
         this.tryToSaveToFile(fileToSave);
     }
 
-    private File getSelectedFileFromChooser(JFileChooser fileChooser)
+    private
+    File getSelectedFileFromChooser(JFileChooser fileChooser)
     {
         File selectedFile = fileChooser.getSelectedFile();
 
-        if (selectedFile.exists() ||
-            !(fileChooser.getFileFilter() instanceof ScrabbleAnalyzerFileFilter)
-        ) return selectedFile;
+        if (selectedFile.exists() || !(fileChooser.getFileFilter() instanceof ScrabbleAnalyzerFileFilter))
+        {
+            return selectedFile;
+        }
 
         return new File(selectedFile.getAbsolutePath() + ScrabbleAnalyzerFileFilter.EXTENSION);
     }
 
-    private void setSaveFile()
+    private
+    void setSaveFile()
     {
         this.saveFile = null;
 
         this.setTitle(this.title + " [" + "Untitled]");
     }
 
-    private void setSaveFile(File file)
+    private
+    void setSaveFile(File file)
     {
         this.saveFile = file;
 
         this.setTitle(this.title + " [" + file.getName() + "]");
     }
 
-    private void saveToFile(File file) throws IOException
+    private
+    void saveToFile(File file) throws IOException
     {
         FileOutputStream fileOut        = new FileOutputStream(file);
         SAOutputStream   saOutputStream = new SAOutputStream(fileOut);
@@ -497,16 +569,14 @@ public class ScrabbleAnalyzer extends JFrame
         this.setSaveFile(file);
     }
 
-    private void readFromFile(File file) throws IOException, UnsupportedBoardException
+    private
+    void readFromFile(File file) throws IOException, UnsupportedBoardException
     {
         FileInputStream    fileIn        = new FileInputStream(file);
         SAInputStream      saInputStream = new SAInputStream(fileIn);
         IScrabbleGameState gameState     = saInputStream.readGameState();
 
-        if (
-            !(gameState.getRows() == 15 && gameState.getCols() == 15) ||
-            !(gameState.getRackSize() == 7)
-        )
+        if (!(gameState.getRows() == 15 && gameState.getCols() == 15) || !(gameState.getRackSize() == 7))
         {
             throw new UnsupportedBoardException();
         }
@@ -518,7 +588,8 @@ public class ScrabbleAnalyzer extends JFrame
         this.setSaveFile(file);
     }
 
-    private static class UnsupportedBoardException extends Exception
+    private static
+    class UnsupportedBoardException extends Exception
     {
 
     }

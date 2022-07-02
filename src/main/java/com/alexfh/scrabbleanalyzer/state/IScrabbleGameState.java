@@ -1,6 +1,7 @@
 package com.alexfh.scrabbleanalyzer.state;
 
-public interface IScrabbleGameState extends IScrabbleBoard, IPlayerTileRack
+public
+interface IScrabbleGameState extends IScrabbleBoard, IPlayerTileRack
 {
 
     char   emptyMarker    = '.';
@@ -11,10 +12,10 @@ public interface IScrabbleGameState extends IScrabbleBoard, IPlayerTileRack
 
     IScrabbleGameState copyScrabbleGame();
 
-    default boolean isEqualTo(IScrabbleGameState otherGameState)
+    default
+    boolean isEqualTo(IScrabbleGameState otherGameState)
     {
-        return this.isEqualTo((IScrabbleBoard) otherGameState) &&
-               this.isEqualTo((IPlayerTileRack) otherGameState);
+        return this.isEqualTo((IScrabbleBoard) otherGameState) && this.isEqualTo((IPlayerTileRack) otherGameState);
     }
 
 }

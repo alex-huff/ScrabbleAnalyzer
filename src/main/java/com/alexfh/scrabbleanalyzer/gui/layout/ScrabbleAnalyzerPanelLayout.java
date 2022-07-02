@@ -4,11 +4,13 @@ import com.alexfh.scrabbleanalyzer.gui.ScrabbleAnalyzerPanel;
 
 import java.awt.*;
 
-public class ScrabbleAnalyzerPanelLayout extends GridBagLayout
+public
+class ScrabbleAnalyzerPanelLayout extends GridBagLayout
 {
 
     @Override
-    protected void arrangeGrid(Container parent)
+    protected
+    void arrangeGrid(Container parent)
     {
         if (parent instanceof ScrabbleAnalyzerPanel scrabbleAnalyzerPanel)
         {

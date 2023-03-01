@@ -15,7 +15,7 @@ ScrabbleAnalyzer is a Java Swing application. It is written purely in Java. Beca
 ## How to use ScrabbleAnalyzer
 To use ScrabbleAnalyzer, you first need to input the current state of your game into the board. For each played word, click on the tile at the start of the word. Then, type out the word, holding down shift if the word is vertical. If one or more of the tiles were placed using a wildcard tile, they do not count towards the score, and you need to indicate that to the program. To do so, just right-click on the tile to remove the points. Once all the words have been placed on the board, input your current tiles into the tile rack. Use '0' to represent a wildcard tile.
 
-The live view should then populate with every single playable word, sorted by score. Any change to the board or to the rack will automatically trigger a recalculation of playable moves, and the list will update accordingly.
+The list view should then populate with every single playable word, sorted by score. Any change to the board or to the rack will automatically trigger a recalculation of playable moves, and the list will update accordingly.
 
 Selecting on a list item will preview the move, and pressing enter will then play that move. This will update your tile rack as well. Any action can be undone, and redone using the keybinds Ctrl+Z, and Ctrl+R.
 

@@ -37,7 +37,7 @@ Games can be saved to, and loaded from a file.
 
 ![play](https://user-images.githubusercontent.com/38389408/222566115-55b830f0-98e3-4752-8306-f85fd22e1446.gif)
 
-Under the 'View' menu, you can select between two tile styles: `Isometric`, and `Flat`.
+Under the `View` menu, you can select between two tile styles: `Isometric`, and `Flat`.
 
 <p align="middle">
   <img src="https://raw.githubusercontent.com/alex-huff/ScrabbleAnalyzer/d1bbc7fe60ecc78dfc072579e994af30fb5aa614/src/main/resources/assets/tile/isonormZ.svg" alt="Isometric" width="40%">

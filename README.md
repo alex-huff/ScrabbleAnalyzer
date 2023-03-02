@@ -1,7 +1,6 @@
 # ScrabbleAnalyzer
 ScrabbleAnalyzer is a Scrabble/Words With Friends analyzer.
 # In action
-![Demo](https://raw.githubusercontent.com/alex-huff/ScrabbleAnalyzer/master/demo/demo.mp4)
 # About
 ## Technologies
 ScrabbleAnalyzer is a Java Swing application. It is written purely in Java. Because of this, it is cross-platform, meaning it can run on Windows, MacOS, and GNU/Linux or any other ecosystem that has a compatible JVM implementation.

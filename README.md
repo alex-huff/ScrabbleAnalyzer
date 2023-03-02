@@ -38,6 +38,12 @@ Games can be saved to, and loaded from a file.
 ![play](https://user-images.githubusercontent.com/38389408/222566115-55b830f0-98e3-4752-8306-f85fd22e1446.gif)
 
 You can select between two tile styles: Isometric, and Flat.
+
+<p align="middle">
+  <img src="https://raw.githubusercontent.com/alex-huff/ScrabbleAnalyzer/d1bbc7fe60ecc78dfc072579e994af30fb5aa614/src/main/resources/assets/tile/isonormZ.svg" alt="Isometric" width="40%">
+  <img src="https://raw.githubusercontent.com/alex-huff/ScrabbleAnalyzer/d1bbc7fe60ecc78dfc072579e994af30fb5aa614/src/main/resources/assets/tile/flatnormZ.svg" alt="Flat" width="40%">
+</p>
+
 ## How it works
 Under the hood, ScrabbleAnalyzer makes use of the [Directed Acyclic Word Graph (DAWG)](https://en.wikipedia.org/wiki/Deterministic_acyclic_finite_state_automaton) data-structure. DAWGs have capabilities that enable ScrabbleAnalyzer's algorithm to perform at high speeds. Namely, when using a DAWG to represent a dictionary of words, DAWGs can calculate if a word is in the dictionary, or if a prefix is in the dictionary, in a speed proportional to the word/prefix length. ScrabbleAnalyzer's algorithm traverses a tree representing the permutations of tiles and the DAWG at the same time, culling whole paths based on whether the currently formed word is a valid prefix in the dictionary. This cuts out whole swaths of tile permutations that a more naive, bruteforce algorithm would needlessly iterate through.
 

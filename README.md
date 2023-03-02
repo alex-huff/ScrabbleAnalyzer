@@ -31,7 +31,7 @@ Once all the words have been placed on the board, input your current tiles into 
 
 The list view should then populate with every single playable word, sorted by score. Any change to the board or to the rack will automatically trigger a recalculation of playable moves, and the list will update accordingly.
 
-Selecting on a list item will preview the move, and pressing enter will then play that move. This will update your tile rack as well. Any action can be undone, and redone using the keybinds Ctrl+Z, and Ctrl+R.
+Selecting a list item will preview the move, and pressing enter will then play that move. This will update your tile rack as well. Any action can be undone, and redone using the keybinds Ctrl+Z, and Ctrl+R.
 
 Games can be saved to, and loaded from a file.
 
@@ -45,8 +45,8 @@ You can select between two tile styles: Isometric, and Flat.
 </p>
 
 ## How it works
-Under the hood, ScrabbleAnalyzer makes use of the [Directed Acyclic Word Graph (DAWG)](https://en.wikipedia.org/wiki/Deterministic_acyclic_finite_state_automaton) data-structure. DAWGs have capabilities that enable ScrabbleAnalyzer's algorithm to perform at high speeds. Namely, when using a DAWG to represent a dictionary of words, DAWGs can calculate if a word is in the dictionary, or if a prefix is in the dictionary, in a speed proportional to the word/prefix length. ScrabbleAnalyzer's algorithm traverses a tree representing the permutations of tiles and the DAWG at the same time, culling whole paths based on whether the currently formed word is a valid prefix in the dictionary. This cuts out whole swaths of tile permutations that a more naive, bruteforce algorithm would needlessly iterate through.
+Under the hood, ScrabbleAnalyzer makes use of the [Directed Acyclic Word Graph (DAWG)](https://en.wikipedia.org/wiki/Deterministic_acyclic_finite_state_automaton) data structure. DAWGs have capabilities that enable ScrabbleAnalyzer's algorithm to perform at high speeds. Specifically, when using a DAWG to represent a dictionary of words, DAWGs can calculate if a word is in the dictionary, or if a prefix is in the dictionary, at a speed proportional to the word or prefix length. ScrabbleAnalyzer's algorithm traverses a tree representing the permutations of tiles and the DAWG at the same time, culling whole paths based on whether the currently formed word is a valid prefix in the dictionary. This cuts out whole chunks of tile permutations that a more naive, bruteforce algorithm would needlessly iterate through.
 
-Another source of optimization comes from an initial sweep of the board that yields pre-computed scoring data, and a list of valid word placement tiles that is drastically culled from the initial 15x15 board. Extra information is also stored with the valid word placement tiles that help to cull iterations based on word length, and perpendicularly intersecting words.
+Another source of optimization comes from an initial sweep of the board that yields pre-computed scoring data, and a list of valid word placement tiles that is drastically culled from the initial 15x15 board. Extra information is also stored with the valid word placement tiles to help cull iterations based on word length, and perpendicularly intersecting words.
 
 Together, these optimizations enable ScrabbleAnalyzer to compute, and sort, every possible move in just a few milliseconds.
